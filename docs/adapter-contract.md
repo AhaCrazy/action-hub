@@ -45,7 +45,7 @@ interface HarnessAdapter {
 
 ## Skill 投影
 
-对于每次 `resources_discover`（Pi / OMP）、provider list（DSH）或 Claude Code 同步：
+对于每次 `resources_discover`（Pi / OMP）或 provider list（DSH）：
 
 1. 从 `cwd` 解析项目根；
 2. 从 core 加载 Action；
@@ -62,7 +62,6 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 
 - DSH：插入引用 chip 或展开后的提示词；
 - Pi / OMP：`ctx.ui.pasteToEditor(rendered)`；
-- Claude Code：生成 `.claude/commands/ah/<name>.md`，由原生 Slash Command 执行；
 - 其他宿主：使用等价的插入 API。
 
 从面板选中的 Skill 也可以插入宿主原生的 Skill 调用（Pi / OMP 上是 `/skill:name`），让宿主自行加载正文。
@@ -76,7 +75,6 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 - 用自己稳定的工作区标识保存范围：
   - DSH：workspace ID；
   - Pi / OMP：当前 session 存储根；项目根编码作为子目录；
-  - Claude Code：项目根下的 `.claude/action-hub/scope.json`；
 - 在宿主工作区创建/删除时同步创建/清理范围文件；
 - 传入最具体的已知根目录（cwd、workspace 或仓库根）；
 - 没有匹配项目时回退到全局分组；
@@ -95,5 +93,3 @@ OMP 不新增独立适配器包，而是复用 Pi 适配器：
 ## 重新加载行为
 
 DSH 的 Skill provider 可以在进程内刷新。Pi / OMP 只在启动或 reload 时发现 Skill；如果管理操作改变了 Skill 可见性，适配器应在退出管理界面时调用 `ctx.reload()`，或在无法自动 reload 的上下文提示用户执行 `/ah reload`。
-
-Claude Code 没有进程内扩展 API；Skill 和 Command 由 `action-hub-claude sync` 生成，生成后需要重新启动 Claude Code 会话才会被原生发现。

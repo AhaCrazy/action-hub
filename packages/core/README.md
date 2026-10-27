@@ -7,7 +7,7 @@
 - 分组、全局分组、项目范围 schema 与项目级显式屏蔽。
 - 搜索、导入导出、使用记录和带版本号的本地状态文件。
 
-本包是共享核心。DSH、Pi、OMP、Claude Code 以及其他 harness 的集成都作为适配器存在，各自提供原生 UI、快捷键和插入方式。OMP 复用 Pi 适配器，不单独发布包。
+本包是共享核心。DSH、Pi、OMP 以及其他 harness 的集成都作为适配器存在，各自提供原生 UI、快捷键和插入方式。OMP 复用 Pi 适配器，不单独发布包。
 
 ## 状态
 
@@ -43,7 +43,7 @@ $ACTION_HUB_HOME/            # 默认 ~/.action-hub
 
 新数据目录会默认创建一个全局 **Common** 分组。内置 Action 由适配器提供，不硬编码进 core。
 
-写入使用跨进程锁和原子替换 `state.json`，因此 DSH、Pi、OMP 和 Claude Code 可以共用同一个 `ACTION_HUB_HOME`，不会互相覆盖。
+写入使用跨进程锁和原子替换 `state.json`，因此 DSH、Pi 和 OMP 可以共用同一个 `ACTION_HUB_HOME`，不会互相覆盖。
 
 ## 开发
 
@@ -57,11 +57,10 @@ npm test
 - DSH：[`../dsh`](../dsh) — Cordis 插件，提供原生 Web UI、Alt+A 面板、composer chip 和 Skill provider。
 - Pi：[`../pi`](../pi) — Pi 包，提供原生 TUI 面板和 `resources_discover`。
 - OMP：通过 OMP 的 legacy Pi 兼容层加载 [`../pi`](../pi)，不新增独立包；项目范围使用 OMP session 存储根 + 项目根编码。
-- Claude Code：[`../claude`](../claude) — 同步 CLI，把 Action 生成为原生 `skills/` 和 `/ah:<name>` commands。
 
 开发态 DSH / Pi 适配器都通过 `file:../core` 链接本核心；发布构建会把本核心打进各自的
-`dist`，因此对外有 `pi-action-hub`、`dsh-action-hub` 和 `claude-action-hub` 三个安装包，
-不需要单独发布 core npm 包。OMP 从仓库根安装（插件名 `action-hub-workspace`），使用 Git 安装。
+`dist`，因此对外只有 `pi-action-hub` 和 `dsh-action-hub` 两个安装包，不需要单独发布
+core npm 包。OMP 从仓库根安装（插件名 `action-hub-workspace`），使用 Git 安装。
 
 参见 [../../docs/architecture.md](../../docs/architecture.md) 和
 [../../docs/adapter-contract.md](../../docs/adapter-contract.md)。

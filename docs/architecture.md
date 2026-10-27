@@ -8,14 +8,13 @@
 
 - DSH：Cordis 插件、Alt+A 面板、composer 插入、Skill provider。
 - Pi：Pi 包、TUI 面板、`resources_discover`、编辑器插入。
-- OMP：复用 Pi 适配器，通过 OMP 的 legacy Pi 兼容层加载；项目范围跟随 OMP session 存储根。
-- Claude Code：通过同步 CLI 生成原生 `skills/` 和 `/ah:<name>` commands；没有自定义 UI。
+- OMP：复用 Pi 适配器，通过 OMP 的 legacy Pi 兼容层加载；项目范围跟随 OMP session 目录。
 - 其他 harness：使用各自的扩展点。
 
 ## 分层
 
 ```text
-adapter（DSH / Pi / OMP / Claude Code / ...）
+adapter（DSH / Pi / OMP / ...）
   ├─ harness 上下文：cwd、项目根、会话身份
   ├─ 原生 UI：面板、对话框、快捷键、主题、键位
   ├─ 插入：composer / editor / host prompt API
@@ -34,7 +33,7 @@ core（本仓库）
 
 共享状态（Action、分组、全局分组）由 core 统一管理。**项目范围不进入共享库**：它由每个适配器按自己的 workspace 生命周期保存，再作为输入传给 core 的可用性解析。
 
-任何适配器都不应该直接读写共享 `state.json`。所有共享状态的修改都经过 core，这样 DSH、Pi、OMP 和 Claude Code 才能安全共享同一份库。
+任何适配器都不应该直接读写共享 `state.json`。所有共享状态的修改都经过 core，这样 DSH、Pi 和 OMP 才能安全共享同一份库。
 
 ## 存储归属
 
@@ -55,12 +54,6 @@ Pi 本地
 OMP 本地
   ~/.omp/agent/sessions/<encoded-project-root>/action-hub/scope.json
   （--profile 时在 ~/.omp/profiles/<profile>/agent/sessions）
-
-Claude Code 本地
-  <项目根>/.claude/action-hub/scope.json
-  <项目根>/.claude/action-hub/generated.json
-  <项目根>/.claude/skills/<name>/
-  <项目根>/.claude/commands/ah/<name>.md
 ```
 
 适配器可以把 `ACTION_HUB_HOME` 指向某个 harness 专属目录，但共用默认目录能让用户在所有 harness 中使用同一份可移植库。
@@ -72,8 +65,7 @@ Pi / OMP 的 `<encoded-project-root>` 由项目根编码：最近的已登记工
 - 它属于某个 harness 的工作区，而不是项目仓库；
 - DSH 用稳定的 workspace ID 作为键；
 - Pi / OMP 用项目根编码作为 session 目录下的子目录键；
-- Claude Code 用项目根下的 `.claude/action-hub/scope.json`；
-- 四个 harness 的项目范围默认不共享；
+- 三个 harness 的项目范围默认不共享；
 - 删除工作区时，对应范围文件由适配器清理或随目录一起删除。
 
 共享状态写入必须满足：

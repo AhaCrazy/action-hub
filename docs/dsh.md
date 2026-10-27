@@ -109,7 +109,7 @@ C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json
 
 - 工作区改名不影响范围；
 - 删除工作区后，对应范围文件会在后续刷新时清理；
-- 同一个项目在 DSH、Pi、OMP、Claude Code 中的范围互相独立。
+- 同一个项目在 DSH、Pi、OMP 中的范围互相独立。
 
 ### 数据
 

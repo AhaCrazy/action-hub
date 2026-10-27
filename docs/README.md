@@ -9,7 +9,6 @@
 | [DSH](dsh.md) | DSH 插件页 / CLI 安装、面板、管理页、项目范围、数据 |
 | [Pi](pi.md) | Pi 安装、面板、管理界面、项目范围、Skill 发现 |
 | [OMP](omp.md) | OMP 安装、`Alt+Shift+A`、Agent Hub 冲突、profile 范围 |
-| [Claude Code](claude.md) | Claude Code 原生 Skills / Commands、同步 CLI、项目范围 |
 
 每个 harness 文档都包含两部分：
 
@@ -31,9 +30,8 @@
 | DSH | DSH Desktop 当前版本，默认 `desktop` profile | 插件页或 `dsh plugin` |
 | Pi | `@earendil-works/pi-coding-agent@1.4.0` | `pi install` |
 | OMP | `omp@18.1.16` | `omp plugin install` |
-| Claude Code | 原生 `skills/` 与 `commands/` | `action-hub-claude sync` |
 
-Node.js 要求见根 `package.json`：`>=20`。OMP 使用自己的运行时；Claude Code 适配器使用 Node 运行同步 CLI。
+Node.js 要求见根 `package.json`：`>=20`。OMP 使用自己的运行时，不依赖 Node 全局包。
 
 ## 公共概念
 
@@ -57,7 +55,6 @@ $ACTION_HUB_HOME（默认 ~/.action-hub）
 DSH:  ~/.dsh/action-hub/workspaces/<workspace-id>.json
 Pi:   ~/.pi/agent/sessions/<encoded-project-root>/action-hub/scope.json
 OMP:  ~/.omp/agent/sessions/<encoded-project-root>/action-hub/scope.json
-Claude Code: <项目根>/.claude/action-hub/scope.json
 ```
 
 Pi / OMP 的 `<encoded-project-root>` 由项目根编码：最近的已登记工作区或 `.git` 祖先，没有则使用 cwd。`--profile` / `--session-dir` 改变 session 存储根，不改变键规则。
@@ -92,18 +89,7 @@ Copy-Item "$env:USERPROFILE\.dsh\dsh-action-hub\state.json" "$env:USERPROFILE\.a
 - 重启 harness；
 - Pi：`/ah`、`Alt+A`、`Ctrl+Alt+A`；
 - OMP：`/ah` 或 `Alt+Shift+A`；`Alt+A` 是 OMP 内置的 Agent Hub；
-- Claude Code：没有 `/ah` 面板，执行 `action-hub-claude sync` 后启动会话；
 - DSH：确认没有旧版 Action Hub 同时启用。
-
-### Claude Code 没有 Action
-
-Claude Code 不会在运行时自动发现 Action。先执行：
-
-```powershell
-action-hub-claude sync
-```
-
-再启动 Claude Code；修改 Action、分组或范围后重新同步。
 
 ### OMP 按 `Alt+A` 打开的是 Agent Hub
 
