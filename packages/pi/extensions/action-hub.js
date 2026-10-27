@@ -149,6 +149,14 @@ export default function actionHub(pi) {
     },
   });
 
+  // OMP binds Alt+A to its built-in Agent Hub. Keep a non-conflicting fallback.
+  pi.registerShortcut('alt+shift+a', {
+    description: '打开 Action Hub 面板（备用快捷键）',
+    handler: async (ctx) => {
+      await openPalette(ctx);
+    },
+  });
+
   pi.registerShortcut('ctrl+alt+a', {
     description: '打开 Action Hub 管理界面',
     handler: async (ctx) => {

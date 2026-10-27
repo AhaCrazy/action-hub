@@ -26,7 +26,7 @@ omp plugin install git:github.com/AhaCrazy/action-hub
 /ah
 ```
 
-或按 `Alt+A`。
+或按 `Alt+A`（OMP 使用 `Alt+Shift+A`，因为 `Alt+A` 被 OMP 的 Agent Hub 占用）。
 
 - 输入关键字搜索；`Alt+R` 切换正则搜索；
 - `↑↓` 选择，`Enter` / `Tab` 插入，`Esc` 关闭；

@@ -34,7 +34,15 @@ omp plugin uninstall action-hub-workspace
 /ah
 ```
 
-应能看到 Action 面板；按 `Alt+A` 也可以打开。
+打开 Action Hub 面板。
+
+OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，因此 Action Hub 额外提供：
+
+```text
+Alt+Shift+A
+```
+
+作为面板快捷键；管理界面仍使用 `Ctrl+Alt+A`。
 
 如果 OMP 的按键被其他插件占用，可以直接使用 `/ah` 命令。
 
@@ -67,7 +75,7 @@ Skill 也可以由用户主动调用：
 /ah
 ```
 
-或按 `Alt+A`。
+或按 `Alt+Shift+A`。
 
 - 输入关键字搜索；
 - `Alt+R` 切换正则搜索；

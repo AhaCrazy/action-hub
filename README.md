@@ -58,7 +58,7 @@ OMP 使用自己的插件安装器，同时兼容本包的 `pi`/`omp` manifest�
 omp plugin install git:github.com/AhaCrazy/action-hub
 ```
 
-安装完成后重启 OMP，输入 `/ah`，或按 `Alt+A`。
+安装完成后重启 OMP，输入 `/ah`，或按 `Alt+Shift+A`。OMP 默认用 `Alt+A` 打开它的 Agent Hub，所以 Action Hub 使用 `Alt+Shift+A` 作为面板快捷键。
 
 ## 第一次使用
 
@@ -141,6 +141,7 @@ C:\Users\<你>\.dsh\dsh-action-hub
 
 - 确认安装命令执行成功；
 - 重启对应的 harness；
+- OMP 的 `Alt+A` 属于内置 Agent Hub，Action Hub 请用 `/ah` 或 `Alt+Shift+A`；
 - 检查 DSH 是否还有旧版 Action Hub 同时启用。新旧适配器使用相同的插件标识，应该只保留一个。
 
 ### `pi install npm:pi-action-hub` 报 404

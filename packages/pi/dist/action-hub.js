@@ -10342,6 +10342,12 @@ function actionHub(pi) {
       await openPalette(ctx);
     }
   });
+  pi.registerShortcut("alt+shift+a", {
+    description: "\u6253\u5F00 Action Hub \u9762\u677F\uFF08\u5907\u7528\u5FEB\u6377\u952E\uFF09",
+    handler: async (ctx) => {
+      await openPalette(ctx);
+    }
+  });
   pi.registerShortcut("ctrl+alt+a", {
     description: "\u6253\u5F00 Action Hub \u7BA1\u7406\u754C\u9762",
     handler: async (ctx) => {
