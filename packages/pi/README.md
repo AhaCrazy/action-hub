@@ -108,4 +108,4 @@ C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
 
 - Pi 没有 DSH 的侧边栏和 composer chip；Action 直接插入 Pi 编辑器。
 - Pi 的 Skill 入口使用原生 `/skill:<name>`。
-- 在管理界面修改模式、分组或项目范围后，退出管理界面会自动重新加载 Pi 资源；外部文件修改可用 `/ah reload`。
+- 通过 `/ah manage` 打开管理界面时，修改模式、分组或项目范围后退出会自动重新加载 Pi 资源；`Ctrl+Alt+A` 快捷方式受 Pi 1.4.0 上下文限制不会自动重载，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。

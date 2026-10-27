@@ -19,7 +19,7 @@
 - **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
 - **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
 - **项目范围** → 按 Pi workdir 保存：`~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json`。它和 DSH 的项目范围默认不共享；删除该 session 工作目录会一起删除范围。
-- **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。修改 Skill 可见性后，退出管理界面会自动重新加载 Pi 资源。
+- **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。通过 `/ah manage` 进入时，修改 Skill 可见性后会在退出时自动重新加载；Pi 1.4.0 的快捷键上下文没有 `reload()`，快捷键入口会提示执行 `/ah reload`。
 
 ## 包结构
 

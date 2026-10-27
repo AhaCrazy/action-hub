@@ -10246,12 +10246,15 @@ async function openManagerWithReload(ctx) {
   await seedDefaultBuiltin(store).catch(() => {
   });
   const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
-  if (reloadNeeded) {
-    try {
-      await ctx.reload();
-    } catch (error) {
-      notify3(ctx, `\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
-    }
+  if (!reloadNeeded) return;
+  if (typeof ctx.reload !== "function") {
+    notify3(ctx, "\u4FEE\u6539\u5DF2\u4FDD\u5B58\u3002\u5F53\u524D\u5FEB\u6377\u952E\u4E0A\u4E0B\u6587\u4E0D\u80FD\u81EA\u52A8\u91CD\u8F7D\uFF0C\u8BF7\u6267\u884C /ah reload\u3002", "warning");
+    return;
+  }
+  try {
+    await ctx.reload();
+  } catch (error) {
+    notify3(ctx, `\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
   }
 }
 function actionHub(pi) {

@@ -61,12 +61,18 @@ async function openPalette(ctx, initialQuery = '') {
 async function openManagerWithReload(ctx) {
   await seedDefaultBuiltin(store).catch(() => {});
   const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
-  if (reloadNeeded) {
-    try {
-      await ctx.reload();
-    } catch (error) {
-      notify(ctx, `自动重新加载失败：${error instanceof Error ? error.message : String(error)}`, 'error');
-    }
+  if (!reloadNeeded) return;
+  // Pi 1.4.0 only exposes reload() on command contexts. Shortcut handlers get
+  // the smaller ExtensionContext, so fall back to the explicit command instead
+  // of throwing "ctx.reload is not a function".
+  if (typeof ctx.reload !== 'function') {
+    notify(ctx, '修改已保存。当前快捷键上下文不能自动重载，请执行 /ah reload。', 'warning');
+    return;
+  }
+  try {
+    await ctx.reload();
+  } catch (error) {
+    notify(ctx, `自动重新加载失败：${error instanceof Error ? error.message : String(error)}`, 'error');
   }
 }
 
