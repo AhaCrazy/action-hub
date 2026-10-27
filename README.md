@@ -17,7 +17,7 @@ dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases
 如果 `dsh` 不在 PATH 中，使用 DSH 安装目录下的 CLI：
 
 ```powershell
-& "D:\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" `
+& "<DSH 安装目录>\resources\runtime\cli\bin\dsh.cmd" `
   plugin --profile desktop add `
   https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
 ```
