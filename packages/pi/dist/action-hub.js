@@ -9166,12 +9166,12 @@ var ManagerDashboard = class {
   renderLeft(width) {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
-    const out = [fit(" " + paint("dim", "\u5BFC\u822A"), width - 1)];
+    const focusedPane = this.focus === "left";
+    const out = [fit(` ${paint(focusedPane ? "accent" : "dim", focusedPane ? "\u25B6 \u5BFC\u822A" : "\u5BFC\u822A")}`, width - 1)];
     this.sections.forEach((section) => {
       const active = section.id === this.sectionId;
-      const focused = active && this.focus === "left";
-      const marker = active ? paint("accent", focused ? "\u25B8" : "\u2022") : " ";
-      const label = active ? paint("accent", section.label) : section.label;
+      const marker = active ? paint(focusedPane ? "accent" : "dim", focusedPane ? "\u25B8" : "\u2022") : " ";
+      const label = active && focusedPane ? paint("accent", section.label) : paint("dim", section.label);
       out.push(fit(` ${marker} ${label} ${paint("dim", String(section.count))}`, width - 1));
     });
     out.push("");
@@ -9183,7 +9183,9 @@ var ManagerDashboard = class {
   renderMiddle(width) {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
-    const out = [` ${paint("dim", this.sectionId === "actions" ? "Actions" : this.sectionId === "groups" ? "\u5206\u7EC4" : this.sectionId === "projects" ? "\u9879\u76EE" : "\u5DE5\u5177")}`];
+    const focusedPane = this.focus === "middle";
+    const title = this.sectionId === "actions" ? "Actions" : this.sectionId === "groups" ? "\u5206\u7EC4" : this.sectionId === "projects" ? "\u9879\u76EE" : "\u5DE5\u5177";
+    const out = [` ${paint(focusedPane ? "accent" : "dim", focusedPane ? `\u25B6 ${title}` : title)}`];
     const queryLine = this.search ? `${paint("accent", "\u641C\u7D22:")} ${this.query}${paint("accent", "\u258C")}${this.regex ? paint("warning", " .*") : ""}` : `${paint("dim", "\u641C\u7D22:")} ${this.query}${this.regex ? paint("warning", " .*") : ""}  ${paint("dim", "f \u8F93\u5165")}`;
     out.push(fit(queryLine, width - 2));
     out.push("");
@@ -9197,9 +9199,9 @@ var ManagerDashboard = class {
     for (let index = start; index < Math.min(items.length, start + visible); index += 1) {
       const item = items[index];
       const active = index === this.selected;
-      const marker = active ? paint("accent", "\u276F") : " ";
-      const label = active ? paint("accent", itemLabel(item)) : itemLabel(item);
-      const mode = this.sectionId === "actions" ? item.mode === "skill" ? paint("success", "S") : paint("dim", "C") : this.sectionId === "groups" ? item.global ? paint("warning", "G") : " " : " ";
+      const marker = active ? paint(focusedPane ? "accent" : "dim", "\u276F") : " ";
+      const label = focusedPane && active ? paint("accent", itemLabel(item)) : focusedPane ? itemLabel(item) : paint("dim", itemLabel(item));
+      const mode = this.sectionId === "actions" ? item.mode === "skill" ? paint(focusedPane ? "success" : "dim", "S") : paint("dim", "C") : this.sectionId === "groups" ? item.global ? paint(focusedPane ? "warning" : "dim", "G") : " " : " ";
       out.push(fit(` ${marker}${mode} ${label}`, width - 1));
     }
     if (items.length > visible) out.push(` ${paint("dim", `${this.selected + 1}/${items.length}`)}`);

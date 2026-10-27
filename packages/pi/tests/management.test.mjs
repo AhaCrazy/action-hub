@@ -66,6 +66,27 @@ test('opening an Action exposes edit in the action menu', async () => {
   await fs.rm(dataDir, { recursive: true, force: true });
 });
 
+test('dashboard marks the focused pane in its header', () => {
+  const dashboard = new ManagerDashboard({
+    tui: { requestRender() {} },
+    theme: { fg: (_color, value) => value },
+    data: {
+      actions: [{ name: 'alpha', description: 'A', mode: 'command', groups: [] }],
+      state: { groups: [], projects: [] },
+      dataDir: 'E:\\data',
+    },
+    cwd: 'E:\\project',
+    done() {},
+  });
+  const middleFocused = dashboard.render(110).join('\n');
+  assert.match(middleFocused, /▶ Actions/u);
+  assert.doesNotMatch(middleFocused, /▶ 导航/u);
+  dashboard.focus = 'left';
+  const leftFocused = dashboard.render(110).join('\n');
+  assert.match(leftFocused, /▶ 导航/u);
+  assert.doesNotMatch(leftFocused, /▶ Actions/u);
+});
+
 test('dashboard only closes on escape, not q, and has no edit shortcut', () => {
   const results = [];
   const dashboard = new ManagerDashboard({

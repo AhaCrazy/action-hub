@@ -279,12 +279,12 @@ export class ManagerDashboard {
   renderLeft(width) {
     const theme = this.theme;
     const paint = (color, value) => (typeof theme?.fg === 'function' ? theme.fg(color, value) : value);
-    const out = [fit(' ' + paint('dim', '导航'), width - 1)];
+    const focusedPane = this.focus === 'left';
+    const out = [fit(` ${paint(focusedPane ? 'accent' : 'dim', focusedPane ? '▶ 导航' : '导航')}`, width - 1)];
     this.sections.forEach((section) => {
       const active = section.id === this.sectionId;
-      const focused = active && this.focus === 'left';
-      const marker = active ? paint('accent', focused ? '▸' : '•') : ' ';
-      const label = active ? paint('accent', section.label) : section.label;
+      const marker = active ? paint(focusedPane ? 'accent' : 'dim', focusedPane ? '▸' : '•') : ' ';
+      const label = active && focusedPane ? paint('accent', section.label) : paint('dim', section.label);
       out.push(fit(` ${marker} ${label} ${paint('dim', String(section.count))}`, width - 1));
     });
     out.push('');
@@ -297,7 +297,9 @@ export class ManagerDashboard {
   renderMiddle(width) {
     const theme = this.theme;
     const paint = (color, value) => (typeof theme?.fg === 'function' ? theme.fg(color, value) : value);
-    const out = [` ${paint('dim', this.sectionId === 'actions' ? 'Actions' : this.sectionId === 'groups' ? '分组' : this.sectionId === 'projects' ? '项目' : '工具')}`];
+    const focusedPane = this.focus === 'middle';
+    const title = this.sectionId === 'actions' ? 'Actions' : this.sectionId === 'groups' ? '分组' : this.sectionId === 'projects' ? '项目' : '工具';
+    const out = [` ${paint(focusedPane ? 'accent' : 'dim', focusedPane ? `▶ ${title}` : title)}`];
     const queryLine = this.search
       ? `${paint('accent', '搜索:')} ${this.query}${paint('accent', '▌')}${this.regex ? paint('warning', ' .*') : ''}`
       : `${paint('dim', '搜索:')} ${this.query}${this.regex ? paint('warning', ' .*') : ''}  ${paint('dim', 'f 输入')}`;
@@ -313,12 +315,12 @@ export class ManagerDashboard {
     for (let index = start; index < Math.min(items.length, start + visible); index += 1) {
       const item = items[index];
       const active = index === this.selected;
-      const marker = active ? paint('accent', '❯') : ' ';
-      const label = active ? paint('accent', itemLabel(item)) : itemLabel(item);
+      const marker = active ? paint(focusedPane ? 'accent' : 'dim', '❯') : ' ';
+      const label = focusedPane && active ? paint('accent', itemLabel(item)) : focusedPane ? itemLabel(item) : paint('dim', itemLabel(item));
       const mode = this.sectionId === 'actions'
-        ? (item.mode === 'skill' ? paint('success', 'S') : paint('dim', 'C'))
+        ? (item.mode === 'skill' ? paint(focusedPane ? 'success' : 'dim', 'S') : paint('dim', 'C'))
         : this.sectionId === 'groups'
-          ? (item.global ? paint('warning', 'G') : ' ')
+          ? (item.global ? paint(focusedPane ? 'warning' : 'dim', 'G') : ' ')
           : ' ';
       out.push(fit(` ${marker}${mode} ${label}`, width - 1));
     }

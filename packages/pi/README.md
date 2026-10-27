@@ -49,6 +49,8 @@ omp plugin install git:github.com/AhaCrazy/action-hub
 右：选中项详情
 ```
 
+当前焦点栏的标题前显示 `▶`，非焦点栏内容变暗。
+
 常用操作：
 
 - `← / →`：在左栏和中栏之间切换焦点；
