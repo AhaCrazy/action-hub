@@ -26,8 +26,6 @@ test('creates a standard SKILL.md and keeps plugin state outside it', async () =
     name: 'code-review',
     description: 'Review changes',
     prompt: 'Please review the current diff.',
-    category: 'dev',
-    tags: ['review'],
     mode: 'command',
   });
   assert.equal(created.name, 'code-review');
@@ -39,7 +37,8 @@ test('creates a standard SKILL.md and keeps plugin state outside it', async () =
   assert.equal(await fs.stat(path.join(dataDir, 'library', 'code-review', 'action.json')).catch(() => undefined), undefined);
   const state = JSON.parse(await fs.readFile(path.join(dataDir, 'state.json'), 'utf8'));
   assert.equal(state.entries['code-review'].mode, 'command');
-  assert.equal(state.entries['code-review'].category, 'dev');
+  assert.equal(state.entries['code-review'].category, undefined);
+  assert.equal(state.entries['code-review'].tags, undefined);
 });
 
 test('updates mode/groups/pin without rewriting the skill body', async () => {
@@ -247,4 +246,24 @@ test('drops state entries when a skill is deleted outside the plugin', async () 
   await fs.rm(path.join(dataDir, 'library', 'orphan'), { recursive: true, force: true });
   await store.read({ prune: true });
   assert.deepEqual(Object.keys((await store.readState()).entries), []);
+});
+
+test('strips removed category and tag metadata from legacy state', async () => {
+  const dataDir = await tempData();
+  await fs.mkdir(path.join(dataDir, 'library', 'legacy'), { recursive: true });
+  await fs.writeFile(path.join(dataDir, 'library', 'legacy', 'SKILL.md'), '---\nname: legacy\ndescription: Legacy\n---\n\nBody.\n');
+  await fs.writeFile(path.join(dataDir, 'state.json'), JSON.stringify({
+    format: 'action-hub/state@1',
+    groups: [{ id: 'common', name: 'Common' }],
+    entries: { legacy: { mode: 'command', category: 'dev', tags: ['review'] } },
+    projects: [],
+    defaultGroup: '',
+  }));
+  const store = createStore({ dataDir });
+  const state = await store.readState();
+  assert.equal(state.entries.legacy.category, undefined);
+  assert.equal(state.entries.legacy.tags, undefined);
+  const persisted = JSON.parse(await fs.readFile(path.join(dataDir, 'state.json'), 'utf8'));
+  assert.equal(persisted.entries.legacy.category, undefined);
+  assert.equal(persisted.entries.legacy.tags, undefined);
 });

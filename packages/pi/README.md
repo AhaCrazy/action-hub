@@ -37,7 +37,7 @@ pi install git:github.com/AhaCrazy/action-hub
 
 ```text
 左：Action / 分组 / 项目 / 工具
-中：当前分类的列表
+中：当前分区的列表
 右：选中项详情
 ```
 
@@ -58,7 +58,7 @@ pi install git:github.com/AhaCrazy/action-hub
 
 管理界面支持：
 
-- **Action**：新建、编辑、删除；切换 Command/Skill；设置分组、分类、标签、参数提示、固定；查看资源文件；插入到编辑器。
+- **Action**：新建、编辑、删除；切换 Command/Skill；设置分组、参数提示、固定；查看资源文件；插入到编辑器。
 - **分组**：新建、改名、删除；设为全局分组；设置成员 Action；设置包含的子分组。
 - **项目范围**：只配置当前 Pi 工作目录；直接启用分组或 Action；屏蔽继承来的分组或 Action；修改项目显示名。
 - **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill。

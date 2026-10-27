@@ -2,7 +2,7 @@
  * dsh-action-hub — Host half.
  *
  * Standard `SKILL.md` directories are the only artifact. Plugin-only state
- * (mode, scope, category, pin, usage) lives in `state.json` outside them.
+ * (mode, scope, pin, usage) lives in `state.json` outside them.
  *
  * @module dsh-action-hub
  */
@@ -341,18 +341,6 @@ async function handle(ctx, store, dataDir, scopeStore, req, res) {
       const entry = await store.setMode(text(body.id), body.mode);
       notifySkillCatalog(ctx);
       sendJson(res, 200, { ok: true, mode: entry.mode });
-      return;
-    }
-
-    if (route === '/category/rename') {
-      const changed = await store.renameCategory(text(body.from), text(body.to));
-      sendJson(res, 200, { ok: true, changed });
-      return;
-    }
-
-    if (route === '/category/delete') {
-      const changed = await store.deleteCategory(text(body.name));
-      sendJson(res, 200, { ok: true, changed });
       return;
     }
 

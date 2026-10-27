@@ -15,7 +15,7 @@
 | `55-reference-source.js` | `/` 引用来源、Action chip、标记匹配 |
 | `60-ui.js` | 图标和基础组件 |
 | `70-page.js` | 库列表行和资源树 |
-| `75-dialogs.js` | 编辑、导入、导出、分类对话框 |
+| `75-dialogs.js` | 编辑、导入、导出对话框 |
 | `76-library-view.js` | 库页面外壳、筛选、排序控件 |
 | `80-palette.js` | Spotlight 面板 |
 | `85-session.js` | 面板状态、会话桥接、composer 触发 |

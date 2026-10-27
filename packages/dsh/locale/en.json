@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "Action Hub",
-    "description": "A Spotlight-style Action shelf for reusable prompts and flows: search, categories, pinning, Skill import, zero context cost."
+    "description": "A Spotlight-style Action shelf for reusable prompts and flows: search, pinning, Skill import, zero context cost."
   },
   "title": "Action Hub",
-  "description": "A Spotlight-style Action shelf for reusable prompts and flows: search, categories, pinning, Skill import, zero context cost."
+  "description": "A Spotlight-style Action shelf for reusable prompts and flows: search, pinning, Skill import, zero context cost."
 }

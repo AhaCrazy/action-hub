@@ -1,8 +1,6 @@
     function EditorDialog(props) {
       const { t, initial } = props;      const [form, setForm] = React.useState(() => ({
         name: initial?.name ?? '',
-        category: initial?.category ?? '',
-        tags: Array.isArray(initial?.tags) ? initial.tags.join(', ') : '',
         argsHint: initial?.argsHint ?? '',
         description: initial?.description ?? '',
         prompt: initial?.prompt ?? '',
@@ -41,8 +39,6 @@
         try {
           await props.onSave({
             name: form.name.trim(),
-            category: form.category.trim(),
-            tags: form.tags.split(',').map((tag) => tag.trim()).filter((tag) => tag !== ''),
             argsHint: form.argsHint.trim(),
             description: form.description.trim(),
             prompt: form.prompt,
@@ -77,16 +73,6 @@
         h('label', { className: 'ah-label' }, t('editor.name')),
         h('input', { className: 'ah-input', value: form.name, maxLength: 80, placeholder: t('editor.namePlaceholder'), onChange: patch('name') }),
         h('span', { className: 'ah-hint' }, t('editor.nameHint'))),
-      h('div', { className: 'ah-field-row' },
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.category')),
-          h('input', { className: 'ah-input', value: form.category, maxLength: 40, list: 'ah-category-options', placeholder: t('editor.categoryPlaceholder'), onChange: patch('category') }),
-          h('datalist', { id: 'ah-category-options' }, (props.categories ?? []).map((name) => h('option', { key: name, value: name }))),
-          h('span', { className: 'ah-hint' }, t('editor.categoryHint'))),
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.tags')),
-          h('input', { className: 'ah-input', value: form.tags, placeholder: t('editor.tagsPlaceholder'), onChange: patch('tags') }),
-          h('span', { className: 'ah-hint' }, t('editor.tagsHint')))),
       h('div', { className: 'ah-field-row' },
         h('div', { className: 'ah-field' },
           h('label', { className: 'ah-label' }, t('editor.description')),
@@ -316,86 +302,4 @@
         h(Button, { small: true, onClick: () => setSelected(new Set()) }, t('export.clear')),
         h('span', { className: 'ah-hint' }, t('export.selected', { count: selected.size, total: actions.length }))),
       error === '' ? null : h('div', { className: 'ah-notice', 'data-kind': 'error', role: 'alert' }, error));
-    }
-
-    function CategoryDialog(props) {
-      const { t } = props;
-      const [renaming, setRenaming] = React.useState(null);
-      const [draft, setDraft] = React.useState('');
-      const [busy, setBusy] = React.useState(false);
-      const [error, setError] = React.useState('');
-      const [pending, setPending] = React.useState(null);
-
-      const submit = async () => {
-        if (renaming === null) return;
-        if (draft.trim() === '' || draft.trim() === renaming) {
-          setRenaming(null);
-          return;
-        }
-        setBusy(true);
-        try {
-          await api('/category/rename', { from: renaming, to: draft.trim() });
-          props.notify(t('lib.saved'), 'ok');
-          props.onDone();
-          setRenaming(null);
-        } catch (failure) {
-          setError(describeError(failure));
-        } finally {
-          setBusy(false);
-        }
-      };
-
-      const remove = async (name) => {
-        setBusy(true);
-        try {
-          await api('/category/delete', { name });
-          props.notify(t('lib.deleted'), 'ok');
-          props.onDone();
-        } catch (failure) {
-          setError(describeError(failure));
-        } finally {
-          setBusy(false);
-        }
-      };
-
-      const confirmDelete = async () => {
-        if (pending === null) return;
-        const name = pending;
-        await remove(name);
-        setPending(null);
-      };
-
-      const pendingCount = pending === null ? 0 : (props.counts?.[pending] ?? 0);
-      const confirmBlock = pending === null ? null : h('div', { className: 'ah-notice', 'data-kind': 'warn', role: 'alert' },
-        h('p', { style: { margin: '0 0 4px', fontWeight: 600 } }, t('category.deleteConfirm', { name: pending })),
-        h('p', { style: { margin: '0 0 8px' } }, pendingCount > 0 ? t('category.deleteConfirmDesc', { count: pendingCount }) : t('category.deleteConfirmEmpty')),
-        h('div', { className: 'ah-actions' },
-          h('div', { style: { flex: '1 1 auto' } }),
-          h(Button, { small: true, onClick: () => setPending(null) }, t('action.cancel')),
-          h(Button, { small: true, danger: true, disabled: busy, onClick: () => { void confirmDelete(); } }, t('category.confirmDelete'))));
-
-      return h(Modal, { title: t('category.title'), t, onClose: props.onClose, footer: h(Button, { onClick: props.onClose }, t('action.cancel')) },
-        confirmBlock,
-        props.categories.length === 0
-          ? h('div', { className: 'ah-notice' }, t('category.empty'))
-          : h('div', { className: 'ah-list-plain' }, props.categories.map((name) => h('div', { key: name, className: 'ah-plain-item' },
-            h('div', { className: 'ah-plain-main' },
-              renaming === name
-                ? h('input', {
-                  className: 'ah-input',
-                  value: draft,
-                  autoFocus: true,
-                  'aria-label': t('category.name'),
-                  onChange: (event) => setDraft(event.target.value),
-                  onKeyDown: (event) => { if (event.key === 'Enter') void submit(); },
-                })
-                : h('span', { className: 'ah-plain-name' }, name)),
-            renaming === name
-              ? h(React.Fragment, null,
-                h(Button, { small: true, primary: true, disabled: busy, onClick: submit }, t('action.save')),
-                h(Button, { small: true, ghost: true, onClick: () => setRenaming(null) }, t('action.cancel')))
-              : h(React.Fragment, null,
-                h(Button, { small: true, onClick: () => { setRenaming(name); setDraft(name); } }, t('category.rename')),
-                h(Button, { small: true, danger: true, disabled: busy, onClick: () => setPending(name) }, t('category.delete')))))),
-        error === '' ? null : h('div', { className: 'ah-notice', 'data-kind': 'error', role: 'alert' }, error));
     }

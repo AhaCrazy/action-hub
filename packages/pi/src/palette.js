@@ -51,8 +51,6 @@ export class ActionPalette {
     return [
       action.name,
       action.description ?? '',
-      action.category ?? '',
-      ...(action.tags ?? []),
       ...(action.groups ?? []).map((id) => groups.get(id) ?? id),
     ].join(' ');
   }

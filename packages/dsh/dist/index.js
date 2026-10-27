@@ -7734,8 +7734,6 @@ function normalizeAction(input = {}) {
     name: name2,
     description: typeof input.description === "string" ? input.description.trim().slice(0, MAX_DESCRIPTION) : "",
     prompt: typeof input.prompt === "string" ? input.prompt : "",
-    category: typeof input.category === "string" ? input.category.trim().slice(0, 40) : "",
-    tags: Array.isArray(input.tags) ? input.tags.filter((tag) => typeof tag === "string" && tag.trim() !== "").map((tag) => tag.trim()) : [],
     argsHint: typeof input.argsHint === "string" ? input.argsHint.trim().slice(0, 120) : "",
     pinned: input.pinned === true,
     mode: normalizeMode(input.mode),
@@ -7781,7 +7779,7 @@ function emptyState() {
 }
 function normalizeEntryRecord(raw, projectsByName) {
   if (raw === null || typeof raw !== "object") return { entry: void 0, legacyProjects: [] };
-  const { scope, ...rest } = raw;
+  const { scope, category, tags, ...rest } = raw;
   let groups;
   if (Array.isArray(rest.groups)) {
     groups = normalizeGroupIds(rest.groups);
@@ -7822,7 +7820,7 @@ function normalizeState(parsed) {
   const rawGroups = Array.isArray(parsed.groups) ? parsed.groups : [];
   const rawProjects = Array.isArray(parsed.projects) ? parsed.projects : [];
   const hadLegacyUngrouped = rawGroups.some((group) => group?.id === UNGROUPED_GROUP_ID) || Object.values(sourceEntries).some((entry) => Array.isArray(entry?.groups) && entry.groups.includes(UNGROUPED_GROUP_ID)) || rawProjects.some((project) => Array.isArray(project?.groups) && project.groups.includes(UNGROUPED_GROUP_ID));
-  const changed = parsed.format !== STATE_FORMAT || !Array.isArray(parsed.groups) || !Array.isArray(parsed.projects) || parsed.defaultGroup !== defaultGroup || hadLegacyUngrouped || Object.values(sourceEntries).some((entry) => entry !== null && typeof entry === "object" && "scope" in entry);
+  const changed = parsed.format !== STATE_FORMAT || !Array.isArray(parsed.groups) || !Array.isArray(parsed.projects) || parsed.defaultGroup !== defaultGroup || hadLegacyUngrouped || Object.values(sourceEntries).some((entry) => entry !== null && typeof entry === "object" && ("scope" in entry || "category" in entry || "tags" in entry));
   return { state: { format: STATE_FORMAT, groups, entries, projects: profiles, defaultGroup }, changed };
 }
 async function readStateFile(dataDir) {
@@ -7862,8 +7860,6 @@ async function ensureDataDir(dataDir) {
 function defaultEntry() {
   return {
     mode: "command",
-    category: "",
-    tags: [],
     argsHint: "",
     pinned: false,
     usage: { count: 0, lastAt: 0 },
@@ -7874,13 +7870,16 @@ function defaultEntry() {
 }
 function mergeEntry(state, name2) {
   const raw = state.entries[name2];
-  const entry = { ...defaultEntry(), ...raw !== null && typeof raw === "object" ? raw : {} };
-  entry.mode = normalizeMode(entry.mode);
-  entry.groups = normalizeGroupIds(entry.groups);
-  entry.tags = Array.isArray(entry.tags) ? entry.tags.filter((tag) => typeof tag === "string") : [];
-  entry.pinned = entry.pinned === true;
-  entry.usage = entry.usage !== null && typeof entry.usage === "object" ? entry.usage : { count: 0, lastAt: 0 };
-  return entry;
+  const entry = raw !== null && typeof raw === "object" ? raw : {};
+  return {
+    mode: normalizeMode(entry.mode),
+    argsHint: typeof entry.argsHint === "string" ? entry.argsHint : "",
+    pinned: entry.pinned === true,
+    usage: entry.usage !== null && typeof entry.usage === "object" ? entry.usage : { count: 0, lastAt: 0 },
+    groups: normalizeGroupIds(entry.groups),
+    createdAt: typeof entry.createdAt === "number" ? entry.createdAt : 0,
+    updatedAt: typeof entry.updatedAt === "number" ? entry.updatedAt : 0
+  };
 }
 function toAction(skill, entry, resources = []) {
   return {
@@ -7889,8 +7888,6 @@ function toAction(skill, entry, resources = []) {
     skillName: skill.name,
     description: skill.description,
     prompt: skill.body,
-    category: entry.category,
-    tags: entry.tags,
     argsHint: entry.argsHint,
     pinned: entry.pinned,
     usage: entry.usage,
@@ -8039,8 +8036,6 @@ function createStore(options = {}) {
         state.entries[action.name] = {
           ...defaultEntry(),
           mode: action.mode,
-          category: action.category,
-          tags: action.tags,
           argsHint: action.argsHint,
           pinned: action.pinned,
           groups: action.groups,
@@ -8078,8 +8073,6 @@ function createStore(options = {}) {
         state.entries[next.name] = {
           ...entry,
           mode: next.mode,
-          category: next.category,
-          tags: next.tags,
           argsHint: next.argsHint,
           pinned: next.pinned,
           groups: next.groups,
@@ -8282,34 +8275,6 @@ function createStore(options = {}) {
         state.entries[name2] = { ...entry, mode: normalizeMode(mode), updatedAt: Date.now() };
         await writeStateFile(dataDir, state);
         return state.entries[name2];
-      });
-    },
-    async renameCategory(from, to) {
-      return serialize(async () => {
-        const state = await readState();
-        let changed = 0;
-        for (const [name2, entry] of Object.entries(state.entries)) {
-          if (entry.category === from) {
-            state.entries[name2] = { ...mergeEntry(state, name2), category: to, updatedAt: Date.now() };
-            changed += 1;
-          }
-        }
-        await writeStateFile(dataDir, state);
-        return changed;
-      });
-    },
-    async deleteCategory(name2) {
-      return serialize(async () => {
-        const state = await readState();
-        let changed = 0;
-        for (const [key, entry] of Object.entries(state.entries)) {
-          if (entry.category === name2) {
-            state.entries[key] = { ...mergeEntry(state, key), category: "", updatedAt: Date.now() };
-            changed += 1;
-          }
-        }
-        await writeStateFile(dataDir, state);
-        return changed;
       });
     }
   };
@@ -8516,7 +8481,6 @@ function planItem(candidate, existing, key, allNames) {
     key,
     name: candidate.name,
     description: candidate.description,
-    category: existing?.category ?? "",
     status,
     defaultMode,
     modes,
@@ -8910,8 +8874,6 @@ async function loadBuiltinActions(root = DEFAULT_ROOT) {
       skillName: skill.name,
       description: skill.description,
       prompt: skill.body,
-      category: "\u5185\u7F6E",
-      tags: [],
       argsHint: "",
       pinned: false,
       usage: { count: 0, lastAt: 0 },
@@ -8944,8 +8906,7 @@ function decorateBuiltin(action, entry) {
     mode: "command",
     pinned: entry?.pinned === true,
     usage: entry?.usage ?? { count: 0, lastAt: 0 },
-    groups: entry?.groups ?? [],
-    category: entry?.category ?? "\u5185\u7F6E"
+    groups: entry?.groups ?? []
   };
   Object.defineProperty(next, "builtinDir", { value: action.dir, enumerable: false });
   return next;
@@ -9579,16 +9540,6 @@ async function handle(ctx, store, dataDir, scopeStore, req, res) {
       const entry = await store.setMode(text(body.id), body.mode);
       notifySkillCatalog(ctx);
       sendJson(res, 200, { ok: true, mode: entry.mode });
-      return;
-    }
-    if (route === "/category/rename") {
-      const changed = await store.renameCategory(text(body.from), text(body.to));
-      sendJson(res, 200, { ok: true, changed });
-      return;
-    }
-    if (route === "/category/delete") {
-      const changed = await store.deleteCategory(text(body.name));
-      sendJson(res, 200, { ok: true, changed });
       return;
     }
     sendJson(res, 404, { ok: false, error: `\u672A\u77E5\u63A5\u53E3\uFF1A${route}` });

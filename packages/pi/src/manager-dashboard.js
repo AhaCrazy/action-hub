@@ -70,7 +70,7 @@ export class ManagerDashboard {
       { id: 'actions', label: 'Action', count: this.actions.length },
       { id: 'groups', label: '分组', count: this.groups.length },
       { id: 'projects', label: '项目', count: this.projects.length },
-      { id: 'tools', label: '工具', count: 4 },
+      { id: 'tools', label: '工具', count: 3 },
     ];
   }
 
@@ -81,7 +81,6 @@ export class ManagerDashboard {
     return [
       { key: 'import', name: '导入 Action', description: '从标准 Skill 目录或 ZIP 导入' },
       { key: 'export', name: '导出 Action', description: '导出全部或单个 Action 为 ZIP' },
-      { key: 'categories', name: '分类管理', description: '重命名或清空分类' },
       { key: 'settings', name: '设置', description: '数据目录、默认分组、重新加载' },
     ];
   }
@@ -91,8 +90,6 @@ export class ManagerDashboard {
     return this.items.filter((item) => matches([
       item.name,
       item.description,
-      item.category,
-      ...(item.tags ?? []),
     ].filter(Boolean).join(' ')));
   }
 
@@ -319,8 +316,6 @@ export class ManagerDashboard {
       push('名称', item.name);
       push('模式', item.mode === 'skill' ? 'Skill' : 'Command');
       push('描述', item.description);
-      push('分类', item.category || '—');
-      push('标签', (item.tags ?? []).join(', ') || '—');
       push('参数', item.argsHint || '—');
       push('固定', item.pinned ? '是' : '否');
       push('使用', String(item.usage?.count ?? 0));

@@ -46,8 +46,6 @@ export async function loadBuiltinActions(root = DEFAULT_ROOT) {
       skillName: skill.name,
       description: skill.description,
       prompt: skill.body,
-      category: '内置',
-      tags: [],
       argsHint: '',
       pinned: false,
       usage: { count: 0, lastAt: 0 },

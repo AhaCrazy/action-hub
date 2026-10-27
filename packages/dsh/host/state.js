@@ -27,7 +27,6 @@ function decorateBuiltin(action, entry) {
     pinned: entry?.pinned === true,
     usage: entry?.usage ?? { count: 0, lastAt: 0 },
     groups: entry?.groups ?? [],
-    category: entry?.category ?? '内置',
   };
   Object.defineProperty(next, 'builtinDir', { value: action.dir, enumerable: false });
   return next;

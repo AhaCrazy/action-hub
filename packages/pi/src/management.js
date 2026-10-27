@@ -111,10 +111,6 @@ async function pickActionNames(ctx, store, title, selected = []) {
   });
 }
 
-function parseTags(value) {
-  return value.split(/[,，\s]+/u).map((tag) => tag.trim()).filter(Boolean);
-}
-
 async function pickMode(ctx, current = 'command') {
   const choice = await ctx.ui.select('选择模式', ['Command（仅用户调用）', 'Skill（模型可调用）']);
   if (choice === undefined) return undefined;
@@ -154,8 +150,6 @@ async function editAction(ctx, store, action) {
       '正文',
       '模式',
       '分组',
-      '分类',
-      '标签',
       '参数提示',
       '固定/取消固定',
       '保存并返回',
@@ -198,16 +192,6 @@ async function editAction(ctx, store, action) {
       if (groups === undefined) continue;
       patch.groups = groups;
       current = { ...current, groups };
-    } else if (choice === '分类') {
-      const value = await askInput(ctx, '分类（留空保持不变）', current.category ?? '');
-      if (value === undefined) continue;
-      patch.category = value;
-      current = { ...current, category: value };
-    } else if (choice === '标签') {
-      const value = await askInput(ctx, '标签，用空格或逗号分隔（留空保持不变）', (current.tags ?? []).join(' '));
-      if (value === undefined) continue;
-      patch.tags = parseTags(value);
-      current = { ...current, tags: patch.tags };
     } else if (choice === '参数提示') {
       const value = await askInput(ctx, '参数提示（可留空）', current.argsHint ?? '');
       if (value === undefined) continue;
@@ -312,41 +296,6 @@ async function manageOneAction(ctx, store, action, tui) {
         notify(ctx, `删除失败：${error instanceof Error ? error.message : String(error)}`, 'error');
       }
       return;
-    }
-  }
-}
-
-async function manageCategories(ctx, store) {
-  for (;;) {
-    const { actions } = await loadAll(store);
-    const categories = [...new Set(actions.map((action) => action.category).filter(Boolean))].sort();
-    if (categories.length === 0) {
-      notify(ctx, '当前没有分类。分类可以在编辑 Action 时设置。', 'info');
-      return;
-    }
-    const choice = await ctx.ui.select('分类管理', [...categories, BACK]);
-    if (choice === undefined || choice === BACK) return;
-    const category = categories[categories.indexOf(choice)];
-    if (category === undefined) continue;
-    const action = await ctx.ui.select(`分类：${category}`, ['重命名分类', '清空分类', BACK]);
-    if (action === undefined || action === BACK) continue;
-    if (action === '重命名分类') {
-      const value = await askInput(ctx, '新的分类名', category);
-      if (value === undefined || value === '') continue;
-      try {
-        await store.renameCategory(category, value);
-        notify(ctx, '分类已重命名', 'info');
-      } catch (error) {
-        notify(ctx, `重命名失败：${error instanceof Error ? error.message : String(error)}`, 'error');
-      }
-    } else if (action === '清空分类') {
-      if (!(await ctx.ui.confirm('清空分类', `把 ${category} 从所有 Action 上移除？`))) continue;
-      try {
-        await store.deleteCategory(category);
-        notify(ctx, '分类已清空', 'info');
-      } catch (error) {
-        notify(ctx, `操作失败：${error instanceof Error ? error.message : String(error)}`, 'error');
-      }
     }
   }
 }
@@ -525,8 +474,6 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
         if (source !== undefined && source.trim() !== '') await importFromPath(ctx, store, dataDir, source.trim());
       } else if (result.tool === 'export') {
         await exportActions(ctx, store, dataDir);
-      } else if (result.tool === 'categories') {
-        await manageCategories(ctx, store);
       } else if (result.tool === 'settings') {
         await manageSettings(ctx, store, dataDir);
       }

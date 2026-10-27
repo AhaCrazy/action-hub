@@ -28,7 +28,7 @@ dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases
 
 `Alt + A`（macOS `⌥ + A`）或输入框工具行按钮打开：
 
-- 中文名、描述、标签、正文均可搜索；
+- 中文名、描述、正文均可搜索；
 - 输入框右侧 `.*` 按钮或 `Alt+R` 切换正则搜索；
 - 每行显示 `[Command]` / `[Skill]`；
 - Command：无参数插入引用 chip，有参数插入展开后的正文；

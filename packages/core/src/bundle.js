@@ -77,7 +77,6 @@ function planItem(candidate, existing, key, allNames) {
     key,
     name: candidate.name,
     description: candidate.description,
-    category: existing?.category ?? '',
     status,
     defaultMode,
     modes,

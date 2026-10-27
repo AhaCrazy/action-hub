@@ -313,9 +313,6 @@ window.__ModuleLoader__.load({
         'action.close': '关闭',
         'lib.all': '全部',
         'lib.groupBar': '分组栏',
-        'lib.uncategorized': '未分类',
-        'lib.categories': '分类',
-        'lib.manageCategories': '管理分类',
         'lib.search': '搜索名称、描述或正文…',
         'lib.count': '{count} 个条目',
         'lib.countFiltered': '{count} / {total}',
@@ -363,12 +360,6 @@ window.__ModuleLoader__.load({
         'editor.name': '名称',
         'editor.namePlaceholder': '例如：代码审查',
         'editor.nameHint': '显示在收藏夹与面板中的名字。',
-        'editor.category': '分类',
-        'editor.categoryPlaceholder': '开发 / 效率 / …',
-        'editor.categoryHint': '自由填写，已有分类会作为候选。',
-        'editor.tags': '标签',
-        'editor.tagsPlaceholder': 'git, commit',
-        'editor.tagsHint': '逗号分隔，参与搜索。',
         'editor.description': '描述',
         'editor.descriptionPlaceholder': '一句话说明它做什么',
         'editor.descriptionHint': '显示在列表里，也参与搜索。',
@@ -427,15 +418,6 @@ window.__ModuleLoader__.load({
         'import.confirm': '确认导入',
         'import.bundleResult': '导入完成：新增 {imported}，更新 {updated}，跳过 {skipped}（重复 {duplicated}，冲突 {conflicts}）',
         'import.bundleUnavailable': '当前环境无法打开目录选择器，请改用 ZIP。',
-        'category.title': '分类管理',
-        'category.empty': '还没有分类',
-        'category.rename': '重命名',
-        'category.delete': '删除分类',
-        'category.deleteConfirm': '删除分类「{name}」？',
-        'category.deleteConfirmDesc': '该分类下还有 {count} 个 Action。删除分类后它们会移到未分类，Action 本身不会被删除。',
-        'category.deleteConfirmEmpty': '该分类下没有 Action，可以安全删除。',
-        'category.confirmDelete': '确认删除',
-        'category.name': '新名称',
         'palette.title': '选择一个 Action',
         'palette.search': '搜索 Action…',
         'search.regexTitle': '正则表达式搜索（Alt+R）',
@@ -575,9 +557,6 @@ window.__ModuleLoader__.load({
         'action.close': 'Close',
         'lib.all': 'All',
         'lib.groupBar': 'Group bar',
-        'lib.uncategorized': 'Uncategorized',
-        'lib.categories': 'Categories',
-        'lib.manageCategories': 'Manage categories',
         'lib.search': 'Search name, description, or body…',
         'lib.count': '{count} entries',
         'lib.countFiltered': '{count} / {total}',
@@ -625,12 +604,6 @@ window.__ModuleLoader__.load({
         'editor.name': 'Name',
         'editor.namePlaceholder': 'e.g. Code review',
         'editor.nameHint': 'Shown in the shelf and the palette.',
-        'editor.category': 'Category',
-        'editor.categoryPlaceholder': 'Dev / Productivity / …',
-        'editor.categoryHint': 'Free text; existing categories are suggested.',
-        'editor.tags': 'Tags',
-        'editor.tagsPlaceholder': 'git, commit',
-        'editor.tagsHint': 'Comma separated; searched too.',
         'editor.description': 'Description',
         'editor.descriptionPlaceholder': 'One line on what it does',
         'editor.descriptionHint': 'Shown in the list and searched.',
@@ -689,15 +662,6 @@ window.__ModuleLoader__.load({
         'import.confirm': 'Import',
         'import.bundleResult': 'Imported {imported}, updated {updated}, skipped {skipped} (duplicates {duplicated}, conflicts {conflicts})',
         'import.bundleUnavailable': 'This environment cannot open the directory picker; use a ZIP instead.',
-        'category.title': 'Categories',
-        'category.empty': 'No categories yet',
-        'category.rename': 'Rename',
-        'category.delete': 'Delete',
-        'category.deleteConfirm': 'Delete category “{name}”?',
-        'category.deleteConfirmDesc': 'It still contains {count} Action(s). They move to Uncategorized; the Actions themselves are kept.',
-        'category.deleteConfirmEmpty': 'This category has no Actions, so it is safe to delete.',
-        'category.confirmDelete': 'Delete category',
-        'category.name': 'New name',
         'palette.title': 'Pick an Action',
         'palette.search': 'Search Actions…',
         'search.regexTitle': 'Regular expression search (Alt+R)',
@@ -1652,7 +1616,6 @@ window.__ModuleLoader__.load({
         open: false,
         mode: 'browse',
         query: '',
-        category: '',
         selectedId: null,
         args: '',
         toast: '',
@@ -1682,7 +1645,7 @@ window.__ModuleLoader__.load({
           emit();
         },
         open() {
-          state = { ...state, open: true, mode: 'browse', query: '', category: '', args: '', toast: '', toastKind: 'ok' };
+          state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
           emit();
         },
         close() {
@@ -1694,7 +1657,7 @@ window.__ModuleLoader__.load({
             state = { ...state, open: false };
             emit();
           } else {
-            state = { ...state, open: true, mode: 'browse', query: '', category: '', args: '', toast: '', toastKind: 'ok' };
+            state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
             emit();
           }
         },
@@ -2017,8 +1980,6 @@ window.__ModuleLoader__.load({
     function EditorDialog(props) {
       const { t, initial } = props;      const [form, setForm] = React.useState(() => ({
         name: initial?.name ?? '',
-        category: initial?.category ?? '',
-        tags: Array.isArray(initial?.tags) ? initial.tags.join(', ') : '',
         argsHint: initial?.argsHint ?? '',
         description: initial?.description ?? '',
         prompt: initial?.prompt ?? '',
@@ -2057,8 +2018,6 @@ window.__ModuleLoader__.load({
         try {
           await props.onSave({
             name: form.name.trim(),
-            category: form.category.trim(),
-            tags: form.tags.split(',').map((tag) => tag.trim()).filter((tag) => tag !== ''),
             argsHint: form.argsHint.trim(),
             description: form.description.trim(),
             prompt: form.prompt,
@@ -2093,16 +2052,6 @@ window.__ModuleLoader__.load({
         h('label', { className: 'ah-label' }, t('editor.name')),
         h('input', { className: 'ah-input', value: form.name, maxLength: 80, placeholder: t('editor.namePlaceholder'), onChange: patch('name') }),
         h('span', { className: 'ah-hint' }, t('editor.nameHint'))),
-      h('div', { className: 'ah-field-row' },
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.category')),
-          h('input', { className: 'ah-input', value: form.category, maxLength: 40, list: 'ah-category-options', placeholder: t('editor.categoryPlaceholder'), onChange: patch('category') }),
-          h('datalist', { id: 'ah-category-options' }, (props.categories ?? []).map((name) => h('option', { key: name, value: name }))),
-          h('span', { className: 'ah-hint' }, t('editor.categoryHint'))),
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.tags')),
-          h('input', { className: 'ah-input', value: form.tags, placeholder: t('editor.tagsPlaceholder'), onChange: patch('tags') }),
-          h('span', { className: 'ah-hint' }, t('editor.tagsHint')))),
       h('div', { className: 'ah-field-row' },
         h('div', { className: 'ah-field' },
           h('label', { className: 'ah-label' }, t('editor.description')),
@@ -2332,88 +2281,6 @@ window.__ModuleLoader__.load({
         h(Button, { small: true, onClick: () => setSelected(new Set()) }, t('export.clear')),
         h('span', { className: 'ah-hint' }, t('export.selected', { count: selected.size, total: actions.length }))),
       error === '' ? null : h('div', { className: 'ah-notice', 'data-kind': 'error', role: 'alert' }, error));
-    }
-
-    function CategoryDialog(props) {
-      const { t } = props;
-      const [renaming, setRenaming] = React.useState(null);
-      const [draft, setDraft] = React.useState('');
-      const [busy, setBusy] = React.useState(false);
-      const [error, setError] = React.useState('');
-      const [pending, setPending] = React.useState(null);
-
-      const submit = async () => {
-        if (renaming === null) return;
-        if (draft.trim() === '' || draft.trim() === renaming) {
-          setRenaming(null);
-          return;
-        }
-        setBusy(true);
-        try {
-          await api('/category/rename', { from: renaming, to: draft.trim() });
-          props.notify(t('lib.saved'), 'ok');
-          props.onDone();
-          setRenaming(null);
-        } catch (failure) {
-          setError(describeError(failure));
-        } finally {
-          setBusy(false);
-        }
-      };
-
-      const remove = async (name) => {
-        setBusy(true);
-        try {
-          await api('/category/delete', { name });
-          props.notify(t('lib.deleted'), 'ok');
-          props.onDone();
-        } catch (failure) {
-          setError(describeError(failure));
-        } finally {
-          setBusy(false);
-        }
-      };
-
-      const confirmDelete = async () => {
-        if (pending === null) return;
-        const name = pending;
-        await remove(name);
-        setPending(null);
-      };
-
-      const pendingCount = pending === null ? 0 : (props.counts?.[pending] ?? 0);
-      const confirmBlock = pending === null ? null : h('div', { className: 'ah-notice', 'data-kind': 'warn', role: 'alert' },
-        h('p', { style: { margin: '0 0 4px', fontWeight: 600 } }, t('category.deleteConfirm', { name: pending })),
-        h('p', { style: { margin: '0 0 8px' } }, pendingCount > 0 ? t('category.deleteConfirmDesc', { count: pendingCount }) : t('category.deleteConfirmEmpty')),
-        h('div', { className: 'ah-actions' },
-          h('div', { style: { flex: '1 1 auto' } }),
-          h(Button, { small: true, onClick: () => setPending(null) }, t('action.cancel')),
-          h(Button, { small: true, danger: true, disabled: busy, onClick: () => { void confirmDelete(); } }, t('category.confirmDelete'))));
-
-      return h(Modal, { title: t('category.title'), t, onClose: props.onClose, footer: h(Button, { onClick: props.onClose }, t('action.cancel')) },
-        confirmBlock,
-        props.categories.length === 0
-          ? h('div', { className: 'ah-notice' }, t('category.empty'))
-          : h('div', { className: 'ah-list-plain' }, props.categories.map((name) => h('div', { key: name, className: 'ah-plain-item' },
-            h('div', { className: 'ah-plain-main' },
-              renaming === name
-                ? h('input', {
-                  className: 'ah-input',
-                  value: draft,
-                  autoFocus: true,
-                  'aria-label': t('category.name'),
-                  onChange: (event) => setDraft(event.target.value),
-                  onKeyDown: (event) => { if (event.key === 'Enter') void submit(); },
-                })
-                : h('span', { className: 'ah-plain-name' }, name)),
-            renaming === name
-              ? h(React.Fragment, null,
-                h(Button, { small: true, primary: true, disabled: busy, onClick: submit }, t('action.save')),
-                h(Button, { small: true, ghost: true, onClick: () => setRenaming(null) }, t('action.cancel')))
-              : h(React.Fragment, null,
-                h(Button, { small: true, onClick: () => { setRenaming(name); setDraft(name); } }, t('category.rename')),
-                h(Button, { small: true, danger: true, disabled: busy, onClick: () => setPending(name) }, t('category.delete')))))),
-        error === '' ? null : h('div', { className: 'ah-notice', 'data-kind': 'error', role: 'alert' }, error));
     }
 
     function createPage(hub, ctx) {

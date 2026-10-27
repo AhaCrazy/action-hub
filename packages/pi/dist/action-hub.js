@@ -7705,8 +7705,6 @@ function normalizeAction(input = {}) {
     name,
     description: typeof input.description === "string" ? input.description.trim().slice(0, MAX_DESCRIPTION) : "",
     prompt: typeof input.prompt === "string" ? input.prompt : "",
-    category: typeof input.category === "string" ? input.category.trim().slice(0, 40) : "",
-    tags: Array.isArray(input.tags) ? input.tags.filter((tag) => typeof tag === "string" && tag.trim() !== "").map((tag) => tag.trim()) : [],
     argsHint: typeof input.argsHint === "string" ? input.argsHint.trim().slice(0, 120) : "",
     pinned: input.pinned === true,
     mode: normalizeMode(input.mode),
@@ -7752,7 +7750,7 @@ function emptyState() {
 }
 function normalizeEntryRecord(raw, projectsByName) {
   if (raw === null || typeof raw !== "object") return { entry: void 0, legacyProjects: [] };
-  const { scope, ...rest } = raw;
+  const { scope, category, tags, ...rest } = raw;
   let groups;
   if (Array.isArray(rest.groups)) {
     groups = normalizeGroupIds(rest.groups);
@@ -7793,7 +7791,7 @@ function normalizeState(parsed) {
   const rawGroups = Array.isArray(parsed.groups) ? parsed.groups : [];
   const rawProjects = Array.isArray(parsed.projects) ? parsed.projects : [];
   const hadLegacyUngrouped = rawGroups.some((group) => group?.id === UNGROUPED_GROUP_ID) || Object.values(sourceEntries).some((entry) => Array.isArray(entry?.groups) && entry.groups.includes(UNGROUPED_GROUP_ID)) || rawProjects.some((project) => Array.isArray(project?.groups) && project.groups.includes(UNGROUPED_GROUP_ID));
-  const changed = parsed.format !== STATE_FORMAT || !Array.isArray(parsed.groups) || !Array.isArray(parsed.projects) || parsed.defaultGroup !== defaultGroup || hadLegacyUngrouped || Object.values(sourceEntries).some((entry) => entry !== null && typeof entry === "object" && "scope" in entry);
+  const changed = parsed.format !== STATE_FORMAT || !Array.isArray(parsed.groups) || !Array.isArray(parsed.projects) || parsed.defaultGroup !== defaultGroup || hadLegacyUngrouped || Object.values(sourceEntries).some((entry) => entry !== null && typeof entry === "object" && ("scope" in entry || "category" in entry || "tags" in entry));
   return { state: { format: STATE_FORMAT, groups, entries, projects: profiles, defaultGroup }, changed };
 }
 async function readStateFile(dataDir2) {
@@ -7833,8 +7831,6 @@ async function ensureDataDir(dataDir2) {
 function defaultEntry() {
   return {
     mode: "command",
-    category: "",
-    tags: [],
     argsHint: "",
     pinned: false,
     usage: { count: 0, lastAt: 0 },
@@ -7845,13 +7841,16 @@ function defaultEntry() {
 }
 function mergeEntry(state, name) {
   const raw = state.entries[name];
-  const entry = { ...defaultEntry(), ...raw !== null && typeof raw === "object" ? raw : {} };
-  entry.mode = normalizeMode(entry.mode);
-  entry.groups = normalizeGroupIds(entry.groups);
-  entry.tags = Array.isArray(entry.tags) ? entry.tags.filter((tag) => typeof tag === "string") : [];
-  entry.pinned = entry.pinned === true;
-  entry.usage = entry.usage !== null && typeof entry.usage === "object" ? entry.usage : { count: 0, lastAt: 0 };
-  return entry;
+  const entry = raw !== null && typeof raw === "object" ? raw : {};
+  return {
+    mode: normalizeMode(entry.mode),
+    argsHint: typeof entry.argsHint === "string" ? entry.argsHint : "",
+    pinned: entry.pinned === true,
+    usage: entry.usage !== null && typeof entry.usage === "object" ? entry.usage : { count: 0, lastAt: 0 },
+    groups: normalizeGroupIds(entry.groups),
+    createdAt: typeof entry.createdAt === "number" ? entry.createdAt : 0,
+    updatedAt: typeof entry.updatedAt === "number" ? entry.updatedAt : 0
+  };
 }
 function toAction(skill, entry, resources = []) {
   return {
@@ -7860,8 +7859,6 @@ function toAction(skill, entry, resources = []) {
     skillName: skill.name,
     description: skill.description,
     prompt: skill.body,
-    category: entry.category,
-    tags: entry.tags,
     argsHint: entry.argsHint,
     pinned: entry.pinned,
     usage: entry.usage,
@@ -8010,8 +8007,6 @@ function createStore(options = {}) {
         state.entries[action.name] = {
           ...defaultEntry(),
           mode: action.mode,
-          category: action.category,
-          tags: action.tags,
           argsHint: action.argsHint,
           pinned: action.pinned,
           groups: action.groups,
@@ -8049,8 +8044,6 @@ function createStore(options = {}) {
         state.entries[next.name] = {
           ...entry,
           mode: next.mode,
-          category: next.category,
-          tags: next.tags,
           argsHint: next.argsHint,
           pinned: next.pinned,
           groups: next.groups,
@@ -8253,34 +8246,6 @@ function createStore(options = {}) {
         state.entries[name] = { ...entry, mode: normalizeMode(mode), updatedAt: Date.now() };
         await writeStateFile(dataDir2, state);
         return state.entries[name];
-      });
-    },
-    async renameCategory(from, to) {
-      return serialize(async () => {
-        const state = await readState();
-        let changed = 0;
-        for (const [name, entry] of Object.entries(state.entries)) {
-          if (entry.category === from) {
-            state.entries[name] = { ...mergeEntry(state, name), category: to, updatedAt: Date.now() };
-            changed += 1;
-          }
-        }
-        await writeStateFile(dataDir2, state);
-        return changed;
-      });
-    },
-    async deleteCategory(name) {
-      return serialize(async () => {
-        const state = await readState();
-        let changed = 0;
-        for (const [key, entry] of Object.entries(state.entries)) {
-          if (entry.category === name) {
-            state.entries[key] = { ...mergeEntry(state, key), category: "", updatedAt: Date.now() };
-            changed += 1;
-          }
-        }
-        await writeStateFile(dataDir2, state);
-        return changed;
       });
     }
   };
@@ -8487,7 +8452,6 @@ function planItem(candidate, existing, key, allNames) {
     key,
     name: candidate.name,
     description: candidate.description,
-    category: existing?.category ?? "",
     status,
     defaultMode,
     modes,
@@ -8796,8 +8760,6 @@ async function loadBuiltinActions(root = DEFAULT_ROOT) {
       skillName: skill.name,
       description: skill.description,
       prompt: skill.body,
-      category: "\u5185\u7F6E",
-      tags: [],
       argsHint: "",
       pinned: false,
       usage: { count: 0, lastAt: 0 },
@@ -8830,8 +8792,7 @@ function decorateBuiltin(action, entry) {
     mode: "command",
     pinned: entry?.pinned === true,
     usage: entry?.usage ?? { count: 0, lastAt: 0 },
-    groups: entry?.groups ?? [],
-    category: entry?.category ?? "\u5185\u7F6E"
+    groups: entry?.groups ?? []
   };
 }
 async function loadAllActions(store2) {
@@ -9009,7 +8970,7 @@ var ManagerDashboard = class {
       { id: "actions", label: "Action", count: this.actions.length },
       { id: "groups", label: "\u5206\u7EC4", count: this.groups.length },
       { id: "projects", label: "\u9879\u76EE", count: this.projects.length },
-      { id: "tools", label: "\u5DE5\u5177", count: 4 }
+      { id: "tools", label: "\u5DE5\u5177", count: 3 }
     ];
   }
   get items() {
@@ -9019,7 +8980,6 @@ var ManagerDashboard = class {
     return [
       { key: "import", name: "\u5BFC\u5165 Action", description: "\u4ECE\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u5BFC\u5165" },
       { key: "export", name: "\u5BFC\u51FA Action", description: "\u5BFC\u51FA\u5168\u90E8\u6216\u5355\u4E2A Action \u4E3A ZIP" },
-      { key: "categories", name: "\u5206\u7C7B\u7BA1\u7406", description: "\u91CD\u547D\u540D\u6216\u6E05\u7A7A\u5206\u7C7B" },
       { key: "settings", name: "\u8BBE\u7F6E", description: "\u6570\u636E\u76EE\u5F55\u3001\u9ED8\u8BA4\u5206\u7EC4\u3001\u91CD\u65B0\u52A0\u8F7D" }
     ];
   }
@@ -9027,9 +8987,7 @@ var ManagerDashboard = class {
     const matches = matcherFor(this.query, this.regex);
     return this.items.filter((item) => matches([
       item.name,
-      item.description,
-      item.category,
-      ...item.tags ?? []
+      item.description
     ].filter(Boolean).join(" ")));
   }
   get currentItem() {
@@ -9240,8 +9198,6 @@ var ManagerDashboard = class {
       push("\u540D\u79F0", item.name);
       push("\u6A21\u5F0F", item.mode === "skill" ? "Skill" : "Command");
       push("\u63CF\u8FF0", item.description);
-      push("\u5206\u7C7B", item.category || "\u2014");
-      push("\u6807\u7B7E", (item.tags ?? []).join(", ") || "\u2014");
       push("\u53C2\u6570", item.argsHint || "\u2014");
       push("\u56FA\u5B9A", item.pinned ? "\u662F" : "\u5426");
       push("\u4F7F\u7528", String(item.usage?.count ?? 0));
@@ -9480,9 +9436,6 @@ async function pickActionNames(ctx, store2, title, selected = []) {
     selected
   });
 }
-function parseTags(value) {
-  return value.split(/[,，\s]+/u).map((tag) => tag.trim()).filter(Boolean);
-}
 async function pickMode(ctx, current = "command") {
   const choice = await ctx.ui.select("\u9009\u62E9\u6A21\u5F0F", ["Command\uFF08\u4EC5\u7528\u6237\u8C03\u7528\uFF09", "Skill\uFF08\u6A21\u578B\u53EF\u8C03\u7528\uFF09"]);
   if (choice === void 0) return void 0;
@@ -9520,8 +9473,6 @@ async function editAction(ctx, store2, action) {
       "\u6B63\u6587",
       "\u6A21\u5F0F",
       "\u5206\u7EC4",
-      "\u5206\u7C7B",
-      "\u6807\u7B7E",
       "\u53C2\u6570\u63D0\u793A",
       "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A",
       "\u4FDD\u5B58\u5E76\u8FD4\u56DE",
@@ -9564,16 +9515,6 @@ async function editAction(ctx, store2, action) {
       if (groups === void 0) continue;
       patch.groups = groups;
       current = { ...current, groups };
-    } else if (choice === "\u5206\u7C7B") {
-      const value = await askInput(ctx, "\u5206\u7C7B\uFF08\u7559\u7A7A\u4FDD\u6301\u4E0D\u53D8\uFF09", current.category ?? "");
-      if (value === void 0) continue;
-      patch.category = value;
-      current = { ...current, category: value };
-    } else if (choice === "\u6807\u7B7E") {
-      const value = await askInput(ctx, "\u6807\u7B7E\uFF0C\u7528\u7A7A\u683C\u6216\u9017\u53F7\u5206\u9694\uFF08\u7559\u7A7A\u4FDD\u6301\u4E0D\u53D8\uFF09", (current.tags ?? []).join(" "));
-      if (value === void 0) continue;
-      patch.tags = parseTags(value);
-      current = { ...current, tags: patch.tags };
     } else if (choice === "\u53C2\u6570\u63D0\u793A") {
       const value = await askInput(ctx, "\u53C2\u6570\u63D0\u793A\uFF08\u53EF\u7559\u7A7A\uFF09", current.argsHint ?? "");
       if (value === void 0) continue;
@@ -9677,40 +9618,6 @@ async function manageOneAction(ctx, store2, action, tui) {
         notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
       }
       return;
-    }
-  }
-}
-async function manageCategories(ctx, store2) {
-  for (; ; ) {
-    const { actions } = await loadAll(store2);
-    const categories = [...new Set(actions.map((action2) => action2.category).filter(Boolean))].sort();
-    if (categories.length === 0) {
-      notify2(ctx, "\u5F53\u524D\u6CA1\u6709\u5206\u7C7B\u3002\u5206\u7C7B\u53EF\u4EE5\u5728\u7F16\u8F91 Action \u65F6\u8BBE\u7F6E\u3002", "info");
-      return;
-    }
-    const choice = await ctx.ui.select("\u5206\u7C7B\u7BA1\u7406", [...categories, BACK]);
-    if (choice === void 0 || choice === BACK) return;
-    const category = categories[categories.indexOf(choice)];
-    if (category === void 0) continue;
-    const action = await ctx.ui.select(`\u5206\u7C7B\uFF1A${category}`, ["\u91CD\u547D\u540D\u5206\u7C7B", "\u6E05\u7A7A\u5206\u7C7B", BACK]);
-    if (action === void 0 || action === BACK) continue;
-    if (action === "\u91CD\u547D\u540D\u5206\u7C7B") {
-      const value = await askInput(ctx, "\u65B0\u7684\u5206\u7C7B\u540D", category);
-      if (value === void 0 || value === "") continue;
-      try {
-        await store2.renameCategory(category, value);
-        notify2(ctx, "\u5206\u7C7B\u5DF2\u91CD\u547D\u540D", "info");
-      } catch (error) {
-        notify2(ctx, `\u91CD\u547D\u540D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
-      }
-    } else if (action === "\u6E05\u7A7A\u5206\u7C7B") {
-      if (!await ctx.ui.confirm("\u6E05\u7A7A\u5206\u7C7B", `\u628A ${category} \u4ECE\u6240\u6709 Action \u4E0A\u79FB\u9664\uFF1F`)) continue;
-      try {
-        await store2.deleteCategory(category);
-        notify2(ctx, "\u5206\u7C7B\u5DF2\u6E05\u7A7A", "info");
-      } catch (error) {
-        notify2(ctx, `\u64CD\u4F5C\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
-      }
     }
   }
 }
@@ -9880,8 +9787,6 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
         if (source !== void 0 && source.trim() !== "") await importFromPath(ctx, store2, dataDir2, source.trim());
       } else if (result.tool === "export") {
         await exportActions(ctx, store2, dataDir2);
-      } else if (result.tool === "categories") {
-        await manageCategories(ctx, store2);
       } else if (result.tool === "settings") {
         await manageSettings(ctx, store2, dataDir2);
       }
@@ -10101,8 +10006,6 @@ var ActionPalette = class {
     return [
       action.name,
       action.description ?? "",
-      action.category ?? "",
-      ...action.tags ?? [],
       ...(action.groups ?? []).map((id) => groups.get(id) ?? id)
     ].join(" ");
   }
