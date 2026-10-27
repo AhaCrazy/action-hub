@@ -8841,7 +8841,7 @@ async function readPlan(ctx, store2, dataDir2, target) {
 async function importFromPath(ctx, store2, dataDir2, source) {
   if (ctx.mode !== "tui") {
     notify(ctx, "\u5BFC\u5165\u529F\u80FD\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
-    return;
+    return false;
   }
   const target = path8.resolve(ctx.cwd ?? process.cwd(), source);
   const { kind, preview, buffer } = await readPlan(ctx, store2, dataDir2, target);
@@ -8850,10 +8850,10 @@ async function importFromPath(ctx, store2, dataDir2, source) {
     "\u5BFC\u5165 Action",
     `\u5171 ${summary.total} \u9879\uFF1A\u65B0\u589E ${summary.new}\uFF0C\u91CD\u590D ${summary.duplicate}\uFF0C\u66F4\u65B0 ${summary.update}\uFF0C\u51B2\u7A81 ${summary.conflict}\u3002`
   );
-  if (!confirmed) return;
+  if (!confirmed) return false;
   const mode = await ctx.ui.select("\u65B0\u589E Action \u7684\u5BFC\u5165\u65B9\u5F0F", ["Command\uFF08\u4EC5\u7528\u6237\u8C03\u7528\uFF09", "Skill\uFF08\u6A21\u578B\u53EF\u8C03\u7528\uFF09"]);
   const createMode = mode === void 0 ? void 0 : mode.startsWith("Skill") ? "create-skill" : "create-command";
-  if (createMode === void 0) return;
+  if (createMode === void 0) return false;
   const update = summary.update > 0 ? await ctx.ui.confirm("\u66F4\u65B0\u5DF2\u6709 Action", `\u68C0\u6D4B\u5230 ${summary.update} \u4E2A\u5DF2\u6709 Action\uFF0C\u662F\u5426\u7528\u5BFC\u5165\u5185\u5BB9\u66F4\u65B0\uFF1F`) : false;
   const decisions = preview.items.map((item) => {
     if (item.status === "new") return { key: item.key, mode: createMode };
@@ -8862,7 +8862,7 @@ async function importFromPath(ctx, store2, dataDir2, source) {
   });
   const result = kind === "folder" ? await applyFolderPlan(store2, dataDir2, target, decisions, []) : await applyZipPlan(store2, dataDir2, buffer, decisions, []);
   notify(ctx, `\u5BFC\u5165\u5B8C\u6210\uFF1A\u65B0\u589E ${result.imported}\uFF0C\u66F4\u65B0 ${result.updated}\uFF0C\u8DF3\u8FC7 ${result.skipped}\uFF0C\u51B2\u7A81 ${result.conflicts}\u3002`, "info");
-  await ctx.reload();
+  return true;
 }
 async function exportActions(ctx, store2, dataDir2) {
   if (ctx.mode !== "tui") {
@@ -9727,7 +9727,7 @@ async function deleteGroup(ctx, store2, group) {
     notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
   }
 }
-async function openManager(ctx, store2, dataDir2, scopeStore2) {
+async function openManager(ctx, store2, dataDir2, scopeStore2, options = {}) {
   if (ctx.mode !== "tui") {
     notify2(ctx, "Action Hub \u7BA1\u7406\u754C\u9762\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
@@ -9758,6 +9758,7 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
     const result = await ctx.ui.custom(
       (tui, theme, _keybindings, done) => {
         dashboardTui = tui;
+        options.onTui?.(tui);
         return new ManagerDashboard({
           tui,
           theme,
@@ -9829,7 +9830,10 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
       sectionId = "tools";
       if (result.tool === "import") {
         const source = await ctx.ui.input("\u5BFC\u5165\u8DEF\u5F84", "\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u7684\u7EDD\u5BF9\u8DEF\u5F84");
-        if (source !== void 0 && source.trim() !== "") await importFromPath(ctx, store2, dataDir2, source.trim());
+        if (source !== void 0 && source.trim() !== "") {
+          const imported = await importFromPath(ctx, store2, dataDir2, source.trim());
+          if (imported) reloadNeeded = true;
+        }
       } else if (result.tool === "export") {
         await exportActions(ctx, store2, dataDir2);
       } else if (result.tool === "settings") {
@@ -10003,7 +10007,8 @@ async function manageSettings(ctx, store2, dataDir2) {
       continue;
     }
     if (choice === "\u91CD\u65B0\u52A0\u8F7D Pi \u8D44\u6E90") {
-      await ctx.reload();
+      if (typeof ctx.reload === "function") await ctx.reload();
+      else notify2(ctx, "\u5F53\u524D\u5FEB\u6377\u952E\u4E0A\u4E0B\u6587\u4E0D\u80FD\u76F4\u63A5\u91CD\u65B0\u52A0\u8F7D\uFF0C\u8BF7\u6267\u884C /ah reload\u3002", "warning");
       return;
     }
   }
@@ -10242,20 +10247,45 @@ async function openPalette(ctx, initialQuery = "") {
   }
   await insertAction(store, ctx, selected, args, paletteTui);
 }
+async function submitReloadThroughEditor(ctx, tui) {
+  if (typeof tui?.getFocusedComponent !== "function") return false;
+  for (const delay2 of [0, 25, 80]) {
+    await new Promise((resolve) => setTimeout(resolve, delay2));
+    if (typeof ctx.ui.getEditorText === "function" && ctx.ui.getEditorText().trim() !== "") return false;
+    const editor = tui.getFocusedComponent();
+    if (editor !== null && typeof editor?.onSubmit === "function") {
+      void Promise.resolve(editor.onSubmit("/ah reload")).catch(() => {
+      });
+      return true;
+    }
+  }
+  return false;
+}
 async function openManagerWithReload(ctx) {
   await seedDefaultBuiltin(store).catch(() => {
   });
-  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
+  let tui;
+  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore, {
+    onTui(value) {
+      tui = value;
+    }
+  });
   if (!reloadNeeded) return;
-  if (typeof ctx.reload !== "function") {
-    notify3(ctx, "\u4FEE\u6539\u5DF2\u4FDD\u5B58\u3002\u5F53\u524D\u5FEB\u6377\u952E\u4E0A\u4E0B\u6587\u4E0D\u80FD\u81EA\u52A8\u91CD\u8F7D\uFF0C\u8BF7\u6267\u884C /ah reload\u3002", "warning");
+  if (typeof ctx.reload === "function") {
+    try {
+      await ctx.reload();
+    } catch (error) {
+      notify3(ctx, `\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+    }
     return;
   }
   try {
-    await ctx.reload();
+    if (await submitReloadThroughEditor(ctx, tui)) return;
   } catch (error) {
     notify3(ctx, `\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+    return;
   }
+  notify3(ctx, "\u4FEE\u6539\u5DF2\u4FDD\u5B58\u3002\u5F53\u524D\u4E0A\u4E0B\u6587\u4E0D\u80FD\u81EA\u52A8\u91CD\u8F7D\uFF0C\u8BF7\u6267\u884C /ah reload\u3002", "warning");
 }
 function actionHub(pi) {
   pi.registerCommand("ah", {
@@ -10280,7 +10310,11 @@ function actionHub(pi) {
           notify3(ctx, "\u7528\u6CD5\uFF1A/ah import <\u76EE\u5F55\u6216 ZIP \u8DEF\u5F84>", "warning");
           return;
         }
-        await importFromPath(ctx, store, dataDir, source);
+        const imported = await importFromPath(ctx, store, dataDir, source);
+        if (imported) {
+          if (typeof ctx.reload === "function") await ctx.reload();
+          else notify3(ctx, "\u5BFC\u5165\u5B8C\u6210\u3002\u8BF7\u6267\u884C /ah reload \u5237\u65B0 Pi \u8D44\u6E90\u3002", "warning");
+        }
         return;
       }
       if (text !== "") {
@@ -10318,5 +10352,6 @@ function actionHub(pi) {
   });
 }
 export {
-  actionHub as default
+  actionHub as default,
+  submitReloadThroughEditor
 };

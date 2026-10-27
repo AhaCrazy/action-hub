@@ -388,7 +388,7 @@ async function deleteGroup(ctx, store, group) {
   }
 }
 
-export async function openManager(ctx, store, dataDir, scopeStore) {
+export async function openManager(ctx, store, dataDir, scopeStore, options = {}) {
   if (ctx.mode !== 'tui') {
     notify(ctx, 'Action Hub 管理界面只在 Pi 交互 TUI 模式可用。', 'warning');
     return;
@@ -419,6 +419,7 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
     const result = await ctx.ui.custom(
       (tui, theme, _keybindings, done) => {
         dashboardTui = tui;
+        options.onTui?.(tui);
         return new ManagerDashboard({
           tui,
           theme,
@@ -490,7 +491,10 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
       sectionId = 'tools';
       if (result.tool === 'import') {
         const source = await ctx.ui.input('导入路径', '标准 Skill 目录或 ZIP 的绝对路径');
-        if (source !== undefined && source.trim() !== '') await importFromPath(ctx, store, dataDir, source.trim());
+        if (source !== undefined && source.trim() !== '') {
+          const imported = await importFromPath(ctx, store, dataDir, source.trim());
+          if (imported) reloadNeeded = true;
+        }
       } else if (result.tool === 'export') {
         await exportActions(ctx, store, dataDir);
       } else if (result.tool === 'settings') {
@@ -689,7 +693,8 @@ async function manageSettings(ctx, store, dataDir) {
       continue;
     }
     if (choice === '重新加载 Pi 资源') {
-      await ctx.reload();
+      if (typeof ctx.reload === 'function') await ctx.reload();
+      else notify(ctx, '当前快捷键上下文不能直接重新加载，请执行 /ah reload。', 'warning');
       return;
     }
   }

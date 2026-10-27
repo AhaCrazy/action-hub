@@ -58,22 +58,47 @@ async function openPalette(ctx, initialQuery = '') {
   await insertAction(store, ctx, selected, args, paletteTui);
 }
 
+export async function submitReloadThroughEditor(ctx, tui) {
+  if (typeof tui?.getFocusedComponent !== 'function') return false;
+  for (const delay of [0, 25, 80]) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    // Only use the editor-submit path when the draft is empty; never overwrite
+    // something the user was writing.
+    if (typeof ctx.ui.getEditorText === 'function' && ctx.ui.getEditorText().trim() !== '') return false;
+    const editor = tui.getFocusedComponent();
+    if (editor !== null && typeof editor?.onSubmit === 'function') {
+      void Promise.resolve(editor.onSubmit('/ah reload')).catch(() => {});
+      return true;
+    }
+  }
+  return false;
+}
+
 async function openManagerWithReload(ctx) {
   await seedDefaultBuiltin(store).catch(() => {});
-  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
+  let tui;
+  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore, {
+    onTui(value) { tui = value; },
+  });
   if (!reloadNeeded) return;
   // Pi 1.4.0 only exposes reload() on command contexts. Shortcut handlers get
-  // the smaller ExtensionContext, so fall back to the explicit command instead
-  // of throwing "ctx.reload is not a function".
-  if (typeof ctx.reload !== 'function') {
-    notify(ctx, '修改已保存。当前快捷键上下文不能自动重载，请执行 /ah reload。', 'warning');
+  // the smaller ExtensionContext, so fall back to submitting the reload command
+  // through the normal editor path.
+  if (typeof ctx.reload === 'function') {
+    try {
+      await ctx.reload();
+    } catch (error) {
+      notify(ctx, `自动重新加载失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+    }
     return;
   }
   try {
-    await ctx.reload();
+    if (await submitReloadThroughEditor(ctx, tui)) return;
   } catch (error) {
     notify(ctx, `自动重新加载失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+    return;
   }
+  notify(ctx, '修改已保存。当前上下文不能自动重载，请执行 /ah reload。', 'warning');
 }
 
 export default function actionHub(pi) {
@@ -99,7 +124,11 @@ export default function actionHub(pi) {
           notify(ctx, '用法：/ah import <目录或 ZIP 路径>', 'warning');
           return;
         }
-        await importFromPath(ctx, store, dataDir, source);
+        const imported = await importFromPath(ctx, store, dataDir, source);
+        if (imported) {
+          if (typeof ctx.reload === 'function') await ctx.reload();
+          else notify(ctx, '导入完成。请执行 /ah reload 刷新 Pi 资源。', 'warning');
+        }
         return;
       }
       if (text !== '') {

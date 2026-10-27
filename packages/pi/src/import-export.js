@@ -30,7 +30,7 @@ async function readPlan(ctx, store, dataDir, target) {
 export async function importFromPath(ctx, store, dataDir, source) {
   if (ctx.mode !== 'tui') {
     notify(ctx, '导入功能只在 Pi 交互 TUI 模式可用。', 'warning');
-    return;
+    return false;
   }
   const target = path.resolve(ctx.cwd ?? process.cwd(), source);
   const { kind, preview, buffer } = await readPlan(ctx, store, dataDir, target);
@@ -39,11 +39,11 @@ export async function importFromPath(ctx, store, dataDir, source) {
     '导入 Action',
     `共 ${summary.total} 项：新增 ${summary.new}，重复 ${summary.duplicate}，更新 ${summary.update}，冲突 ${summary.conflict}。`,
   );
-  if (!confirmed) return;
+  if (!confirmed) return false;
 
   const mode = await ctx.ui.select('新增 Action 的导入方式', ['Command（仅用户调用）', 'Skill（模型可调用）']);
   const createMode = mode === undefined ? undefined : mode.startsWith('Skill') ? 'create-skill' : 'create-command';
-  if (createMode === undefined) return;
+  if (createMode === undefined) return false;
   const update = summary.update > 0
     ? await ctx.ui.confirm('更新已有 Action', `检测到 ${summary.update} 个已有 Action，是否用导入内容更新？`)
     : false;
@@ -58,7 +58,7 @@ export async function importFromPath(ctx, store, dataDir, source) {
     ? await applyFolderPlan(store, dataDir, target, decisions, [])
     : await applyZipPlan(store, dataDir, buffer, decisions, []);
   notify(ctx, `导入完成：新增 ${result.imported}，更新 ${result.updated}，跳过 ${result.skipped}，冲突 ${result.conflicts}。`, 'info');
-  await ctx.reload();
+  return true;
 }
 
 export async function exportActions(ctx, store, dataDir) {

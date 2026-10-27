@@ -8,7 +8,7 @@ import { canonicalPath, createStore, normalizeProjectScope } from 'action-hub';
 import { seedDefaultBuiltin } from '../src/builtins.js';
 import { loadCatalog, renderAction, groupLabels } from '../src/catalog.js';
 import { ActionPalette } from '../src/palette.js';
-import actionHub from '../extensions/action-hub.js';
+import actionHub, { submitReloadThroughEditor } from '../extensions/action-hub.js';
 
 function fixedScope(root, profile) {
   return {
@@ -88,6 +88,23 @@ test('palette renders a native TUI overlay', () => {
   assert.match(lines.join('\n'), /review/u);
   palette.handleInput('r');
   assert.match(palette.render(80).join('\n'), /review/u);
+});
+
+test('shortcut contexts can submit /ah reload through the editor', async () => {
+  const submitted = [];
+  const editor = { onSubmit(text) { submitted.push(text); } };
+  const tui = { getFocusedComponent: () => editor };
+  const ctx = { ui: { getEditorText: () => '' } };
+  assert.equal(await submitReloadThroughEditor(ctx, tui), true);
+  assert.deepEqual(submitted, ['/ah reload']);
+});
+
+test('shortcut reload never overwrites a draft', async () => {
+  let submitted = 0;
+  const tui = { getFocusedComponent: () => ({ onSubmit() { submitted += 1; } }) };
+  const ctx = { ui: { getEditorText: () => 'draft' } };
+  assert.equal(await submitReloadThroughEditor(ctx, tui), false);
+  assert.equal(submitted, 0);
 });
 
 test('extension registers Pi command, shortcut, and resource discovery', () => {
