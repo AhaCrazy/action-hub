@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "DeepSeek Harness adapter for the harness-agnostic action-hub core: native Alt+A palette, composer insertion, project scopes, and skill provider.",
+  "description": "DeepSeek Harness 适配器：基于通用 action-hub 核心，提供原生 Alt+A 面板、composer 插入、项目范围和 Skill provider。",
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -47,7 +47,6 @@
     "assets/**",
     "screenshots.json",
     "README.md",
-    "README.en.md",
     "CHANGELOG.md",
     "LICENSE"
   ],

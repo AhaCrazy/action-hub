@@ -1,73 +1,69 @@
-# Architecture
+# 架构说明
 
-## Goals
+## 目标
 
-`action-hub` is a **library and data model**, not a daemon, not a web app, and
-not a harness-specific plugin.
+`action-hub` 是一个**库和数据模型**，不是守护进程，不是 Web 应用，也不是某个 harness 专属插件。
 
-The same standard skill directory must work in every adapter while each adapter
-keeps its own native experience:
+同一份标准 Skill 目录需要在所有适配器中可用，同时每个适配器保留自己的原生体验：
 
-- DSH: Cordis plugin, Alt+A overlay, composer insertion, skill provider.
-- Pi: Pi package, TUI overlay, `resources_discover`, editor insertion.
-- Other harnesses: their own extension points.
+- DSH：Cordis 插件、Alt+A 面板、composer 插入、Skill provider。
+- Pi：Pi 包、TUI 面板、`resources_discover`、编辑器插入。
+- 其他 harness：使用各自的扩展点。
 
-## Layers
+## 分层
 
 ```text
-adapter (DSH / Pi / ...)
-  ├─ harness context: cwd, project root, session identity
-  ├─ native UI: palette, dialogs, shortcuts, theme, keybindings
-  ├─ insertion: composer / editor / host prompt API
-  └─ registration: model-visible skills and commands
+adapter（DSH / Pi / ...）
+  ├─ harness 上下文：cwd、项目根、会话身份
+  ├─ 原生 UI：面板、对话框、快捷键、主题、键位
+  ├─ 插入：composer / editor / host prompt API
+  └─ 注册：模型可见的 Skill 和 Command
             │
             ▼
-core (this repository)
-  ├─ SKILL.md library
-  ├─ state schema: mode, groups, scopes, blocks, usage
-  ├─ availability resolution
-  ├─ search and sorting
-  ├─ folder/ZIP import/export
-  └─ storage locking and atomic writes
+core（本仓库）
+  ├─ SKILL.md 库
+  ├─ 状态 schema：模式、分组、范围、屏蔽、使用记录
+  ├─ 可用性解析
+  ├─ 搜索与排序
+  ├─ 文件夹/ZIP 导入导出
+  └─ 存储锁与原子写入
 ```
 
-No adapter should read or write `state.json` directly. All mutations go through
-the core so that DSH and Pi can share one library safely.
+任何适配器都不应该直接读写 `state.json`。所有修改都经过 core，这样 DSH 和 Pi 才能安全共享同一份库。
 
-## Storage ownership
+## 存储归属
 
-Recommended default:
+推荐默认结构：
 
 ```text
-$ACTION_HUB_HOME/            # ~/.action-hub by default
+$ACTION_HUB_HOME/            # 默认 ~/.action-hub
   library/
   state.json
   .lock
 ```
 
-Adapters may point `ACTION_HUB_HOME` at a harness-specific directory, but sharing
-the default gives users one portable library across harnesses.
+适配器可以把 `ACTION_HUB_HOME` 指向某个 harness 专属目录，但共用默认目录能让用户在所有 harness 中使用同一份可移植库。
 
-Writes must be:
+写入必须满足：
 
-1. guarded by a cross-process lock;
-2. read-modify-write inside that lock;
-3. written to a temporary file and atomically renamed;
-4. followed by a file-watch notification to open UIs.
+1. 由跨进程锁保护；
+2. 在锁内完成读取—修改—写入；
+3. 写入临时文件后原子重命名；
+4. 写入完成后通过文件监听通知已打开的 UI。
 
-A later revision may add a monotonic `revision` to detect conflicting edits.
+后续版本可以加入单调递增的 `revision`，用于检测并发编辑冲突。
 
-## Portability boundary
+## 可移植性边界
 
-Core must not import:
+core 不能 import：
 
-- Cordis / DSH packages;
-- Pi packages;
-- React or DOM;
-- terminal UI libraries;
-- harness workspace registries.
+- Cordis / DSH 包；
+- Pi 包；
+- React 或 DOM；
+- 终端 UI 库；
+- harness 的 workspace registry。
 
-Harness-specific concepts are supplied as `HarnessContext`:
+harness 专属概念通过 `HarnessContext` 传入：
 
 ```ts
 interface HarnessContext {
@@ -77,12 +73,11 @@ interface HarnessContext {
 }
 ```
 
-Core exposes behavior, not presentation.
+core 只暴露行为，不暴露展示方式。
 
-## Non-goals
+## 非目标
 
-- Running a shared HTTP server.
-- Opening a separate browser window.
-- A universal UI that every harness embeds.
-- Executing skill scripts. Skill content is prompt data; harnesses remain
-  responsible for tool approvals and sandboxing.
+- 运行共享 HTTP 服务。
+- 打开独立浏览器窗口。
+- 提供一套所有 harness 共用的通用 UI。
+- 执行 Skill 脚本。Skill 内容是提示词数据；工具审批和沙箱仍由 harness 负责。

@@ -1,12 +1,12 @@
-# Changelog
+# 更新日志
+
+> 0.1.0 起文档默认使用中文；更早版本保留发布时的原始记录。
 
 ## 0.1.0 — 2026-10-27
 
-- Extracted the DSH adapter from the former monolith. The adapter now depends
-  on the harness-agnostic `action-hub` core and supplies only DSH-specific
-  UI, project discovery, skill provider, and API wiring.
-- Fresh installs seed the built-in `skill-import-assistant` into the global
-  `Common` group supplied by the core.
+- 从原单体插件中拆出 DSH 适配器。适配器现在依赖与 harness 无关的
+  `action-hub` 核心，只保留 DSH 专属的 UI、项目发现、Skill provider 和 API 接线。
+- 全新安装会把内置 `skill-import-assistant` 放入核心提供的全局 `Common` 分组。
 
 ## 8.8.0 — 2026-10-27
 

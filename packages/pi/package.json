@@ -2,7 +2,7 @@
   "name": "pi-action-hub",
   "version": "0.1.0",
   "type": "module",
-  "description": "Pi adapter for Action Hub: native TUI palette, editor insertion, and resource discovery for standard Agent Skills.",
+  "description": "Action Hub 的 Pi 适配器：原生 TUI 面板、编辑器插入和标准 Agent Skill 资源发现。",
   "keywords": [
     "pi-package",
     "pi",

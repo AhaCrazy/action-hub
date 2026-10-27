@@ -1,4 +1,4 @@
-# Action Hub for DSH
+# DSH 版 Action Hub
 
 **DSH 适配层。** 通用核心位于 [`../core`](../core)；本包只负责 DSH 的原生 UI、快捷键、composer 插入、项目识别和 Skill provider。
 
@@ -18,7 +18,7 @@ npm test --workspace dsh-action-hub
 
 本文把 **Skill** 和 **Command** 统称为 **Action**。可用范围只影响 Action 在哪个项目中可见、可调用，不写进 `SKILL.md`。
 
-[English](README.en.md) · [更新日志](CHANGELOG.md) · [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
+[更新日志](CHANGELOG.md) · [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![version](https://img.shields.io/badge/version-0.1.0-green.svg)](CHANGELOG.md)

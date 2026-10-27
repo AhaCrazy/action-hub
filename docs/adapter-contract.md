@@ -1,25 +1,22 @@
-# Adapter contract
+# 适配器契约
 
-An adapter is a thin harness-specific package that embeds `action-hub` and
-translates its native capabilities into core calls.
+适配器是薄薄一层 harness 专属包：嵌入 `action-hub`，把 harness 的原生能力翻译成 core 调用。
 
-## Required capabilities
+## 必备能力
 
 ```ts
 type HarnessCapabilities = {
-  skills: boolean;          // can expose model-visible skills
-  commands: boolean;        // has a user-invoked prompt insertion surface
-  nativePalette: boolean;   // can render a custom picker
+  skills: boolean;          // 能否暴露模型可见的 Skill
+  commands: boolean;        // 是否有用户主动调用的提示词插入入口
+  nativePalette: boolean;   // 能否渲染自定义选择面板
   composerInsertion: boolean;
-  projectContext: boolean;  // can provide a meaningful cwd/project root
+  projectContext: boolean;  // 能否提供有意义的 cwd/项目根
 };
 ```
 
-Adapters may support a subset. A harness with only commands can expose every
-Action as a command; a harness with only skills can expose Skill-mode Actions
-only.
+适配器可以只支持其中一部分能力。只有 Command 能力的 harness 可以把所有 Action 都暴露成命令；只有 Skill 能力的 harness 只能暴露 Skill 模式的 Action。
 
-## Lifecycle
+## 生命周期
 
 ```ts
 interface HarnessAdapter {
@@ -31,58 +28,52 @@ interface HarnessAdapter {
 }
 ```
 
-The adapter owns:
+适配器负责：
 
-- hotkeys, command names, and menu registration;
-- palette rendering;
-- editor/composer insertion;
-- model skill registration;
-- settings placement.
+- 快捷键、命令名和菜单注册；
+- 面板渲染；
+- 编辑器/composer 插入；
+- 模型可见 Skill 的注册；
+- 设置项的放置位置。
 
-The adapter must not own:
+适配器不负责：
 
-- `SKILL.md` parsing;
-- group/scope resolution;
-- import/export;
-- state file shape or direct writes.
+- `SKILL.md` 解析；
+- 分组/范围解析；
+- 导入导出；
+- 状态文件结构或直接写入。
 
-## Skill projection
+## Skill 投影
 
-For each `resources_discover` (Pi) or provider list (DSH):
+对于每次 `resources_discover`（Pi）或 provider list（DSH）：
 
-1. resolve project root from `cwd`;
-2. load actions from the core;
-3. select actions where `mode === 'skill'` and `actionAvailable(...)`;
-4. expose each selected action's real directory.
+1. 从 `cwd` 解析项目根；
+2. 从 core 加载 Action；
+3. 选出 `mode === 'skill'` 且 `actionAvailable(...)` 为真的 Action；
+4. 暴露每个选中 Action 的真实目录。
 
-Do not copy skills into a host-specific directory unless the host requires it.
-The action directory itself is a valid standard skill root.
+除非宿主强制要求，不要把 Skill 复制到 harness 专属目录。Action 目录本身就是一个合法的标准 Skill 根目录。
 
-## Command projection
+## Command 投影
 
-Commands are **user-only** prompt templates. They must never be registered as
-model tools by default.
+Command 是**仅用户可见**的提示词模板，默认绝不能注册成模型工具。
 
-On selection, render the prompt and hand it to the host:
+选中后，渲染提示词并交给宿主：
 
-- DSH: insert a reference chip or expanded prompt;
-- Pi: `ctx.ui.pasteToEditor(rendered)`;
-- other hosts: their equivalent insertion API.
+- DSH：插入引用 chip 或展开后的提示词；
+- Pi：`ctx.ui.pasteToEditor(rendered)`；
+- 其他宿主：使用等价的插入 API。
 
-A Skill selected from a palette may instead insert the host's native skill
-invocation (`/skill:name` on Pi) and let the host load the body.
+从面板选中的 Skill 也可以插入宿主原生的 Skill 调用（Pi 上是 `/skill:name`），让宿主自行加载正文。
 
-## Project scope
+## 项目范围
 
-Core matches project roots against registered profiles. Adapters should:
+core 会把项目根与已登记的项目配置匹配。适配器应该：
 
-- pass the most specific known root (cwd, registered workspace, or repo root);
-- fall back to global groups when no profile matches;
-- never invent a project identity that hides global groups.
+- 传入最具体的已知根目录（cwd、已登记 workspace 或仓库根）；
+- 没有匹配项目时回退到全局分组；
+- 绝不发明一个会隐藏全局分组的项目身份。
 
-## Reload behavior
+## 重新加载行为
 
-DSH skill providers can refresh in-process. Pi discovers skills at startup and
-`/reload`; after a management action that changes Skill visibility, the Pi
-adapter should close the overlay and request `ctx.reload()` (or clearly tell the
-user to run `/reload`).
+DSH 的 Skill provider 可以在进程内刷新。Pi 只在启动和 `/reload` 时发现 Skill；如果管理操作改变了 Skill 可见性，Pi 适配器应关闭面板并调用 `ctx.reload()`，或者明确提示用户执行 `/reload`。

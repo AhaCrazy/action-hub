@@ -1,51 +1,41 @@
-# Pi adapter design
+# Pi 适配器设计
 
-Local Pi: `@earendil-works/pi-coding-agent@1.4.0`, TUI harness.
+本机验证环境：`@earendil-works/pi-coding-agent@1.4.0`，TUI harness。
 
-## Native surfaces
+## 原生能力
 
-| Surface | Pi API |
+| 能力 | Pi API |
 | --- | --- |
-| Command | `pi.registerCommand('ah', ...)` |
-| Shortcut | `pi.registerShortcut('alt+a', ...)` |
-| Palette | `ctx.ui.custom(...)` with `@earendil-works/pi-tui` |
-| Insertion | `ctx.ui.pasteToEditor(text)` |
-| Skill discovery | `pi.on('resources_discover', ...)` → `skillPaths` |
-| Settings UI | custom TUI screen or `ctx.ui.select/input` |
+| 命令 | `pi.registerCommand('ah', ...)` |
+| 快捷键 | `pi.registerShortcut('alt+a', ...)` |
+| 面板 | `ctx.ui.custom(...)` + `@earendil-works/pi-tui` |
+| 插入 | `ctx.ui.pasteToEditor(text)` |
+| Skill 发现 | `pi.on('resources_discover', ...)` → `skillPaths` |
+| 设置界面 | 自定义 TUI 页面，或 `ctx.ui.select/input` |
 
-## Mapping
+## 映射关系
 
-- **Skill action** → return its directory from `resources_discover`; Pi shows it
-  in the model catalog and exposes `/skill:<name>`.
-- **Command action** → never returned as a skill; the palette inserts the
-  rendered prompt into the editor.
-- **Palette** → custom TUI overlay: search (substring + regex), list, preview,
-  args, Enter to insert.
-- **Project scope** → `ctx.cwd` or nearest `.git` root; global groups apply
-  everywhere; per-project blocks use the shared state.
-- **Management** → `/ah manage` TUI screen for groups, scopes, import/export,
-  and mode changes. After changing Skill visibility, trigger `ctx.reload()` or
-  notify the user.
+- **Skill 类型 Action** → 在 `resources_discover` 中返回它的目录；Pi 会把它放进模型目录，并提供 `/skill:<name>`。
+- **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
+- **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
+- **项目范围** → 使用 `ctx.cwd` 或最近的 `.git` 根；全局分组对所有项目生效；项目级屏蔽使用共享状态。
+- **管理** → 后续增加 `/ah manage` TUI 页面，处理分组、范围、导入导出和模式切换。修改 Skill 可见性后，需要调用 `ctx.reload()` 或提示用户。
 
-## Package shape
+## 包结构
 
 ```text
-pi-action-hub/
-  package.json        # pi manifest, pi-package keyword, peerDependencies
-  extensions/ah.ts    # extension entry
-  src/core/           # bundled/action-hub core
-  src/ui/             # Pi TUI palette and manager
+packages/pi/
+  package.json        # pi manifest、pi-package keyword、peerDependencies
+  extensions/         # 扩展入口
+  src/                # 面板和 catalog 适配
 ```
 
-Install with `pi install npm:pi-action-hub` (or a git/local source). Pi runs the
-extension in its own process; no server, port, or browser window.
+安装方式：`pi install ./packages/pi`，或发布后 `pi install npm:pi-action-hub`。Pi 在自己的进程内运行扩展；没有服务、端口或浏览器窗口。
 
-## Constraints found in Pi 1.4.0
+## Pi 1.4.0 的限制
 
-- `ctx.ui.custom` is TUI-only; print/JSON modes have no UI.
-- Commands and shortcuts are available in interactive mode.
-- Skills are discovered at startup and `/reload`; scope changes need a reload.
-- Use Pi's theme and `KeybindingsManager`; do not hard-code colors or terminal
-  key handling.
-- Extension factory must not start watchers/timers; start them on
-  `session_start` and clean up on `session_shutdown`.
+- `ctx.ui.custom` 只在 TUI 模式可用；print/JSON 模式没有 UI。
+- 命令和快捷键只在交互模式可用。
+- Skill 在启动和 `/reload` 时发现；范围变化需要重新加载。
+- 使用 Pi 的主题和 `KeybindingsManager`，不要硬编码颜色或终端按键处理。
+- 扩展工厂里不要启动 watcher/timer；应在 `session_start` 启动，在 `session_shutdown` 清理。

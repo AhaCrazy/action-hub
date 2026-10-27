@@ -1,7 +1,7 @@
 {
   "name": "action-hub",
   "version": "0.1.0",
-  "description": "Harness-agnostic library for standard Agent Skills, user Commands, groups, project scopes, and import/export.",
+  "description": "与 harness 无关的通用库：标准 Agent Skill、用户 Command、分组、项目范围和导入导出。",
   "type": "module",
   "license": "MIT",
   "engines": {

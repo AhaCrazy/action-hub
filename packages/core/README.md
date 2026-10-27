@@ -1,70 +1,62 @@
-# action-hub
+# action-hub 核心
 
-Harness-agnostic core for a portable **Action** library:
+与 harness 无关的可移植 **Action** 库核心：
 
-- **Skill**: a standard `SKILL.md` directory that a harness may expose to the model.
-- **Command**: the same standard directory, used as a user-invoked prompt template.
-- Groups, global groups, project scopes, explicit per-project blocks.
-- Search, import/export, usage metadata, and a versioned local state file.
+- **Skill**：标准 `SKILL.md` 目录，可被 harness 暴露给模型。
+- **Command**：同一个标准目录，作为用户主动调用的提示词模板。
+- 分组、全局分组、项目范围、项目级显式屏蔽。
+- 搜索、导入导出、使用记录和带版本号的本地状态文件。
 
-This repository is the shared core. Harness integrations (DSH, Pi, and others)
-are separate adapter packages that bundle this core and provide their own native
-UI, shortcuts, and insertion behavior.
+本包是共享核心。DSH、Pi 以及其他 harness 的集成都作为独立适配器包存在，各自提供原生 UI、快捷键和插入方式。
 
-## Status
+## 状态
 
-Early extraction of the proven `dsh-action-hub` core. The storage format and
-public API are still stabilizing; do not treat this package as published yet.
+从已验证的 `dsh-action-hub` 核心中抽离而来。存储格式和公共 API 仍在稳定过程中，暂不要把它当作已正式发布的稳定包。
 
-## Layout
+## 目录
 
 ```text
 src/
-  store.js          # library + state, groups, scopes, modes, search data
-  availability.js   # project/global/blocked resolution
-  scope.js          # project-root and path matching
-  skill-doc.js      # SKILL.md parsing and writing
-  resources.js      # resource files inside a skill
-  bundle.js         # folder/ZIP import and export
-  zip.js            # deterministic ZIP codec
-  index.js          # public exports
-tests/              # Node test runner suites
+  store.js          # 库与状态、分组、范围、模式、搜索数据
+  availability.js   # 项目/全局/屏蔽解析
+  scope.js          # 项目根和路径匹配
+  skill-doc.js      # SKILL.md 解析与写入
+  resources.js      # Skill 内的资源文件
+  bundle.js         # 文件夹/ZIP 导入导出
+  zip.js            # 确定性的 ZIP 编解码
+  index.js          # 公共导出
+tests/              # Node 测试
 ```
 
-## Data
+## 数据
 
 ```text
-$ACTION_HUB_HOME/            # defaults to ~/.action-hub
+$ACTION_HUB_HOME/            # 默认 ~/.action-hub
   library/<skill-name>/
     SKILL.md
-    ...resources
-  state.json                 # mode / groups / scopes / usage / excludes
+    ...资源文件
+  state.json                 # 模式 / 分组 / 范围 / 使用记录 / 屏蔽
 ```
 
-`SKILL.md` is the only portable artifact. `state.json` is local metadata and is
-never included in exported bundles.
+`SKILL.md` 是唯一的可移植产物；`state.json` 是本地元数据，不会进入导出包。
 
-On a fresh data directory, the core creates a global **Common** group. Built-in
-Actions are supplied by the adapter, not hard-coded into the core.
+新数据目录会默认创建一个全局 **Common** 分组。内置 Action 由适配器提供，不硬编码进 core。
 
-Writes use a cross-process lock and atomic `state.json` replacement, so DSH and
-Pi can use the same `ACTION_HUB_HOME` without one overwriting the other.
+写入使用跨进程锁和原子替换 `state.json`，因此 DSH 和 Pi 可以共用同一个 `ACTION_HUB_HOME`，不会互相覆盖。
 
-## Development
+## 开发
 
 ```bash
 npm install
 npm test
 ```
 
-## Adapters
+## 适配器
 
-- DSH: [`../dsh`](../dsh) — Cordis plugin with the native Web UI, Alt+A palette,
-  composer chips, and skill provider.
-- Pi: [`../pi`](../pi) — Pi package with a native TUI palette and
-  `resources_discover`.
+- DSH：[`../dsh`](../dsh) — Cordis 插件，提供原生 Web UI、Alt+A 面板、composer chip 和 Skill provider。
+- Pi：[`../pi`](../pi) — Pi 包，提供原生 TUI 面板和 `resources_discover`。
 
-Both adapters link this core with `file:../core` while the API stabilizes.
+在 API 稳定前，两个适配器都通过 `file:../core` 链接本核心。
 
-See [../../docs/architecture.md](../../docs/architecture.md) and
-[../../docs/adapter-contract.md](../../docs/adapter-contract.md).
+参见 [../../docs/architecture.md](../../docs/architecture.md) 和
+[../../docs/adapter-contract.md](../../docs/adapter-contract.md)。
