@@ -5,6 +5,7 @@
  */
 import { createStore, defaultDataDir } from 'action-hub';
 import { loadCatalog } from '../src/catalog.js';
+import { seedDefaultBuiltin } from '../src/builtins.js';
 import { exportActions, importFromPath } from '../src/import-export.js';
 import { insertAction } from '../src/insert.js';
 import { openManager } from '../src/management.js';
@@ -28,6 +29,7 @@ async function openPalette(ctx, initialQuery = '') {
     notify(ctx, 'Action 面板只在 Pi 交互 TUI 模式可用。', 'warning');
     return;
   }
+  await seedDefaultBuiltin(store).catch(() => {});
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd(), scopeStore);
   if (catalog.actions.length === 0) {
     notify(ctx, '当前没有可用的 Action。使用 /ah import <路径> 导入一个标准 Skill 目录。', 'info');
@@ -62,6 +64,7 @@ export default function actionHub(pi) {
         return;
       }
       if (text === 'manage' || text === '管理') {
+        await seedDefaultBuiltin(store).catch(() => {});
         await openManager(ctx, store, dataDir, scopeStore);
         return;
       }
@@ -96,12 +99,14 @@ export default function actionHub(pi) {
   pi.registerShortcut('ctrl+alt+a', {
     description: '打开 Action Hub 管理界面',
     handler: async (ctx) => {
+      await seedDefaultBuiltin(store).catch(() => {});
       await openManager(ctx, store, dataDir, scopeStore);
     },
   });
 
   pi.on('resources_discover', async (event) => {
     try {
+      await seedDefaultBuiltin(store).catch(() => {});
       const catalog = await loadCatalog(store, event.cwd ?? process.cwd(), scopeStore);
       return {
         skillPaths: catalog.actions

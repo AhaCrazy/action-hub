@@ -69,13 +69,13 @@ Action 库、分组和全局分组与 DSH 版共享；**项目范围不共享**�
 
 ## 第一次使用
 
-新库默认只有一个全局 `Common` 分组。
+新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill 后交给 `/ah import` 导入。
 
 ```text
 /ah import C:\path\to\skill-folder
 ```
 
-导入后 `/ah` 才会出现可选择的 Action。
+导入后 `/ah` 会同时显示内置导入助手和用户 Action。
 
 ## 其他命令
 

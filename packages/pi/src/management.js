@@ -7,9 +7,10 @@
  */
 import path from 'node:path';
 
-import { resolveProjectRoot, sortActions } from 'action-hub';
+import { resolveProjectRoot } from 'action-hub';
 import { readResourcePreviews } from 'action-hub';
 
+import { loadAllActions } from './catalog.js';
 import { exportActions, importFromPath } from './import-export.js';
 import { insertAction } from './insert.js';
 import { ManagerDashboard } from './manager-dashboard.js';
@@ -60,8 +61,8 @@ async function pickChecklist(ctx, { title, items, selected }) {
 }
 
 async function loadAll(store) {
-  const data = await store.read();
-  return { state: data.state, actions: sortActions(data.actions) };
+  const { data, actions } = await loadAllActions(store);
+  return { state: data.state, actions };
 }
 
 async function pickAction(ctx, store, title = '选择 Action') {
@@ -140,6 +141,10 @@ async function createAction(ctx, store) {
 }
 
 async function editAction(ctx, store, action) {
+  if (action.builtin) {
+    notify(ctx, '内置 Action 不可编辑。', 'warning');
+    return;
+  }
   const patch = {};
   let current = action;
   for (;;) {
@@ -217,6 +222,29 @@ async function editAction(ctx, store, action) {
 }
 
 async function manageOneAction(ctx, store, action) {
+  if (action.builtin) {
+    for (;;) {
+      const choice = await ctx.ui.select(`${actionLabel(action)}（内置，只读）`, [
+        '插入到编辑器',
+        '查看资源',
+        '设置分组',
+        BACK,
+      ]);
+      if (choice === undefined || choice === BACK) return;
+      if (choice === '插入到编辑器') {
+        await insertSelected(ctx, store, action);
+        return;
+      }
+      if (choice === '查看资源') {
+        await showResources(ctx, action);
+        continue;
+      }
+      if (choice === '设置分组') {
+        await setActionGroups(ctx, store, action);
+        continue;
+      }
+    }
+  }
   for (;;) {
     const choice = await ctx.ui.select(actionLabel(action), [
       '插入到编辑器',
@@ -345,6 +373,10 @@ async function showResources(ctx, action) {
 }
 
 async function deleteAction(ctx, store, action) {
+  if (action.builtin) {
+    notify(ctx, '内置 Action 不可删除。', 'warning');
+    return;
+  }
   if (!(await ctx.ui.confirm('删除 Action', `确定删除 ${action.name}？此操作不可恢复。`))) return;
   try {
     await store.remove(action.id);
@@ -355,6 +387,10 @@ async function deleteAction(ctx, store, action) {
 }
 
 async function toggleMode(ctx, store, action) {
+  if (action.builtin) {
+    notify(ctx, '内置 Action 固定为 Command。', 'warning');
+    return;
+  }
   try {
     await store.setMode(action.id, action.mode === 'skill' ? 'command' : 'skill');
     notify(ctx, '模式已切换；Skill 可见性变化后请 /ah reload。', 'info');
@@ -417,13 +453,13 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
   }
   let sectionId = 'actions';
   for (;;) {
-    const data = await store.read();
+    const data = await loadAll(store);
     const cwd = ctx.cwd ?? process.cwd();
     const root = await resolveProjectRoot(cwd, []);
     const projectRoot = root ?? path.resolve(cwd);
     const scope = scopeStore === undefined ? null : await scopeStore.readForRoot(projectRoot);
     const dashboardData = {
-      actions: sortActions(data.actions),
+      actions: data.actions,
       state: data.state,
       projects: [{
         ...(scope ?? { groups: [], actions: [], excludeGroups: [], excludeActions: [] }),

@@ -113,17 +113,17 @@ var require_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path10) {
-      const ctrl = callVisitor(key, node, visitor, path10);
+    function visit_(key, node, visitor, path11) {
+      const ctrl = callVisitor(key, node, visitor, path11);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path10, ctrl);
-        return visit_(key, ctrl, visitor, path10);
+        replaceNode(key, path11, ctrl);
+        return visit_(key, ctrl, visitor, path11);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path10 = Object.freeze(path10.concat(node));
+          path11 = Object.freeze(path11.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path10);
+            const ci = visit_(i, node.items[i], visitor, path11);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -134,13 +134,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path10 = Object.freeze(path10.concat(node));
-          const ck = visit_("key", node.key, visitor, path10);
+          path11 = Object.freeze(path11.concat(node));
+          const ck = visit_("key", node.key, visitor, path11);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = visit_("value", node.value, visitor, path10);
+          const cv = visit_("value", node.value, visitor, path11);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -161,17 +161,17 @@ var require_visit = __commonJS({
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path10) {
-      const ctrl = await callVisitor(key, node, visitor, path10);
+    async function visitAsync_(key, node, visitor, path11) {
+      const ctrl = await callVisitor(key, node, visitor, path11);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path10, ctrl);
-        return visitAsync_(key, ctrl, visitor, path10);
+        replaceNode(key, path11, ctrl);
+        return visitAsync_(key, ctrl, visitor, path11);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path10 = Object.freeze(path10.concat(node));
+          path11 = Object.freeze(path11.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path10);
+            const ci = await visitAsync_(i, node.items[i], visitor, path11);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -182,13 +182,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path10 = Object.freeze(path10.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path10);
+          path11 = Object.freeze(path11.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path11);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path10);
+          const cv = await visitAsync_("value", node.value, visitor, path11);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -215,23 +215,23 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path10) {
+    function callVisitor(key, node, visitor, path11) {
       if (typeof visitor === "function")
-        return visitor(key, node, path10);
+        return visitor(key, node, path11);
       if (identity.isMap(node))
-        return visitor.Map?.(key, node, path10);
+        return visitor.Map?.(key, node, path11);
       if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path10);
+        return visitor.Seq?.(key, node, path11);
       if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path10);
+        return visitor.Pair?.(key, node, path11);
       if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path10);
+        return visitor.Scalar?.(key, node, path11);
       if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path10);
+        return visitor.Alias?.(key, node, path11);
       return void 0;
     }
-    function replaceNode(key, path10, node) {
-      const parent = path10[path10.length - 1];
+    function replaceNode(key, path11, node) {
+      const parent = path11[path11.length - 1];
       if (identity.isCollection(parent)) {
         parent.items[key] = node;
       } else if (identity.isPair(parent)) {
@@ -843,10 +843,10 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node = require_Node();
-    function collectionFromPath(schema, path10, value) {
+    function collectionFromPath(schema, path11, value) {
       let v = value;
-      for (let i = path10.length - 1; i >= 0; --i) {
-        const k = path10[i];
+      for (let i = path11.length - 1; i >= 0; --i) {
+        const k = path11[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
           a[k] = v;
@@ -865,7 +865,7 @@ var require_Collection = __commonJS({
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
-    var isEmptyPath = (path10) => path10 == null || typeof path10 === "object" && !!path10[Symbol.iterator]().next().done;
+    var isEmptyPath = (path11) => path11 == null || typeof path11 === "object" && !!path11[Symbol.iterator]().next().done;
     var Collection = class extends Node.NodeBase {
       constructor(type, schema) {
         super(type);
@@ -895,11 +895,11 @@ var require_Collection = __commonJS({
        * be a Pair instance or a `{ key, value }` object, which may not have a key
        * that already exists in the map.
        */
-      addIn(path10, value) {
-        if (isEmptyPath(path10))
+      addIn(path11, value) {
+        if (isEmptyPath(path11))
           this.add(value);
         else {
-          const [key, ...rest] = path10;
+          const [key, ...rest] = path11;
           const node = this.get(key, true);
           if (identity.isCollection(node))
             node.addIn(rest, value);
@@ -913,8 +913,8 @@ var require_Collection = __commonJS({
        * Removes a value from the collection.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path10) {
-        const [key, ...rest] = path10;
+      deleteIn(path11) {
+        const [key, ...rest] = path11;
         if (rest.length === 0)
           return this.delete(key);
         const node = this.get(key, true);
@@ -928,8 +928,8 @@ var require_Collection = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path10, keepScalar) {
-        const [key, ...rest] = path10;
+      getIn(path11, keepScalar) {
+        const [key, ...rest] = path11;
         const node = this.get(key, true);
         if (rest.length === 0)
           return !keepScalar && identity.isScalar(node) ? node.value : node;
@@ -947,8 +947,8 @@ var require_Collection = __commonJS({
       /**
        * Checks if the collection includes a value with the key `key`.
        */
-      hasIn(path10) {
-        const [key, ...rest] = path10;
+      hasIn(path11) {
+        const [key, ...rest] = path11;
         if (rest.length === 0)
           return this.has(key);
         const node = this.get(key, true);
@@ -958,8 +958,8 @@ var require_Collection = __commonJS({
        * Sets a value in this collection. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path10, value) {
-        const [key, ...rest] = path10;
+      setIn(path11, value) {
+        const [key, ...rest] = path11;
         if (rest.length === 0) {
           this.set(key, value);
         } else {
@@ -3474,9 +3474,9 @@ var require_Document = __commonJS({
           this.contents.add(value);
       }
       /** Adds a value to the document. */
-      addIn(path10, value) {
+      addIn(path11, value) {
         if (assertCollection(this.contents))
-          this.contents.addIn(path10, value);
+          this.contents.addIn(path11, value);
       }
       /**
        * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
@@ -3551,14 +3551,14 @@ var require_Document = __commonJS({
        * Removes a value from the document.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path10) {
-        if (Collection.isEmptyPath(path10)) {
+      deleteIn(path11) {
+        if (Collection.isEmptyPath(path11)) {
           if (this.contents == null)
             return false;
           this.contents = null;
           return true;
         }
-        return assertCollection(this.contents) ? this.contents.deleteIn(path10) : false;
+        return assertCollection(this.contents) ? this.contents.deleteIn(path11) : false;
       }
       /**
        * Returns item at `key`, or `undefined` if not found. By default unwraps
@@ -3573,10 +3573,10 @@ var require_Document = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path10, keepScalar) {
-        if (Collection.isEmptyPath(path10))
+      getIn(path11, keepScalar) {
+        if (Collection.isEmptyPath(path11))
           return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
-        return identity.isCollection(this.contents) ? this.contents.getIn(path10, keepScalar) : void 0;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path11, keepScalar) : void 0;
       }
       /**
        * Checks if the document includes a value with the key `key`.
@@ -3587,10 +3587,10 @@ var require_Document = __commonJS({
       /**
        * Checks if the document includes a value at `path`.
        */
-      hasIn(path10) {
-        if (Collection.isEmptyPath(path10))
+      hasIn(path11) {
+        if (Collection.isEmptyPath(path11))
           return this.contents !== void 0;
-        return identity.isCollection(this.contents) ? this.contents.hasIn(path10) : false;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path11) : false;
       }
       /**
        * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -3607,13 +3607,13 @@ var require_Document = __commonJS({
        * Sets a value in this document. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path10, value) {
-        if (Collection.isEmptyPath(path10)) {
+      setIn(path11, value) {
+        if (Collection.isEmptyPath(path11)) {
           this.contents = value;
         } else if (this.contents == null) {
-          this.contents = Collection.collectionFromPath(this.schema, Array.from(path10), value);
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path11), value);
         } else if (assertCollection(this.contents)) {
-          this.contents.setIn(path10, value);
+          this.contents.setIn(path11, value);
         }
       }
       /**
@@ -5574,9 +5574,9 @@ var require_cst_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path10) => {
+    visit.itemAtPath = (cst, path11) => {
       let item = cst;
-      for (const [field, index] of path10) {
+      for (const [field, index] of path11) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
           item = tok.items[index];
@@ -5585,23 +5585,23 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path10) => {
-      const parent = visit.itemAtPath(cst, path10.slice(0, -1));
-      const field = path10[path10.length - 1][0];
+    visit.parentCollection = (cst, path11) => {
+      const parent = visit.itemAtPath(cst, path11.slice(0, -1));
+      const field = path11[path11.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
         return coll;
       throw new Error("Parent collection not found");
     };
-    function _visit(path10, item, visitor) {
-      let ctrl = visitor(item, path10);
+    function _visit(path11, item, visitor) {
+      let ctrl = visitor(item, path11);
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
         const token = item[field];
         if (token && "items" in token) {
           for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path10.concat([[field, i]])), token.items[i], visitor);
+            const ci = _visit(Object.freeze(path11.concat([[field, i]])), token.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -5612,10 +5612,10 @@ var require_cst_visit = __commonJS({
             }
           }
           if (typeof ctrl === "function" && field === "key")
-            ctrl = ctrl(item, path10);
+            ctrl = ctrl(item, path11);
         }
       }
-      return typeof ctrl === "function" ? ctrl(item, path10) : ctrl;
+      return typeof ctrl === "function" ? ctrl(item, path11) : ctrl;
     }
     exports.visit = visit;
   }
@@ -6917,14 +6917,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs9 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs8, sep: [] });
+                map.items.push({ start, key: fs9, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs8);
+                this.stack.push(fs9);
               } else {
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs9, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -7052,13 +7052,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs9 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs8, sep: [] });
+                fc.items.push({ start: [], key: fs9, sep: [] });
               else if (it.sep)
-                this.stack.push(fs8);
+                this.stack.push(fs9);
               else
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs9, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -7664,9 +7664,9 @@ function normalizeGroups(raw) {
   }
   return out;
 }
-function defaultProjectProfile(path10 = "", label = "", groupId = "") {
+function defaultProjectProfile(path11 = "", label = "", groupId = "") {
   return {
-    path: path10,
+    path: path11,
     label,
     groups: groupId === "" ? [] : [groupId],
     actions: [],
@@ -8766,26 +8766,102 @@ async function deleteProjectScope(file) {
   await fs6.rm(file, { force: true });
 }
 
+// src/builtins.js
+import { promises as fs7 } from "node:fs";
+import path7 from "node:path";
+import { fileURLToPath } from "node:url";
+var DEFAULT_ROOT = fileURLToPath(new URL("../builtin-actions/", import.meta.url));
+var DEFAULT_BUILTIN = "skill-import-assistant";
+var cache = /* @__PURE__ */ new Map();
+async function loadBuiltinActions(root = DEFAULT_ROOT) {
+  if (cache.has(root)) return cache.get(root);
+  const actions = [];
+  let entries = [];
+  try {
+    entries = await fs7.readdir(root, { withFileTypes: true });
+  } catch {
+    cache.set(root, actions);
+    return actions;
+  }
+  const seen = /* @__PURE__ */ new Set();
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+    const dir = path7.join(root, entry.name);
+    const skill = await readSkillDir(dir);
+    if (skill.error !== "" || seen.has(skill.name)) continue;
+    seen.add(skill.name);
+    actions.push({
+      id: skill.name,
+      name: skill.name,
+      skillName: skill.name,
+      description: skill.description,
+      prompt: skill.body,
+      category: "\u5185\u7F6E",
+      tags: [],
+      argsHint: "",
+      pinned: false,
+      usage: { count: 0, lastAt: 0 },
+      mode: "command",
+      groups: [],
+      resources: skill.files.map((name) => ({ name, bytes: 0 })),
+      frontmatter: skill.frontmatter,
+      builtin: true,
+      dir,
+      fingerprint: skill.fingerprint
+    });
+  }
+  actions.sort((left, right) => left.name.localeCompare(right.name));
+  cache.set(root, actions);
+  return actions;
+}
+async function seedDefaultBuiltin(store2) {
+  const state = await store2.readState();
+  const names = Object.keys(state.entries ?? {});
+  if (names.length !== 0) return false;
+  if (state.groups.length !== 1 || state.groups[0].id !== DEFAULT_GROUP_ID) return false;
+  await store2.setGroupActions(DEFAULT_GROUP_ID, [DEFAULT_BUILTIN], [DEFAULT_BUILTIN]);
+  return true;
+}
+
 // src/catalog.js
+function decorateBuiltin(action, entry) {
+  return {
+    ...action,
+    mode: "command",
+    pinned: entry?.pinned === true,
+    usage: entry?.usage ?? { count: 0, lastAt: 0 },
+    groups: entry?.groups ?? [],
+    category: entry?.category ?? "\u5185\u7F6E"
+  };
+}
+async function loadAllActions(store2) {
+  const builtins = await loadBuiltinActions();
+  const data = await store2.read({ keep: builtins.map((action) => action.name), prune: true });
+  const builtinIds = new Set(builtins.map((action) => action.name));
+  return {
+    data,
+    actions: sortActions([
+      ...data.actions.filter((action) => !builtinIds.has(action.name)),
+      ...builtins.map((action) => decorateBuiltin(action, data.state.entries[action.name]))
+    ])
+  };
+}
 async function loadCatalog(store2, cwd = process.cwd(), scopeStore2) {
-  const data = await store2.read();
+  const { data, actions } = await loadAllActions(store2);
   const root = await resolveProjectRoot(cwd, []);
   const scope = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(root ?? "");
   const profile = scope ?? defaultProjectProfile(root ?? "", "", data.state.defaultGroup ?? "");
-  const actions = sortActions(
-    data.actions.filter((action) => actionAvailable(action, profile, data.state.groups))
-  );
   return {
     root,
     profile,
     groups: data.state.groups,
-    actions
+    actions: sortActions(actions.filter((action) => actionAvailable(action, profile, data.state.groups)))
   };
 }
 
 // src/import-export.js
-import { promises as fs7 } from "node:fs";
-import path7 from "node:path";
+import { promises as fs8 } from "node:fs";
+import path8 from "node:path";
 function notify(ctx, text, kind = "info") {
   try {
     ctx.ui.notify(text, kind);
@@ -8793,12 +8869,12 @@ function notify(ctx, text, kind = "info") {
   }
 }
 async function readPlan(ctx, store2, dataDir2, target) {
-  const stat = await fs7.stat(target).catch(() => void 0);
+  const stat = await fs8.stat(target).catch(() => void 0);
   if (stat === void 0) throw new Error(`\u8DEF\u5F84\u4E0D\u5B58\u5728\uFF1A${target}`);
   if (stat.isDirectory()) {
     return { kind: "folder", preview: await previewFolder(store2, dataDir2, target) };
   }
-  const buffer = await fs7.readFile(target);
+  const buffer = await fs8.readFile(target);
   return { kind: "zip", preview: await previewZipBuffer(store2, dataDir2, buffer), buffer };
 }
 async function importFromPath(ctx, store2, dataDir2, source) {
@@ -8806,7 +8882,7 @@ async function importFromPath(ctx, store2, dataDir2, source) {
     notify(ctx, "\u5BFC\u5165\u529F\u80FD\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
-  const target = path7.resolve(ctx.cwd ?? process.cwd(), source);
+  const target = path8.resolve(ctx.cwd ?? process.cwd(), source);
   const { kind, preview, buffer } = await readPlan(ctx, store2, dataDir2, target);
   const summary = preview.summary;
   const confirmed = await ctx.ui.confirm(
@@ -8848,15 +8924,15 @@ async function exportActions(ctx, store2, dataDir2) {
     if (action === void 0) return;
     selection = [action.id];
   }
-  const defaultPath = path7.join(ctx.cwd ?? process.cwd(), selection === void 0 ? "action-hub.zip" : `${selection[0]}.zip`);
+  const defaultPath = path8.join(ctx.cwd ?? process.cwd(), selection === void 0 ? "action-hub.zip" : `${selection[0]}.zip`);
   const raw = await ctx.ui.input("\u5BFC\u51FA\u8DEF\u5F84", defaultPath);
   if (raw === void 0 || raw.trim() === "") return;
-  const target = path7.resolve(ctx.cwd ?? process.cwd(), raw.trim());
-  const exists = await fs7.stat(target).then(() => true).catch(() => false);
+  const target = path8.resolve(ctx.cwd ?? process.cwd(), raw.trim());
+  const exists = await fs8.stat(target).then(() => true).catch(() => false);
   if (exists && !await ctx.ui.confirm("\u8986\u76D6\u6587\u4EF6", `${target} \u5DF2\u5B58\u5728\uFF0C\u662F\u5426\u8986\u76D6\uFF1F`)) return;
   const exported = await exportZipBuffer(store2, dataDir2, selection);
-  await fs7.mkdir(path7.dirname(target), { recursive: true });
-  await fs7.writeFile(target, exported.buffer);
+  await fs8.mkdir(path8.dirname(target), { recursive: true });
+  await fs8.writeFile(target, exported.buffer);
   notify(ctx, `\u5DF2\u5BFC\u51FA ${exported.count} \u4E2A Action \u5230 ${target}`, "info");
 }
 
@@ -8870,7 +8946,7 @@ async function insertAction(store2, ctx, action, args = "") {
 }
 
 // src/management.js
-import path8 from "node:path";
+import path9 from "node:path";
 
 // src/manager-dashboard.js
 import { Key, matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
@@ -9353,8 +9429,8 @@ async function pickChecklist(ctx, { title, items, selected }) {
   );
 }
 async function loadAll(store2) {
-  const data = await store2.read();
-  return { state: data.state, actions: sortActions(data.actions) };
+  const { data, actions } = await loadAllActions(store2);
+  return { state: data.state, actions };
 }
 async function pickGroups(ctx, store2, title, selected = []) {
   const state = await store2.readState();
@@ -9415,6 +9491,10 @@ async function createAction(ctx, store2) {
   }
 }
 async function editAction(ctx, store2, action) {
+  if (action.builtin) {
+    notify2(ctx, "\u5185\u7F6E Action \u4E0D\u53EF\u7F16\u8F91\u3002", "warning");
+    return;
+  }
   const patch = {};
   let current = action;
   for (; ; ) {
@@ -9491,6 +9571,29 @@ async function editAction(ctx, store2, action) {
   }
 }
 async function manageOneAction(ctx, store2, action) {
+  if (action.builtin) {
+    for (; ; ) {
+      const choice = await ctx.ui.select(`${actionLabel(action)}\uFF08\u5185\u7F6E\uFF0C\u53EA\u8BFB\uFF09`, [
+        "\u63D2\u5165\u5230\u7F16\u8F91\u5668",
+        "\u67E5\u770B\u8D44\u6E90",
+        "\u8BBE\u7F6E\u5206\u7EC4",
+        BACK
+      ]);
+      if (choice === void 0 || choice === BACK) return;
+      if (choice === "\u63D2\u5165\u5230\u7F16\u8F91\u5668") {
+        await insertSelected(ctx, store2, action);
+        return;
+      }
+      if (choice === "\u67E5\u770B\u8D44\u6E90") {
+        await showResources(ctx, action);
+        continue;
+      }
+      if (choice === "\u8BBE\u7F6E\u5206\u7EC4") {
+        await setActionGroups(ctx, store2, action);
+        continue;
+      }
+    }
+  }
   for (; ; ) {
     const choice = await ctx.ui.select(actionLabel(action), [
       "\u63D2\u5165\u5230\u7F16\u8F91\u5668",
@@ -9616,6 +9719,10 @@ async function showResources(ctx, action) {
   notify2(ctx, resource.text === void 0 ? `${resource.name}\uFF08\u4E8C\u8FDB\u5236\u6216\u5927\u6587\u4EF6\uFF0C\u8BF7\u5728\u6587\u4EF6\u7CFB\u7EDF\u4E2D\u67E5\u770B\uFF09` : resource.text, "info");
 }
 async function deleteAction(ctx, store2, action) {
+  if (action.builtin) {
+    notify2(ctx, "\u5185\u7F6E Action \u4E0D\u53EF\u5220\u9664\u3002", "warning");
+    return;
+  }
   if (!await ctx.ui.confirm("\u5220\u9664 Action", `\u786E\u5B9A\u5220\u9664 ${action.name}\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\u3002`)) return;
   try {
     await store2.remove(action.id);
@@ -9625,6 +9732,10 @@ async function deleteAction(ctx, store2, action) {
   }
 }
 async function toggleMode(ctx, store2, action) {
+  if (action.builtin) {
+    notify2(ctx, "\u5185\u7F6E Action \u56FA\u5B9A\u4E3A Command\u3002", "warning");
+    return;
+  }
   try {
     await store2.setMode(action.id, action.mode === "skill" ? "command" : "skill");
     notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1BSkill \u53EF\u89C1\u6027\u53D8\u5316\u540E\u8BF7 /ah reload\u3002", "info");
@@ -9681,17 +9792,17 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
   }
   let sectionId = "actions";
   for (; ; ) {
-    const data = await store2.read();
+    const data = await loadAll(store2);
     const cwd = ctx.cwd ?? process.cwd();
     const root = await resolveProjectRoot(cwd, []);
-    const projectRoot = root ?? path8.resolve(cwd);
+    const projectRoot = root ?? path9.resolve(cwd);
     const scope = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(projectRoot);
     const dashboardData = {
-      actions: sortActions(data.actions),
+      actions: data.actions,
       state: data.state,
       projects: [{
         ...scope ?? { groups: [], actions: [], excludeGroups: [], excludeActions: [] },
-        label: scope?.label || path8.basename(projectRoot),
+        label: scope?.label || path9.basename(projectRoot),
         path: projectRoot
       }],
       dataDir: dataDir2,
@@ -9846,7 +9957,7 @@ async function manageOneGroup(ctx, store2, group) {
 async function editProjectScope(ctx, store2, scopeStore2, projectPath) {
   const existing = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(projectPath);
   let profile = {
-    label: existing?.label || path8.basename(projectPath),
+    label: existing?.label || path9.basename(projectPath),
     groups: existing?.groups ?? [],
     actions: existing?.actions ?? [],
     excludeGroups: existing?.excludeGroups ?? [],
@@ -10088,18 +10199,18 @@ var ActionPalette = class {
 
 // src/project-scopes.js
 import os3 from "node:os";
-import path9 from "node:path";
+import path10 from "node:path";
 function piAgentDir() {
   const configured = process.env.PI_CODING_AGENT_DIR?.trim();
-  return configured !== void 0 && configured !== "" ? configured : path9.join(os3.homedir(), ".pi", "agent");
+  return configured !== void 0 && configured !== "" ? configured : path10.join(os3.homedir(), ".pi", "agent");
 }
 function piWorkdirKey(projectRoot) {
   return `--${String(projectRoot).replace(/^[/\\]/u, "").replace(/[/\\:]/gu, "-")}--`;
 }
 function createPiProjectScopeStore() {
   const configuredSessions = process.env.PI_CODING_AGENT_SESSION_DIR?.trim();
-  const sessionsDir = configuredSessions !== void 0 && configuredSessions !== "" ? configuredSessions : path9.join(piAgentDir(), "sessions");
-  const fileForRoot = (projectRoot) => path9.join(sessionsDir, piWorkdirKey(projectRoot), "action-hub", "scope.json");
+  const sessionsDir = configuredSessions !== void 0 && configuredSessions !== "" ? configuredSessions : path10.join(piAgentDir(), "sessions");
+  const fileForRoot = (projectRoot) => path10.join(sessionsDir, piWorkdirKey(projectRoot), "action-hub", "scope.json");
   return {
     sessionsDir,
     fileForRoot,
@@ -10120,7 +10231,7 @@ function createPiProjectScopeStore() {
       const scope = await this.readForRoot(root ?? "");
       return {
         root,
-        profile: scope ?? defaultProjectProfile(root ?? "", path9.basename(root ?? ""), defaultGroup)
+        profile: scope ?? defaultProjectProfile(root ?? "", path10.basename(root ?? ""), defaultGroup)
       };
     }
   };
@@ -10141,6 +10252,8 @@ async function openPalette(ctx, initialQuery = "") {
     notify3(ctx, "Action \u9762\u677F\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
+  await seedDefaultBuiltin(store).catch(() => {
+  });
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd(), scopeStore);
   if (catalog.actions.length === 0) {
     notify3(ctx, "\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u7684 Action\u3002\u4F7F\u7528 /ah import <\u8DEF\u5F84> \u5BFC\u5165\u4E00\u4E2A\u6807\u51C6 Skill \u76EE\u5F55\u3002", "info");
@@ -10174,6 +10287,8 @@ function actionHub(pi) {
         return;
       }
       if (text === "manage" || text === "\u7BA1\u7406") {
+        await seedDefaultBuiltin(store).catch(() => {
+        });
         await openManager(ctx, store, dataDir, scopeStore);
         return;
       }
@@ -10206,11 +10321,15 @@ function actionHub(pi) {
   pi.registerShortcut("ctrl+alt+a", {
     description: "\u6253\u5F00 Action Hub \u7BA1\u7406\u754C\u9762",
     handler: async (ctx) => {
+      await seedDefaultBuiltin(store).catch(() => {
+      });
       await openManager(ctx, store, dataDir, scopeStore);
     }
   });
   pi.on("resources_discover", async (event) => {
     try {
+      await seedDefaultBuiltin(store).catch(() => {
+      });
       const catalog = await loadCatalog(store, event.cwd ?? process.cwd(), scopeStore);
       return {
         skillPaths: catalog.actions.filter((action) => action.mode === "skill").map((action) => action.dir)

@@ -11,6 +11,33 @@ import {
   sortActions,
 } from 'action-hub';
 
+import { loadBuiltinActions } from './builtins.js';
+
+function decorateBuiltin(action, entry) {
+  return {
+    ...action,
+    mode: 'command',
+    pinned: entry?.pinned === true,
+    usage: entry?.usage ?? { count: 0, lastAt: 0 },
+    groups: entry?.groups ?? [],
+    category: entry?.category ?? '内置',
+  };
+}
+
+/** Load user actions and read-only built-ins, preserving their saved metadata. */
+export async function loadAllActions(store) {
+  const builtins = await loadBuiltinActions();
+  const data = await store.read({ keep: builtins.map((action) => action.name), prune: true });
+  const builtinIds = new Set(builtins.map((action) => action.name));
+  return {
+    data,
+    actions: sortActions([
+      ...data.actions.filter((action) => !builtinIds.has(action.name)),
+      ...builtins.map((action) => decorateBuiltin(action, data.state.entries[action.name])),
+    ]),
+  };
+}
+
 /**
  * Resolve the action catalog for a Pi working directory.
  *
@@ -18,18 +45,15 @@ import {
  * library. Callers pass the Pi scope store.
  */
 export async function loadCatalog(store, cwd = process.cwd(), scopeStore) {
-  const data = await store.read();
+  const { data, actions } = await loadAllActions(store);
   const root = await resolveProjectRoot(cwd, []);
   const scope = scopeStore === undefined ? null : await scopeStore.readForRoot(root ?? '');
   const profile = scope ?? defaultProjectProfile(root ?? '', '', data.state.defaultGroup ?? '');
-  const actions = sortActions(
-    data.actions.filter((action) => actionAvailable(action, profile, data.state.groups)),
-  );
   return {
     root,
     profile,
     groups: data.state.groups,
-    actions,
+    actions: sortActions(actions.filter((action) => actionAvailable(action, profile, data.state.groups))),
   };
 }
 
