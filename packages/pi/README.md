@@ -23,7 +23,7 @@ pi -e ./extensions/action-hub.js
 ```
 
 `pi -e` loads the extension for one Pi invocation. To install the local package
-persistently, run `pi install ./pi-action-hub` from the parent directory after
+persistently, run `pi install ./packages/pi` from the repository root after
 `npm install`; Pi packages do not install a local package's dependency tree for
 you. In a session:
 
