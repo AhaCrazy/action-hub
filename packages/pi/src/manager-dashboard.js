@@ -57,10 +57,10 @@ export class ManagerDashboard {
   }
 
   get projects() {
-    const projects = this.data.state.projects ?? [];
+    const projects = Array.isArray(this.data.projects) ? this.data.projects : [];
     const root = this.data.currentProjectRoot;
     if (root === undefined || root === '') return projects;
-    const key = root.toLowerCase();
+    const key = String(root).toLowerCase();
     if (projects.some((project) => String(project.path).toLowerCase() === key)) return projects;
     return [...projects, { label: '当前项目（未登记）', path: root, groups: [], actions: [], excludeGroups: [], excludeActions: [] }];
   }

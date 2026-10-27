@@ -113,17 +113,17 @@ var require_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path8) {
-      const ctrl = callVisitor(key, node, visitor, path8);
+    function visit_(key, node, visitor, path10) {
+      const ctrl = callVisitor(key, node, visitor, path10);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visit_(key, ctrl, visitor, path8);
+        replaceNode(key, path10, ctrl);
+        return visit_(key, ctrl, visitor, path10);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path10 = Object.freeze(path10.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path8);
+            const ci = visit_(i, node.items[i], visitor, path10);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -134,13 +134,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = visit_("key", node.key, visitor, path8);
+          path10 = Object.freeze(path10.concat(node));
+          const ck = visit_("key", node.key, visitor, path10);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = visit_("value", node.value, visitor, path8);
+          const cv = visit_("value", node.value, visitor, path10);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -161,17 +161,17 @@ var require_visit = __commonJS({
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path8) {
-      const ctrl = await callVisitor(key, node, visitor, path8);
+    async function visitAsync_(key, node, visitor, path10) {
+      const ctrl = await callVisitor(key, node, visitor, path10);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visitAsync_(key, ctrl, visitor, path8);
+        replaceNode(key, path10, ctrl);
+        return visitAsync_(key, ctrl, visitor, path10);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path10 = Object.freeze(path10.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path8);
+            const ci = await visitAsync_(i, node.items[i], visitor, path10);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -182,13 +182,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path8);
+          path10 = Object.freeze(path10.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path10);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path8);
+          const cv = await visitAsync_("value", node.value, visitor, path10);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -215,23 +215,23 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path8) {
+    function callVisitor(key, node, visitor, path10) {
       if (typeof visitor === "function")
-        return visitor(key, node, path8);
+        return visitor(key, node, path10);
       if (identity.isMap(node))
-        return visitor.Map?.(key, node, path8);
+        return visitor.Map?.(key, node, path10);
       if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path8);
+        return visitor.Seq?.(key, node, path10);
       if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path8);
+        return visitor.Pair?.(key, node, path10);
       if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path8);
+        return visitor.Scalar?.(key, node, path10);
       if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path8);
+        return visitor.Alias?.(key, node, path10);
       return void 0;
     }
-    function replaceNode(key, path8, node) {
-      const parent = path8[path8.length - 1];
+    function replaceNode(key, path10, node) {
+      const parent = path10[path10.length - 1];
       if (identity.isCollection(parent)) {
         parent.items[key] = node;
       } else if (identity.isPair(parent)) {
@@ -843,10 +843,10 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node = require_Node();
-    function collectionFromPath(schema, path8, value) {
+    function collectionFromPath(schema, path10, value) {
       let v = value;
-      for (let i = path8.length - 1; i >= 0; --i) {
-        const k = path8[i];
+      for (let i = path10.length - 1; i >= 0; --i) {
+        const k = path10[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
           a[k] = v;
@@ -865,7 +865,7 @@ var require_Collection = __commonJS({
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
-    var isEmptyPath = (path8) => path8 == null || typeof path8 === "object" && !!path8[Symbol.iterator]().next().done;
+    var isEmptyPath = (path10) => path10 == null || typeof path10 === "object" && !!path10[Symbol.iterator]().next().done;
     var Collection = class extends Node.NodeBase {
       constructor(type, schema) {
         super(type);
@@ -895,11 +895,11 @@ var require_Collection = __commonJS({
        * be a Pair instance or a `{ key, value }` object, which may not have a key
        * that already exists in the map.
        */
-      addIn(path8, value) {
-        if (isEmptyPath(path8))
+      addIn(path10, value) {
+        if (isEmptyPath(path10))
           this.add(value);
         else {
-          const [key, ...rest] = path8;
+          const [key, ...rest] = path10;
           const node = this.get(key, true);
           if (identity.isCollection(node))
             node.addIn(rest, value);
@@ -913,8 +913,8 @@ var require_Collection = __commonJS({
        * Removes a value from the collection.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        const [key, ...rest] = path8;
+      deleteIn(path10) {
+        const [key, ...rest] = path10;
         if (rest.length === 0)
           return this.delete(key);
         const node = this.get(key, true);
@@ -928,8 +928,8 @@ var require_Collection = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        const [key, ...rest] = path8;
+      getIn(path10, keepScalar) {
+        const [key, ...rest] = path10;
         const node = this.get(key, true);
         if (rest.length === 0)
           return !keepScalar && identity.isScalar(node) ? node.value : node;
@@ -947,8 +947,8 @@ var require_Collection = __commonJS({
       /**
        * Checks if the collection includes a value with the key `key`.
        */
-      hasIn(path8) {
-        const [key, ...rest] = path8;
+      hasIn(path10) {
+        const [key, ...rest] = path10;
         if (rest.length === 0)
           return this.has(key);
         const node = this.get(key, true);
@@ -958,8 +958,8 @@ var require_Collection = __commonJS({
        * Sets a value in this collection. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        const [key, ...rest] = path8;
+      setIn(path10, value) {
+        const [key, ...rest] = path10;
         if (rest.length === 0) {
           this.set(key, value);
         } else {
@@ -3474,9 +3474,9 @@ var require_Document = __commonJS({
           this.contents.add(value);
       }
       /** Adds a value to the document. */
-      addIn(path8, value) {
+      addIn(path10, value) {
         if (assertCollection(this.contents))
-          this.contents.addIn(path8, value);
+          this.contents.addIn(path10, value);
       }
       /**
        * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
@@ -3551,14 +3551,14 @@ var require_Document = __commonJS({
        * Removes a value from the document.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        if (Collection.isEmptyPath(path8)) {
+      deleteIn(path10) {
+        if (Collection.isEmptyPath(path10)) {
           if (this.contents == null)
             return false;
           this.contents = null;
           return true;
         }
-        return assertCollection(this.contents) ? this.contents.deleteIn(path8) : false;
+        return assertCollection(this.contents) ? this.contents.deleteIn(path10) : false;
       }
       /**
        * Returns item at `key`, or `undefined` if not found. By default unwraps
@@ -3573,10 +3573,10 @@ var require_Document = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        if (Collection.isEmptyPath(path8))
+      getIn(path10, keepScalar) {
+        if (Collection.isEmptyPath(path10))
           return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
-        return identity.isCollection(this.contents) ? this.contents.getIn(path8, keepScalar) : void 0;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path10, keepScalar) : void 0;
       }
       /**
        * Checks if the document includes a value with the key `key`.
@@ -3587,10 +3587,10 @@ var require_Document = __commonJS({
       /**
        * Checks if the document includes a value at `path`.
        */
-      hasIn(path8) {
-        if (Collection.isEmptyPath(path8))
+      hasIn(path10) {
+        if (Collection.isEmptyPath(path10))
           return this.contents !== void 0;
-        return identity.isCollection(this.contents) ? this.contents.hasIn(path8) : false;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path10) : false;
       }
       /**
        * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -3607,13 +3607,13 @@ var require_Document = __commonJS({
        * Sets a value in this document. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        if (Collection.isEmptyPath(path8)) {
+      setIn(path10, value) {
+        if (Collection.isEmptyPath(path10)) {
           this.contents = value;
         } else if (this.contents == null) {
-          this.contents = Collection.collectionFromPath(this.schema, Array.from(path8), value);
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path10), value);
         } else if (assertCollection(this.contents)) {
-          this.contents.setIn(path8, value);
+          this.contents.setIn(path10, value);
         }
       }
       /**
@@ -5574,9 +5574,9 @@ var require_cst_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path8) => {
+    visit.itemAtPath = (cst, path10) => {
       let item = cst;
-      for (const [field, index] of path8) {
+      for (const [field, index] of path10) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
           item = tok.items[index];
@@ -5585,23 +5585,23 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path8) => {
-      const parent = visit.itemAtPath(cst, path8.slice(0, -1));
-      const field = path8[path8.length - 1][0];
+    visit.parentCollection = (cst, path10) => {
+      const parent = visit.itemAtPath(cst, path10.slice(0, -1));
+      const field = path10[path10.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
         return coll;
       throw new Error("Parent collection not found");
     };
-    function _visit(path8, item, visitor) {
-      let ctrl = visitor(item, path8);
+    function _visit(path10, item, visitor) {
+      let ctrl = visitor(item, path10);
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
         const token = item[field];
         if (token && "items" in token) {
           for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path8.concat([[field, i]])), token.items[i], visitor);
+            const ci = _visit(Object.freeze(path10.concat([[field, i]])), token.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -5612,10 +5612,10 @@ var require_cst_visit = __commonJS({
             }
           }
           if (typeof ctrl === "function" && field === "key")
-            ctrl = ctrl(item, path8);
+            ctrl = ctrl(item, path10);
         }
       }
-      return typeof ctrl === "function" ? ctrl(item, path8) : ctrl;
+      return typeof ctrl === "function" ? ctrl(item, path10) : ctrl;
     }
     exports.visit = visit;
   }
@@ -6917,14 +6917,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs7 = this.flowScalar(this.type);
+              const fs8 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs7, sep: [] });
+                map.items.push({ start, key: fs8, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs7);
+                this.stack.push(fs8);
               } else {
-                Object.assign(it, { key: fs7, sep: [] });
+                Object.assign(it, { key: fs8, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -7052,13 +7052,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs7 = this.flowScalar(this.type);
+              const fs8 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs7, sep: [] });
+                fc.items.push({ start: [], key: fs8, sep: [] });
               else if (it.sep)
-                this.stack.push(fs7);
+                this.stack.push(fs8);
               else
-                Object.assign(it, { key: fs7, sep: [] });
+                Object.assign(it, { key: fs8, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -7693,9 +7693,9 @@ function normalizeGroups(raw) {
   }
   return out;
 }
-function defaultProjectProfile(path8 = "", label = "", groupId = "") {
+function defaultProjectProfile(path10 = "", label = "", groupId = "") {
   return {
-    path: path8,
+    path: path10,
     label,
     groups: groupId === "" ? [] : [groupId],
     actions: [],
@@ -8187,6 +8187,16 @@ function createStore(options = {}) {
         state.groups = groups;
         await writeStateFile(dataDir, state);
         return entry;
+      });
+    },
+    async clearProjects() {
+      return serialize(async () => {
+        const state = await readState();
+        if (!Array.isArray(state.projects) || state.projects.length === 0) return 0;
+        const count = state.projects.length;
+        state.projects = [];
+        await writeStateFile(dataDir, state);
+        return count;
       });
     },
     async createGroup(name2) {
@@ -8685,15 +8695,6 @@ async function resolveProjectRoot(cwd, projects = []) {
 }
 
 // ../core/src/availability.js
-function findProjectProfile(projects, projectRoot) {
-  if (!Array.isArray(projects) || typeof projectRoot !== "string" || projectRoot === "") return null;
-  const key = canonicalPath(projectRoot);
-  if (key === "") return null;
-  return projects.find((project) => canonicalPath(project.path) === key) ?? null;
-}
-function profileFor(projects, projectRoot, defaultGroup = "") {
-  return findProjectProfile(projects, projectRoot) ?? defaultProjectProfile(typeof projectRoot === "string" ? projectRoot : "", "", defaultGroup);
-}
 function expandGroupIds(groups, selectedIds) {
   const selected = Array.isArray(selectedIds) ? selectedIds : [];
   const byId = new Map((Array.isArray(groups) ? groups : []).map((group) => [group.id, group]));
@@ -8732,6 +8733,85 @@ function actionAvailable(action, profile, groups = []) {
   const selected = selectedGroupIds(profile, groups);
   const blocked = blockedGroupIds(profile, groups);
   return Array.isArray(action.groups) && action.groups.some((id) => selected.has(id) && !blocked.has(id));
+}
+
+// ../core/src/project-scope.js
+import { promises as fs6 } from "node:fs";
+import path6 from "node:path";
+var PROJECT_SCOPE_FORMAT = "action-hub/project-scope@1";
+function normalizeIds(value) {
+  const seen = /* @__PURE__ */ new Set();
+  const out = [];
+  for (const item of Array.isArray(value) ? value : []) {
+    if (typeof item !== "string") continue;
+    const id = item.trim();
+    if (id === "" || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+function normalizeProjectScope(input = {}) {
+  return {
+    label: typeof input.label === "string" ? input.label.trim() : "",
+    groups: normalizeIds(input.groups),
+    actions: normalizeIds(input.actions),
+    excludeGroups: normalizeIds(input.excludeGroups),
+    excludeActions: normalizeIds(input.excludeActions)
+  };
+}
+async function readProjectScope(file) {
+  let raw;
+  try {
+    raw = await fs6.readFile(file, "utf8");
+  } catch {
+    return null;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (parsed === null || typeof parsed !== "object") return null;
+  const scope = normalizeProjectScope(parsed);
+  if (typeof parsed.updatedAt === "number") scope.updatedAt = parsed.updatedAt;
+  return scope;
+}
+async function writeProjectScope(file, profile = {}) {
+  const scope = {
+    format: PROJECT_SCOPE_FORMAT,
+    ...normalizeProjectScope(profile),
+    updatedAt: Date.now()
+  };
+  await fs6.mkdir(path6.dirname(file), { recursive: true });
+  const temporary = `${file}.tmp-${process.pid}-${Date.now()}`;
+  await fs6.writeFile(temporary, `${JSON.stringify(scope, null, 2)}
+`, "utf8");
+  await fs6.rename(temporary, file);
+  return scope;
+}
+async function deleteProjectScope(file) {
+  await fs6.rm(file, { force: true });
+}
+async function pruneProjectScopes(dir, validKeys) {
+  const keep = new Set((Array.isArray(validKeys) ? validKeys : []).map((key) => String(key)));
+  let entries = [];
+  try {
+    entries = await fs6.readdir(dir, { withFileTypes: true });
+  } catch {
+    return 0;
+  }
+  let removed = 0;
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+    const key = entry.name.slice(0, -".json".length);
+    if (keep.has(key)) continue;
+    await fs6.rm(path6.join(dir, entry.name), { force: true }).catch(() => {
+    });
+    removed += 1;
+  }
+  return removed;
 }
 
 // host/refs.js
@@ -8799,11 +8879,11 @@ ${file.text}
 }
 
 // host/state.js
-import path7 from "node:path";
+import path8 from "node:path";
 
 // builtins.js
-import { promises as fs6 } from "node:fs";
-import path6 from "node:path";
+import { promises as fs7 } from "node:fs";
+import path7 from "node:path";
 import { fileURLToPath } from "node:url";
 var DEFAULT_ROOT = fileURLToPath(new URL("./builtin-actions/", import.meta.url));
 var cache = /* @__PURE__ */ new Map();
@@ -8812,7 +8892,7 @@ async function loadBuiltinActions(root = DEFAULT_ROOT) {
   const actions = [];
   let entries = [];
   try {
-    entries = await fs6.readdir(root, { withFileTypes: true });
+    entries = await fs7.readdir(root, { withFileTypes: true });
   } catch {
     cache.set(root, actions);
     return actions;
@@ -8820,7 +8900,7 @@ async function loadBuiltinActions(root = DEFAULT_ROOT) {
   const seen = /* @__PURE__ */ new Set();
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-    const dir = path6.join(root, entry.name);
+    const dir = path7.join(root, entry.name);
     const skill = await readSkillDir(dir);
     if (skill.error !== "" || seen.has(skill.name)) continue;
     seen.add(skill.name);
@@ -8879,7 +8959,6 @@ async function readAll(store) {
     invalid: state.invalid ?? [],
     builtins,
     groups: state.state.groups,
-    projects: state.state.projects,
     defaultGroup: state.state.defaultGroup ?? "",
     actions: sortActions([
       ...state.actions.filter((action) => !ids.has(action.id)),
@@ -8888,7 +8967,7 @@ async function readAll(store) {
   };
 }
 function actionResourceDir(action) {
-  return typeof action.dir === "string" && action.dir !== "" ? action.dir : path7.join("");
+  return typeof action.dir === "string" && action.dir !== "" ? action.dir : path8.join("");
 }
 
 // host/projects.js
@@ -8907,10 +8986,13 @@ async function listProjects(ctx) {
     if (item === null || typeof item !== "object") continue;
     const raw = typeof item.path === "string" ? item.path : typeof item.realPath === "string" ? item.realPath : "";
     if (raw === "") continue;
+    const id = typeof item.id === "string" ? item.id : typeof item.workspaceId === "string" ? item.workspaceId : "";
+    if (id === "") continue;
     const key = process.platform === "win32" ? raw.toLowerCase() : raw;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({
+      id,
       label: typeof item.title === "string" && item.title !== "" ? item.title : raw.split(/[\\/]/u).pop() || raw,
       path: raw
     });
@@ -8973,7 +9055,7 @@ async function workingCwd(ctx, agent, signal) {
   }
   return void 0;
 }
-function installActionInvocations(ctx, store) {
+function installActionInvocations(ctx, store, scopeStore) {
   return ctx.on("agent/pre-step", async ({ agent, messages, signal }, next) => {
     const decision = await next();
     if (decision.kind === "reject" || signal.aborted) return decision;
@@ -8984,13 +9066,11 @@ function installActionInvocations(ctx, store) {
     ));
     if (!hasMarker) return decision;
     let actions;
-    let projects;
     let groups;
     let defaultGroup;
     try {
       const snapshot = await readAll(store);
       actions = snapshot.actions;
-      projects = snapshot.projects;
       groups = snapshot.groups;
       defaultGroup = snapshot.defaultGroup;
     } catch (error) {
@@ -9002,8 +9082,11 @@ function installActionInvocations(ctx, store) {
     const markers = referencedActions(messages, new Set(byHandle.keys()));
     if (markers.length === 0) return decision;
     const cwd = await workingCwd(ctx, agent, signal);
-    const root = await resolveProjectRoot(cwd, await listProjects(ctx));
-    const profile = profileFor(projects, root, defaultGroup);
+    const projects = await listProjects(ctx);
+    const root = await resolveProjectRoot(cwd, projects);
+    const project = projects.find((entry) => canonicalPath(entry.path) === canonicalPath(root ?? "")) ?? null;
+    const scope = project === null ? null : await scopeStore.read(project.id);
+    const profile = scope ?? defaultProjectProfile(root ?? "", project?.label ?? "", defaultGroup);
     const injections = [];
     const notices = /* @__PURE__ */ new Map();
     for (const marker of markers) {
@@ -9037,9 +9120,100 @@ function installActionInvocations(ctx, store) {
   });
 }
 
+// host/project-scopes.js
+import os3 from "node:os";
+import path9 from "node:path";
+function dshHome() {
+  const configured = process.env.DSH_HOME?.trim();
+  return configured !== void 0 && configured !== "" ? configured : path9.join(os3.homedir(), ".dsh");
+}
+function safeKey(value) {
+  return String(value).replace(/[^a-zA-Z0-9._-]/gu, "-");
+}
+function createDshProjectScopeStore() {
+  const root = path9.join(dshHome(), "action-hub", "workspaces");
+  const fileFor = (workspaceId) => path9.join(root, `${safeKey(workspaceId)}.json`);
+  return {
+    root,
+    fileFor,
+    async read(workspaceId) {
+      if (typeof workspaceId !== "string" || workspaceId === "") return null;
+      return readProjectScope(fileFor(workspaceId));
+    },
+    async write(workspaceId, profile) {
+      if (typeof workspaceId !== "string" || workspaceId === "") throw new Error("workspaceId \u4E0D\u80FD\u4E3A\u7A7A");
+      return writeProjectScope(fileFor(workspaceId), profile);
+    },
+    async delete(workspaceId) {
+      if (typeof workspaceId !== "string" || workspaceId === "") return;
+      await deleteProjectScope(fileFor(workspaceId));
+    },
+    async listProfiles(projects) {
+      const out = [];
+      for (const project of Array.isArray(projects) ? projects : []) {
+        if (project === null || typeof project !== "object" || typeof project.id !== "string") continue;
+        const scope = await this.read(project.id);
+        if (scope === null) continue;
+        out.push({
+          ...scope,
+          id: project.id,
+          label: project.label,
+          path: project.path
+        });
+      }
+      return out;
+    },
+    async prune(projects) {
+      const list = Array.isArray(projects) ? projects : [];
+      if (list.length === 0) return 0;
+      const ids = list.map((project) => project?.id).filter((id) => typeof id === "string" && id !== "");
+      return pruneProjectScopes(root, ids);
+    },
+    async profileForCwd(ctx, cwd, defaultGroup = "") {
+      const projects = await listProjects(ctx);
+      const rootPath = await resolveProjectRoot(cwd, projects);
+      const project = projects.find((entry) => canonicalPath(entry.path) === canonicalPath(rootPath ?? ""));
+      const scope = project === void 0 ? null : await this.read(project.id);
+      return {
+        project: project ?? null,
+        root: rootPath,
+        profile: scope ?? defaultProjectProfile(rootPath ?? "", project?.label ?? "", defaultGroup)
+      };
+    }
+  };
+}
+async function migrateLegacyProjects(ctx, store, scopeStore) {
+  const state = await store.readState();
+  const legacy = Array.isArray(state.projects) ? state.projects : [];
+  if (legacy.length === 0) return 0;
+  const projects = await listProjects(ctx);
+  let migrated = 0;
+  let matched = 0;
+  for (const entry of legacy) {
+    if (entry === null || typeof entry !== "object" || typeof entry.path !== "string") continue;
+    const project = projects.find((item) => canonicalPath(item.path) === canonicalPath(entry.path));
+    if (project === void 0) continue;
+    matched += 1;
+    const existing = await scopeStore.read(project.id);
+    if (existing === null) {
+      await scopeStore.write(project.id, entry);
+      migrated += 1;
+    }
+  }
+  if (matched === legacy.length) await store.clearProjects();
+  return migrated;
+}
+
 // host/skills-provider.js
 var PROVIDER = "action-hub";
 var control = null;
+var migrationPromise = null;
+function ensureMigration(ctx, store, scopeStore) {
+  if (migrationPromise === null) {
+    migrationPromise = migrateLegacyProjects(ctx, store, scopeStore).catch(() => 0);
+  }
+  return migrationPromise;
+}
 function invalidateSkills() {
   try {
     control?.invalidate?.();
@@ -9063,15 +9237,26 @@ function notifySkillCatalog(ctx) {
   } catch {
   }
 }
-function installSkillsProvider(ctx, store) {
+async function profileForCwd(scopeStore, projects, cwd, defaultGroup) {
+  const root = await resolveProjectRoot(cwd, projects);
+  const project = projects.find((entry) => canonicalPath(entry.path) === canonicalPath(root ?? "")) ?? null;
+  const scope = project === null ? null : await scopeStore.read(project.id);
+  return {
+    root,
+    project,
+    profile: scope ?? defaultProjectProfile(root ?? "", project?.label ?? "", defaultGroup)
+  };
+}
+function installSkillsProvider(ctx, store, scopeStore) {
   const make = (providerControl) => {
     control = providerControl;
     return {
       name: PROVIDER,
       async list(options = {}) {
-        const { actions, projects, groups, defaultGroup } = await readAll(store);
-        const root = await resolveProjectRoot(options.cwd, await listProjects(ctx));
-        const profile = profileFor(projects, root, defaultGroup);
+        await ensureMigration(ctx, store, scopeStore);
+        const { actions, groups, defaultGroup } = await readAll(store);
+        const projects = await listProjects(ctx);
+        const { profile } = await profileForCwd(scopeStore, projects, options.cwd, defaultGroup);
         const candidates = [];
         for (const action of actions) {
           if (action.mode !== "skill") continue;
@@ -9093,10 +9278,11 @@ function installSkillsProvider(ctx, store) {
         return { candidates, complete: true };
       },
       async get(target, options = {}) {
+        await ensureMigration(ctx, store, scopeStore);
         if (target === null || typeof target !== "object" || typeof target.name !== "string") return void 0;
-        const { actions, projects, groups, defaultGroup } = await readAll(store);
-        const root = await resolveProjectRoot(options.cwd, await listProjects(ctx));
-        const profile = profileFor(projects, root, defaultGroup);
+        const { actions, groups, defaultGroup } = await readAll(store);
+        const projects = await listProjects(ctx);
+        const { profile } = await profileForCwd(scopeStore, projects, options.cwd, defaultGroup);
         const action = actions.find((entry) => entry.name === target.name && entry.mode === "skill");
         if (action === void 0 || !actionAvailable(action, profile, groups)) return void 0;
         const skill = await readSkillDir(action.dir);
@@ -9130,6 +9316,16 @@ var inject = ["webServer"];
 var ROUTE = "/api/dsh-action-hub";
 var MAX_BODY2 = 40 * 1024 * 1024;
 var DEFAULT_BUILTIN = "skill-import-assistant";
+async function ensureScopeMaintenance(ctx, store, scopeStore) {
+  try {
+    await migrateLegacyProjects(ctx, store, scopeStore);
+  } catch {
+  }
+  try {
+    await scopeStore.prune(await listProjects(ctx));
+  } catch {
+  }
+}
 async function seedDefaultBuiltin(store) {
   const state = await store.readState();
   const names = Object.keys(state.entries ?? {});
@@ -9140,17 +9336,18 @@ async function seedDefaultBuiltin(store) {
 async function apply(ctx, config = {}) {
   const dataDir = typeof config.dataDir === "string" && config.dataDir.trim() !== "" ? config.dataDir.trim() : defaultDataDir();
   const store = createStore({ dataDir });
+  const scopeStore = createDshProjectScopeStore();
   if (config.seed !== false) await seedDefaultBuiltin(store).catch(() => {
   });
-  ctx.effect(() => installActionInvocations(ctx, store), "action-hub: command invocations");
-  installSkillsProvider(ctx, store);
+  ctx.effect(() => installActionInvocations(ctx, store, scopeStore), "action-hub: command invocations");
+  installSkillsProvider(ctx, store, scopeStore);
   ctx.effect(() => ctx.webServer.register({
     kind: "prefix",
     path: ROUTE,
-    handler: (req, res) => handle(ctx, store, dataDir, req, res)
+    handler: (req, res) => handle(ctx, store, dataDir, scopeStore, req, res)
   }), "action-hub: API route");
 }
-async function handle(ctx, store, dataDir, req, res) {
+async function handle(ctx, store, dataDir, scopeStore, req, res) {
   if (!originAllowed(ctx, req)) {
     sendJson(res, 403, { ok: false, error: "\u8DE8\u7AD9\u8BF7\u6C42\u88AB\u62D2\u7EDD" });
     return;
@@ -9163,16 +9360,19 @@ async function handle(ctx, store, dataDir, req, res) {
       const view = await readAll(store);
       const { state, actions, invalid } = view;
       const plan = planActionRefs(actions);
+      await ensureScopeMaintenance(ctx, store, scopeStore);
       const projects = await listProjects(ctx);
+      const projectScopes = await scopeStore.listProfiles(projects);
       const currentProject = await findCurrentProject(ctx, projects, url.searchParams.get("sessionId") ?? "");
       const currentRoot = currentProject === null ? null : await resolveProjectRoot(currentProject.path, projects);
-      const currentProfile = profileFor(view.projects, currentRoot, view.defaultGroup);
+      const currentScope = currentProject === null ? null : projectScopes.find((scope) => scope.id === currentProject.id) ?? null;
+      const currentProfile = currentScope ?? defaultProjectProfile(currentRoot ?? "", currentProject?.label ?? "", view.defaultGroup);
       sendJson(res, 200, {
         ok: true,
         version: state.version,
         actions: sortActions(actions).map((action) => ({ ...action, available: actionAvailable(action, currentProfile, view.groups) })),
         projects,
-        projectScopes: view.projects,
+        projectScopes,
         groups: state.state.groups,
         defaultGroup: view.defaultGroup,
         currentProject,
@@ -9329,9 +9529,20 @@ async function handle(ctx, store, dataDir, req, res) {
       return;
     }
     if (route === "/project-scope") {
-      const profile = await store.setProjectScope(text(body.path), body);
+      const projects = await listProjects(ctx);
+      const requestedId = text(body.workspaceId);
+      const requestedPath = canonicalPath(text(body.path));
+      const project = requestedId !== "" ? projects.find((entry) => entry.id === requestedId) : projects.find((entry) => canonicalPath(entry.path) === requestedPath);
+      if (project === void 0) {
+        sendJson(res, 404, { ok: false, error: "\u672A\u627E\u5230\u5BF9\u5E94\u7684 DSH \u5DE5\u4F5C\u533A" });
+        return;
+      }
+      const scope = await scopeStore.write(project.id, body);
       notifySkillCatalog(ctx);
-      sendJson(res, 200, { ok: true, profile });
+      sendJson(res, 200, {
+        ok: true,
+        profile: { ...scope, id: project.id, label: project.label, path: project.path }
+      });
       return;
     }
     if (route === "/groups/create") {

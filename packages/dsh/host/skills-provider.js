@@ -1,11 +1,21 @@
 import { readSkillDir } from 'action-hub';
+import { actionAvailable } from 'action-hub';
+import { canonicalPath, defaultProjectProfile } from 'action-hub';
 import { resolveProjectRoot } from 'action-hub';
 import { listProjects } from './projects.js';
-import { actionAvailable, profileFor } from 'action-hub';
+import { migrateLegacyProjects } from './project-scopes.js';
 import { readAll } from './state.js';
 
 const PROVIDER = 'action-hub';
 let control = null;
+let migrationPromise = null;
+
+function ensureMigration(ctx, store, scopeStore) {
+  if (migrationPromise === null) {
+    migrationPromise = migrateLegacyProjects(ctx, store, scopeStore).catch(() => 0);
+  }
+  return migrationPromise;
+}
 
 export function invalidateSkills() {
   try {
@@ -40,15 +50,27 @@ export function notifySkillCatalog(ctx) {
   }
 }
 
-export function installSkillsProvider(ctx, store) {
+async function profileForCwd(scopeStore, projects, cwd, defaultGroup) {
+  const root = await resolveProjectRoot(cwd, projects);
+  const project = projects.find((entry) => canonicalPath(entry.path) === canonicalPath(root ?? '')) ?? null;
+  const scope = project === null ? null : await scopeStore.read(project.id);
+  return {
+    root,
+    project,
+    profile: scope ?? defaultProjectProfile(root ?? '', project?.label ?? '', defaultGroup),
+  };
+}
+
+export function installSkillsProvider(ctx, store, scopeStore) {
   const make = (providerControl) => {
     control = providerControl;
     return {
       name: PROVIDER,
       async list(options = {}) {
-        const { actions, projects, groups, defaultGroup } = await readAll(store);
-        const root = await resolveProjectRoot(options.cwd, await listProjects(ctx));
-        const profile = profileFor(projects, root, defaultGroup);
+        await ensureMigration(ctx, store, scopeStore);
+        const { actions, groups, defaultGroup } = await readAll(store);
+        const projects = await listProjects(ctx);
+        const { profile } = await profileForCwd(scopeStore, projects, options.cwd, defaultGroup);
         const candidates = [];
         for (const action of actions) {
           if (action.mode !== 'skill') continue;
@@ -70,10 +92,11 @@ export function installSkillsProvider(ctx, store) {
         return { candidates, complete: true };
       },
       async get(target, options = {}) {
+        await ensureMigration(ctx, store, scopeStore);
         if (target === null || typeof target !== 'object' || typeof target.name !== 'string') return undefined;
-        const { actions, projects, groups, defaultGroup } = await readAll(store);
-        const root = await resolveProjectRoot(options.cwd, await listProjects(ctx));
-        const profile = profileFor(projects, root, defaultGroup);
+        const { actions, groups, defaultGroup } = await readAll(store);
+        const projects = await listProjects(ctx);
+        const { profile } = await profileForCwd(scopeStore, projects, options.cwd, defaultGroup);
         const action = actions.find((entry) => entry.name === target.name && entry.mode === 'skill');
         if (action === undefined || !actionAvailable(action, profile, groups)) return undefined;
         const skill = await readSkillDir(action.dir);

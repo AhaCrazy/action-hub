@@ -14,8 +14,9 @@ export { actionInvocationMessage, planActionRefs, referencedActions } from './ho
 import { actionResourceDir, getBuiltins, isBuiltinId, readAll } from './host/state.js';
 import { installSkillsProvider, notifySkillCatalog } from './host/skills-provider.js';
 import { listProjects, findCurrentProject } from './host/projects.js';
-import { resolveProjectRoot } from 'action-hub';
-import { actionAvailable, profileFor } from 'action-hub';
+import { createDshProjectScopeStore, migrateLegacyProjects } from './host/project-scopes.js';
+import { defaultProjectProfile, canonicalPath, resolveProjectRoot } from 'action-hub';
+import { actionAvailable } from 'action-hub';
 import {
   applyFolderPlan,
   applyZipPlan,
@@ -42,6 +43,19 @@ const ROUTE = '/api/dsh-action-hub';
 const MAX_BODY = 40 * 1024 * 1024;
 const DEFAULT_BUILTIN = 'skill-import-assistant';
 
+async function ensureScopeMaintenance(ctx, store, scopeStore) {
+  try {
+    await migrateLegacyProjects(ctx, store, scopeStore);
+  } catch {
+    /* legacy migration must not break the API */
+  }
+  try {
+    await scopeStore.prune(await listProjects(ctx));
+  } catch {
+    /* cleanup must not break the API */
+  }
+}
+
 async function seedDefaultBuiltin(store) {
   const state = await store.readState();
   const names = Object.keys(state.entries ?? {});
@@ -55,18 +69,19 @@ export async function apply(ctx, config = {}) {
     ? config.dataDir.trim()
     : defaultDataDir();
   const store = createStore({ dataDir });
+  const scopeStore = createDshProjectScopeStore();
   if (config.seed !== false) await seedDefaultBuiltin(store).catch(() => {});
-  ctx.effect(() => installActionInvocations(ctx, store), 'action-hub: command invocations');
-  installSkillsProvider(ctx, store);
+  ctx.effect(() => installActionInvocations(ctx, store, scopeStore), 'action-hub: command invocations');
+  installSkillsProvider(ctx, store, scopeStore);
 
   ctx.effect(() => ctx.webServer.register({
     kind: 'prefix',
     path: ROUTE,
-    handler: (req, res) => handle(ctx, store, dataDir, req, res),
+    handler: (req, res) => handle(ctx, store, dataDir, scopeStore, req, res),
   }), 'action-hub: API route');
 }
 
-async function handle(ctx, store, dataDir, req, res) {
+async function handle(ctx, store, dataDir, scopeStore, req, res) {
   if (!originAllowed(ctx, req)) {
     sendJson(res, 403, { ok: false, error: '跨站请求被拒绝' });
     return;
@@ -80,16 +95,21 @@ async function handle(ctx, store, dataDir, req, res) {
       const view = await readAll(store);
       const { state, actions, invalid } = view;
       const plan = planActionRefs(actions);
+      await ensureScopeMaintenance(ctx, store, scopeStore);
       const projects = await listProjects(ctx);
+      const projectScopes = await scopeStore.listProfiles(projects);
       const currentProject = await findCurrentProject(ctx, projects, url.searchParams.get('sessionId') ?? '');
       const currentRoot = currentProject === null ? null : await resolveProjectRoot(currentProject.path, projects);
-      const currentProfile = profileFor(view.projects, currentRoot, view.defaultGroup);
+      const currentScope = currentProject === null
+        ? null
+        : projectScopes.find((scope) => scope.id === currentProject.id) ?? null;
+      const currentProfile = currentScope ?? defaultProjectProfile(currentRoot ?? '', currentProject?.label ?? '', view.defaultGroup);
       sendJson(res, 200, {
         ok: true,
         version: state.version,
         actions: sortActions(actions).map((action) => ({ ...action, available: actionAvailable(action, currentProfile, view.groups) })),
         projects,
-        projectScopes: view.projects,
+        projectScopes,
         groups: state.state.groups,
         defaultGroup: view.defaultGroup,
         currentProject,
@@ -263,9 +283,22 @@ async function handle(ctx, store, dataDir, req, res) {
     }
 
     if (route === '/project-scope') {
-      const profile = await store.setProjectScope(text(body.path), body);
+      const projects = await listProjects(ctx);
+      const requestedId = text(body.workspaceId);
+      const requestedPath = canonicalPath(text(body.path));
+      const project = requestedId !== ''
+        ? projects.find((entry) => entry.id === requestedId)
+        : projects.find((entry) => canonicalPath(entry.path) === requestedPath);
+      if (project === undefined) {
+        sendJson(res, 404, { ok: false, error: '未找到对应的 DSH 工作区' });
+        return;
+      }
+      const scope = await scopeStore.write(project.id, body);
       notifySkillCatalog(ctx);
-      sendJson(res, 200, { ok: true, profile });
+      sendJson(res, 200, {
+        ok: true,
+        profile: { ...scope, id: project.id, label: project.label, path: project.path },
+      });
       return;
     }
 

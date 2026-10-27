@@ -410,7 +410,7 @@ async function deleteGroup(ctx, store, group) {
   }
 }
 
-export async function openManager(ctx, store, dataDir) {
+export async function openManager(ctx, store, dataDir, scopeStore) {
   if (ctx.mode !== 'tui') {
     notify(ctx, 'Action Hub 管理界面只在 Pi 交互 TUI 模式可用。', 'warning');
     return;
@@ -419,12 +419,19 @@ export async function openManager(ctx, store, dataDir) {
   for (;;) {
     const data = await store.read();
     const cwd = ctx.cwd ?? process.cwd();
-    const root = await resolveProjectRoot(cwd, data.state.projects);
+    const root = await resolveProjectRoot(cwd, []);
+    const projectRoot = root ?? path.resolve(cwd);
+    const scope = scopeStore === undefined ? null : await scopeStore.readForRoot(projectRoot);
     const dashboardData = {
       actions: sortActions(data.actions),
       state: data.state,
+      projects: [{
+        ...(scope ?? { groups: [], actions: [], excludeGroups: [], excludeActions: [] }),
+        label: scope?.label || path.basename(projectRoot),
+        path: projectRoot,
+      }],
       dataDir,
-      currentProjectRoot: root ?? path.resolve(cwd),
+      currentProjectRoot: projectRoot,
     };
     const result = await ctx.ui.custom(
       (tui, theme, _keybindings, done) => new ManagerDashboard({
@@ -477,7 +484,7 @@ export async function openManager(ctx, store, dataDir) {
       await deleteGroup(ctx, store, result.group);
     } else if (result.kind === 'edit-project') {
       sectionId = 'projects';
-      await editProjectScope(ctx, store, result.project.path);
+      await editProjectScope(ctx, store, scopeStore, result.project.path);
     } else if (result.kind === 'tool') {
       sectionId = 'tools';
       if (result.tool === 'import') {
@@ -596,11 +603,10 @@ async function manageGroups(ctx, store) {
   }
 }
 
-async function editProjectScope(ctx, store, projectPath) {
-  const state = await store.readState();
-  const existing = state.projects.find((project) => project.path.toLowerCase() === projectPath.toLowerCase());
+async function editProjectScope(ctx, store, scopeStore, projectPath) {
+  const existing = scopeStore === undefined ? null : await scopeStore.readForRoot(projectPath);
   let profile = {
-    label: existing?.label ?? path.basename(projectPath),
+    label: existing?.label || path.basename(projectPath),
     groups: existing?.groups ?? [],
     actions: existing?.actions ?? [],
     excludeGroups: existing?.excludeGroups ?? [],
@@ -619,8 +625,9 @@ async function editProjectScope(ctx, store, projectPath) {
     if (choice === undefined || choice === BACK) return;
     if (choice === '保存') {
       try {
-        await store.setProjectScope(projectPath, profile);
-        notify(ctx, '项目范围已保存', 'info');
+        if (scopeStore === undefined) throw new Error('项目范围存储不可用');
+        await scopeStore.writeForRoot(projectPath, profile);
+        notify(ctx, '项目范围已保存（仅当前 Pi 工作目录）', 'info');
       } catch (error) {
         notify(ctx, `保存失败：${error instanceof Error ? error.message : String(error)}`, 'error');
       }
@@ -652,25 +659,6 @@ async function editProjectScope(ctx, store, projectPath) {
       if (actions !== undefined) profile = { ...profile, excludeActions: actions };
       continue;
     }
-  }
-}
-
-async function manageProjects(ctx, store) {
-  for (;;) {
-    const state = await store.readState();
-    const cwd = ctx.cwd ?? process.cwd();
-    const root = await resolveProjectRoot(cwd, state.projects);
-    const target = root ?? path.resolve(cwd);
-    const labels = state.projects.map((project) => `${project.label}  ${project.path}`);
-    const currentLabel = `当前项目：${path.basename(target)}  ${target}`;
-    const choice = await ctx.ui.select('项目范围', [currentLabel, ...labels, BACK]);
-    if (choice === undefined || choice === BACK) return;
-    if (choice === currentLabel) {
-      await editProjectScope(ctx, store, target);
-      continue;
-    }
-    const index = labels.indexOf(choice);
-    if (index >= 0) await editProjectScope(ctx, store, state.projects[index].path);
   }
 }
 

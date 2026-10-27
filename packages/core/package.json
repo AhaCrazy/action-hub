@@ -14,7 +14,8 @@
     "./resources": "./src/resources.js",
     "./skill-doc": "./src/skill-doc.js",
     "./availability": "./src/availability.js",
-    "./scope": "./src/scope.js"
+    "./scope": "./src/scope.js",
+    "./project-scope": "./src/project-scope.js"
   },
   "files": [
     "src",
@@ -22,7 +23,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node tests/store.test.mjs && node tests/resources.test.mjs && node tests/bundle.test.mjs && node tests/availability.test.mjs"
+    "test": "node tests/store.test.mjs && node tests/resources.test.mjs && node tests/bundle.test.mjs && node tests/availability.test.mjs && node tests/project-scope.test.mjs"
   },
   "dependencies": {
     "yaml": "^2.9.1"

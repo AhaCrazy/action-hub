@@ -31,7 +31,7 @@
     "dev": "node scripts/watch-client.mjs",
     "pretest": "npm run build",
     "prepack": "npm run build",
-    "test": "node tests/builtins.test.mjs && node tests/provider.test.mjs && node tests/client.test.mjs && node tests/host.test.mjs && node tests/seed.test.mjs"
+    "test": "node tests/builtins.test.mjs && node tests/provider.test.mjs && node tests/client.test.mjs && node tests/host.test.mjs && node tests/seed.test.mjs && node tests/project-scopes.test.mjs && node tests/state.test.mjs"
   },
   "exports": {
     ".": "./dist/index.js",

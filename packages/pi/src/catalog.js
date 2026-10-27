@@ -5,8 +5,8 @@
  */
 import {
   actionAvailable,
+  defaultProjectProfile,
   expandPrompt,
-  profileFor,
   resolveProjectRoot,
   sortActions,
 } from 'action-hub';
@@ -14,13 +14,14 @@ import {
 /**
  * Resolve the action catalog for a Pi working directory.
  *
- * Pi has no workspace registry. We use the nearest registered project root, or
- * the nearest `.git`/cwd fallback supplied by the core.
+ * Project availability is scoped to the Pi workdir directory, not the shared
+ * library. Callers pass the Pi scope store.
  */
-export async function loadCatalog(store, cwd = process.cwd()) {
+export async function loadCatalog(store, cwd = process.cwd(), scopeStore) {
   const data = await store.read();
-  const root = await resolveProjectRoot(cwd, data.state.projects);
-  const profile = profileFor(data.state.projects, root, data.state.defaultGroup ?? '');
+  const root = await resolveProjectRoot(cwd, []);
+  const scope = scopeStore === undefined ? null : await scopeStore.readForRoot(root ?? '');
+  const profile = scope ?? defaultProjectProfile(root ?? '', '', data.state.defaultGroup ?? '');
   const actions = sortActions(
     data.actions.filter((action) => actionAvailable(action, profile, data.state.groups)),
   );

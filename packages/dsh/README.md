@@ -77,7 +77,15 @@ C:\Users\<你>\.action-hub
   state.json
 ```
 
-`SKILL.md` 是可移植内容；`state.json` 保存分组、项目范围和使用记录，不会进入导出包。
+`SKILL.md` 是可移植内容；`state.json` 保存共享的分组、全局分组和使用记录，不会进入导出包。
+
+项目范围属于 DSH 工作区，不放在共享状态里：
+
+```text
+C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json
+```
+
+工作区改名不影响范围；删除工作区后，对应范围文件会在后续刷新时清理。
 
 旧版 DSH 插件的数据在：
 
@@ -85,14 +93,15 @@ C:\Users\<你>\.action-hub
 C:\Users\<你>\.dsh\dsh-action-hub
 ```
 
-如需沿用旧数据，把旧目录里的 `library` 和 `state.json` 复制到 `.action-hub`。
+如需沿用旧数据，把旧目录里的 `library` 和 `state.json` 复制到 `.action-hub`。旧的项目范围会在首次读取时迁移到 `.dsh\action-hub\workspaces`。
 
 ## 分组与项目范围
 
 - 每个 Action 可以属于多个分组；
 - 分组可以标记为**全局分组**，所有工作区自动可用；
 - 项目可以只启用指定分组/Action；
-- 项目可以屏蔽继承来的分组/Action，而不影响其他工作区。
+- 项目可以屏蔽继承来的分组/Action，而不影响其他工作区；
+- 项目范围只对当前 DSH 工作区生效，不会同步到 Pi 或其他 harness。
 
 ## 卸载
 

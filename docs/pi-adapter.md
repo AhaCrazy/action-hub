@@ -18,7 +18,7 @@
 - **Skill 类型 Action** → 在 `resources_discover` 中返回它的目录；Pi 会把它放进模型目录，并提供 `/skill:<name>`。
 - **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
 - **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
-- **项目范围** → 使用 `ctx.cwd` 或最近的 `.git` 根；全局分组对所有项目生效；项目级屏蔽使用共享状态。
+- **项目范围** → 按 Pi workdir 保存：`~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json`。它和 DSH 的项目范围默认不共享；删除该 session 工作目录会一起删除范围。
 - **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。修改 Skill 可见性后需要重新加载 Pi 资源。
 
 ## 包结构

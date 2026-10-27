@@ -4,7 +4,7 @@
 
 - **Skill**：标准 `SKILL.md` 目录，可被 harness 暴露给模型。
 - **Command**：同一个标准目录，作为用户主动调用的提示词模板。
-- 分组、全局分组、项目范围、项目级显式屏蔽。
+- 分组、全局分组、项目范围 schema 与项目级显式屏蔽。
 - 搜索、导入导出、使用记录和带版本号的本地状态文件。
 
 本包是共享核心。DSH、Pi 以及其他 harness 的集成都作为独立适配器包存在，各自提供原生 UI、快捷键和插入方式。
@@ -17,7 +17,8 @@
 
 ```text
 src/
-  store.js          # 库与状态、分组、范围、模式、搜索数据
+  store.js          # 库与共享状态、分组、模式、搜索数据
+  project-scope.js  # harness 本地项目范围的 schema 与原子读写
   availability.js   # 项目/全局/屏蔽解析
   scope.js          # 项目根和路径匹配
   skill-doc.js      # SKILL.md 解析与写入
@@ -35,10 +36,10 @@ $ACTION_HUB_HOME/            # 默认 ~/.action-hub
   library/<skill-name>/
     SKILL.md
     ...资源文件
-  state.json                 # 模式 / 分组 / 范围 / 使用记录 / 屏蔽
+  state.json                 # 模式 / 分组 / 全局分组 / 使用记录（共享）
 ```
 
-`SKILL.md` 是唯一的可移植产物；`state.json` 是本地元数据，不会进入导出包。
+`SKILL.md` 是唯一的可移植产物；`state.json` 是共享本地元数据，不会进入导出包。项目范围不放在 `state.json`，而是由适配器按 harness 工作区保存在自己的目录中，并通过 `project-scope.js` 的辅助函数读写。
 
 新数据目录会默认创建一个全局 **Common** 分组。内置 Action 由适配器提供，不硬编码进 core。
 

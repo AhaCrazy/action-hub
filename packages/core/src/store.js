@@ -713,6 +713,16 @@ export function createStore(options = {}) {
         return entry;
       });
     },
+    async clearProjects() {
+      return serialize(async () => {
+        const state = await readState();
+        if (!Array.isArray(state.projects) || state.projects.length === 0) return 0;
+        const count = state.projects.length;
+        state.projects = [];
+        await writeStateFile(dataDir, state);
+        return count;
+      });
+    },
     async createGroup(name) {
       return serialize(async () => {
         const display = normalizeGroupName(name);

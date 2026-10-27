@@ -22,10 +22,13 @@ export async function listProjects(ctx) {
     if (item === null || typeof item !== 'object') continue;
     const raw = typeof item.path === 'string' ? item.path : typeof item.realPath === 'string' ? item.realPath : '';
     if (raw === '') continue;
+    const id = typeof item.id === 'string' ? item.id : typeof item.workspaceId === 'string' ? item.workspaceId : '';
+    if (id === '') continue;
     const key = process.platform === 'win32' ? raw.toLowerCase() : raw;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({
+      id,
       label: typeof item.title === 'string' && item.title !== '' ? item.title : raw.split(/[\\/]/u).pop() || raw,
       path: raw,
     });

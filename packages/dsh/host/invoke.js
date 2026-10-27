@@ -6,9 +6,9 @@
 import { readInvocationResources } from 'action-hub';
 import { planActionRefs, referencedActions, actionInvocationMessage } from './refs.js';
 import { actionResourceDir, readAll } from './state.js';
-import { resolveProjectRoot } from 'action-hub';
+import { defaultProjectProfile, canonicalPath, resolveProjectRoot } from 'action-hub';
 import { listProjects } from './projects.js';
-import { actionAvailable, profileFor } from 'action-hub';
+import { actionAvailable } from 'action-hub';
 
 function describe(error) {
   return error instanceof Error ? error.message : String(error);
@@ -24,7 +24,7 @@ async function workingCwd(ctx, agent, signal) {
   return undefined;
 }
 
-export function installActionInvocations(ctx, store) {
+export function installActionInvocations(ctx, store, scopeStore) {
   return ctx.on('agent/pre-step', async ({ agent, messages, signal }, next) => {
     const decision = await next();
     if (decision.kind === 'reject' || signal.aborted) return decision;
@@ -35,13 +35,11 @@ export function installActionInvocations(ctx, store) {
     ));
     if (!hasMarker) return decision;
     let actions;
-    let projects;
     let groups;
     let defaultGroup;
     try {
       const snapshot = await readAll(store);
       actions = snapshot.actions;
-      projects = snapshot.projects;
       groups = snapshot.groups;
       defaultGroup = snapshot.defaultGroup;
     } catch (error) {
@@ -53,8 +51,11 @@ export function installActionInvocations(ctx, store) {
     const markers = referencedActions(messages, new Set(byHandle.keys()));
     if (markers.length === 0) return decision;
     const cwd = await workingCwd(ctx, agent, signal);
-    const root = await resolveProjectRoot(cwd, await listProjects(ctx));
-    const profile = profileFor(projects, root, defaultGroup);
+    const projects = await listProjects(ctx);
+    const root = await resolveProjectRoot(cwd, projects);
+    const project = projects.find((entry) => canonicalPath(entry.path) === canonicalPath(root ?? '')) ?? null;
+    const scope = project === null ? null : await scopeStore.read(project.id);
+    const profile = scope ?? defaultProjectProfile(root ?? '', project?.label ?? '', defaultGroup);
     const injections = [];
     const notices = new Map();
     for (const marker of markers) {

@@ -2,7 +2,7 @@
 
 一套可移植的 Action 库，在 DSH 和 Pi 中提供原生使用体验。
 
-**Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组、项目范围和全局分组保存在本地状态中，不写进 Skill 文件。
+**Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组和全局分组保存在共享状态中；项目范围跟随各自 harness 的工作区，不写进 Skill 文件。
 
 ## 安装
 
@@ -75,7 +75,7 @@ pi remove git:github.com/AhaCrazy/action-hub
 
 ## 数据
 
-DSH 和 Pi 默认共用：
+DSH 和 Pi 默认共用 Action 库、分组和全局分组：
 
 ```text
 C:\Users\<你>\.action-hub
@@ -85,7 +85,19 @@ C:\Users\<你>\.action-hub
   state.json
 ```
 
-`SKILL.md` 是可移植的 Skill 内容；`state.json` 是本地分组、范围和使用记录，不会进入导出包。
+`SKILL.md` 是可移植的 Skill 内容；`state.json` 保存共享的分组、全局分组和使用记录，不会进入导出包。
+
+**项目范围不共享**，它跟随各自 harness 的工作区：
+
+```text
+DSH:
+C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json
+
+Pi:
+C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+```
+
+因此同一个项目在 DSH 和 Pi 中可以有不同范围；删除对应工作区时，范围文件也会一起清理。
 
 旧版 DSH 插件的数据在：
 
@@ -93,7 +105,7 @@ C:\Users\<你>\.action-hub
 C:\Users\<你>\.dsh\dsh-action-hub
 ```
 
-想沿用旧数据，需要把旧目录里的 `library` 和 `state.json` 复制到 `.action-hub`，或者在 DSH 配置里把 `dataDir` 指向旧目录。
+想沿用旧数据，需要把旧目录里的 `library` 和 `state.json` 复制到 `.action-hub`，或者在 DSH 配置里把 `dataDir` 指向旧目录。旧的项目范围会在 DSH 首次读取时迁移到 `.dsh\action-hub\workspaces`。
 
 ## 常见问题
 

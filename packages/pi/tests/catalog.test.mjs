@@ -4,10 +4,19 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { createStore } from 'action-hub';
+import { canonicalPath, createStore, normalizeProjectScope } from 'action-hub';
 import { loadCatalog, renderAction, groupLabels } from '../src/catalog.js';
 import { ActionPalette } from '../src/palette.js';
 import actionHub from '../extensions/action-hub.js';
+
+function fixedScope(root, profile) {
+  return {
+    async readForRoot(candidate) {
+      return canonicalPath(candidate) === canonicalPath(root) ? normalizeProjectScope(profile) : null;
+    },
+    async writeForRoot() {},
+  };
+}
 
 test('loads only available actions and renders command/skill payloads', async () => {
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-'));
@@ -27,9 +36,9 @@ test('loads only available actions and renders command/skill payloads', async ()
     mode: 'skill',
     groups: [group.id],
   });
-  await store.setProjectScope(dataDir, { label: 'project', groups: [group.id], actions: [] });
+  const scopeStore = fixedScope(dataDir, { groups: [group.id], actions: [] });
 
-  const catalog = await loadCatalog(store, dataDir);
+  const catalog = await loadCatalog(store, dataDir, scopeStore);
   assert.deepEqual(catalog.actions.map((action) => action.name).sort(), ['commit', 'review']);
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'commit'), 'fix bug'), 'Commit the staged changes with fix bug.');
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'review')), '/skill:review');

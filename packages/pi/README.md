@@ -60,12 +60,12 @@ pi install git:github.com/AhaCrazy/action-hub
 
 - **Action**：新建、编辑、删除；切换 Command/Skill；设置分组、分类、标签、参数提示、固定；查看资源文件；插入到编辑器。
 - **分组**：新建、改名、删除；设为全局分组；设置成员 Action；设置包含的子分组。
-- **项目范围**：直接启用分组或 Action；屏蔽继承来的分组或 Action；修改项目显示名。
+- **项目范围**：只配置当前 Pi 工作目录；直接启用分组或 Action；屏蔽继承来的分组或 Action；修改项目显示名。
 - **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill。
 - **导出**：导出全部 Action 或单个 Action 为 ZIP。
 - **设置**：查看数据目录；设置新项目默认分组；重新加载 Pi 资源。
 
-分组和项目范围与 DSH 版共享同一份 `state.json`。
+Action 库、分组和全局分组与 DSH 版共享；**项目范围不共享**，它跟随当前 Pi 工作目录。
 
 ## 第一次使用
 
@@ -94,7 +94,15 @@ C:\Users\<你>\.action-hub
   state.json
 ```
 
-和 DSH 版共享同一份库。
+`state.json` 只保存共享的 Action 元数据、分组和全局分组。
+
+项目范围保存在当前 Pi workdir 的 session 目录中：
+
+```text
+C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+```
+
+同一个项目在 DSH 和 Pi 中的范围是独立的；删除该 Pi workdir 的 session 目录时，范围会一起删除。
 
 ## 平台差异
 

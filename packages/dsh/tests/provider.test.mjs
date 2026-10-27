@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { createStore } from 'action-hub';
+import { createStore, normalizeProjectScope } from 'action-hub';
 import { installSkillsProvider } from '../host/skills-provider.js';
 
 function fakeContext(options = {}) {
@@ -26,15 +26,28 @@ function fakeContext(options = {}) {
   return { ctx, provider: () => provider };
 }
 
+function fakeScopeStore(scopes = {}) {
+  return {
+    async read(id) {
+      return scopes[id] ?? null;
+    },
+    async write(id, profile) {
+      scopes[id] = normalizeProjectScope(profile);
+      return scopes[id];
+    },
+  };
+}
+
 test('provider exposes only Skill-mode entries', async () => {
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ah-provider-'));
   const store = createStore({ dataDir });
   const group = await store.createGroup('Default');
   await store.create({ name: 'visible-skill', description: 'visible', prompt: 'body', mode: 'skill', groups: [group.id] });
   await store.create({ name: 'hidden-command', description: 'hidden', prompt: 'body', mode: 'command', groups: [group.id] });
-  await store.setProjectScope(dataDir, { label: 'default', groups: [group.id], actions: [] });
-  const { ctx, provider } = fakeContext();
-  installSkillsProvider(ctx, store);
+  const workspace = { id: 'w1', title: 'default', path: dataDir };
+  const scopeStore = fakeScopeStore({ w1: normalizeProjectScope({ groups: [group.id] }) });
+  const { ctx, provider } = fakeContext({ workspaces: [workspace] });
+  installSkillsProvider(ctx, store, scopeStore);
   const listed = await provider().list({ cwd: dataDir });
   assert.deepEqual(listed.candidates.map((entry) => entry.name), ['visible-skill']);
   assert.deepEqual(listed.candidates[0].invocation, { modelInvocable: true, userInvocable: false });
@@ -57,9 +70,10 @@ test('provider hides project-scoped entries outside the project', async () => {
     mode: 'skill',
     groups: [group.id],
   });
-  await store.setProjectScope(other, { label: 'other', groups: [group.id], actions: [] });
-  const { ctx, provider } = fakeContext();
-  installSkillsProvider(ctx, store);
+  const workspace = { id: 'w-other', title: 'other', path: other };
+  const scopeStore = fakeScopeStore({ 'w-other': normalizeProjectScope({ groups: [group.id] }) });
+  const { ctx, provider } = fakeContext({ workspaces: [workspace] });
+  installSkillsProvider(ctx, store, scopeStore);
   assert.equal((await provider().list({ cwd: dataDir })).candidates.length, 0);
   assert.equal((await provider().list({ cwd: other })).candidates.length, 1);
 });
@@ -78,9 +92,9 @@ test('provider matches a registered project ancestor when the session cwd is nes
     mode: 'skill',
     groups: [group.id],
   });
-  await store.setProjectScope(project, { label: 'project', groups: [group.id], actions: [] });
-  const { ctx, provider } = fakeContext({ workspaces: [{ title: 'project', path: project }] });
-  installSkillsProvider(ctx, store);
+  const workspace = { id: 'w-project', title: 'project', path: project };
+  const scopeStore = fakeScopeStore({ 'w-project': normalizeProjectScope({ groups: [group.id] }) });
+  const { ctx, provider } = fakeContext({ workspaces: [workspace] });
+  installSkillsProvider(ctx, store, scopeStore);
   assert.equal((await provider().list({ cwd: nested })).candidates.length, 1);
 });
-

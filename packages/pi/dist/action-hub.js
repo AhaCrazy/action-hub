@@ -113,17 +113,17 @@ var require_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path8) {
-      const ctrl = callVisitor(key, node, visitor, path8);
+    function visit_(key, node, visitor, path10) {
+      const ctrl = callVisitor(key, node, visitor, path10);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visit_(key, ctrl, visitor, path8);
+        replaceNode(key, path10, ctrl);
+        return visit_(key, ctrl, visitor, path10);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path10 = Object.freeze(path10.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path8);
+            const ci = visit_(i, node.items[i], visitor, path10);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -134,13 +134,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = visit_("key", node.key, visitor, path8);
+          path10 = Object.freeze(path10.concat(node));
+          const ck = visit_("key", node.key, visitor, path10);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = visit_("value", node.value, visitor, path8);
+          const cv = visit_("value", node.value, visitor, path10);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -161,17 +161,17 @@ var require_visit = __commonJS({
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path8) {
-      const ctrl = await callVisitor(key, node, visitor, path8);
+    async function visitAsync_(key, node, visitor, path10) {
+      const ctrl = await callVisitor(key, node, visitor, path10);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visitAsync_(key, ctrl, visitor, path8);
+        replaceNode(key, path10, ctrl);
+        return visitAsync_(key, ctrl, visitor, path10);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path10 = Object.freeze(path10.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path8);
+            const ci = await visitAsync_(i, node.items[i], visitor, path10);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -182,13 +182,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path8);
+          path10 = Object.freeze(path10.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path10);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path8);
+          const cv = await visitAsync_("value", node.value, visitor, path10);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -215,23 +215,23 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path8) {
+    function callVisitor(key, node, visitor, path10) {
       if (typeof visitor === "function")
-        return visitor(key, node, path8);
+        return visitor(key, node, path10);
       if (identity.isMap(node))
-        return visitor.Map?.(key, node, path8);
+        return visitor.Map?.(key, node, path10);
       if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path8);
+        return visitor.Seq?.(key, node, path10);
       if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path8);
+        return visitor.Pair?.(key, node, path10);
       if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path8);
+        return visitor.Scalar?.(key, node, path10);
       if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path8);
+        return visitor.Alias?.(key, node, path10);
       return void 0;
     }
-    function replaceNode(key, path8, node) {
-      const parent = path8[path8.length - 1];
+    function replaceNode(key, path10, node) {
+      const parent = path10[path10.length - 1];
       if (identity.isCollection(parent)) {
         parent.items[key] = node;
       } else if (identity.isPair(parent)) {
@@ -843,10 +843,10 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node = require_Node();
-    function collectionFromPath(schema, path8, value) {
+    function collectionFromPath(schema, path10, value) {
       let v = value;
-      for (let i = path8.length - 1; i >= 0; --i) {
-        const k = path8[i];
+      for (let i = path10.length - 1; i >= 0; --i) {
+        const k = path10[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
           a[k] = v;
@@ -865,7 +865,7 @@ var require_Collection = __commonJS({
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
-    var isEmptyPath = (path8) => path8 == null || typeof path8 === "object" && !!path8[Symbol.iterator]().next().done;
+    var isEmptyPath = (path10) => path10 == null || typeof path10 === "object" && !!path10[Symbol.iterator]().next().done;
     var Collection = class extends Node.NodeBase {
       constructor(type, schema) {
         super(type);
@@ -895,11 +895,11 @@ var require_Collection = __commonJS({
        * be a Pair instance or a `{ key, value }` object, which may not have a key
        * that already exists in the map.
        */
-      addIn(path8, value) {
-        if (isEmptyPath(path8))
+      addIn(path10, value) {
+        if (isEmptyPath(path10))
           this.add(value);
         else {
-          const [key, ...rest] = path8;
+          const [key, ...rest] = path10;
           const node = this.get(key, true);
           if (identity.isCollection(node))
             node.addIn(rest, value);
@@ -913,8 +913,8 @@ var require_Collection = __commonJS({
        * Removes a value from the collection.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        const [key, ...rest] = path8;
+      deleteIn(path10) {
+        const [key, ...rest] = path10;
         if (rest.length === 0)
           return this.delete(key);
         const node = this.get(key, true);
@@ -928,8 +928,8 @@ var require_Collection = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        const [key, ...rest] = path8;
+      getIn(path10, keepScalar) {
+        const [key, ...rest] = path10;
         const node = this.get(key, true);
         if (rest.length === 0)
           return !keepScalar && identity.isScalar(node) ? node.value : node;
@@ -947,8 +947,8 @@ var require_Collection = __commonJS({
       /**
        * Checks if the collection includes a value with the key `key`.
        */
-      hasIn(path8) {
-        const [key, ...rest] = path8;
+      hasIn(path10) {
+        const [key, ...rest] = path10;
         if (rest.length === 0)
           return this.has(key);
         const node = this.get(key, true);
@@ -958,8 +958,8 @@ var require_Collection = __commonJS({
        * Sets a value in this collection. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        const [key, ...rest] = path8;
+      setIn(path10, value) {
+        const [key, ...rest] = path10;
         if (rest.length === 0) {
           this.set(key, value);
         } else {
@@ -3474,9 +3474,9 @@ var require_Document = __commonJS({
           this.contents.add(value);
       }
       /** Adds a value to the document. */
-      addIn(path8, value) {
+      addIn(path10, value) {
         if (assertCollection(this.contents))
-          this.contents.addIn(path8, value);
+          this.contents.addIn(path10, value);
       }
       /**
        * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
@@ -3551,14 +3551,14 @@ var require_Document = __commonJS({
        * Removes a value from the document.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        if (Collection.isEmptyPath(path8)) {
+      deleteIn(path10) {
+        if (Collection.isEmptyPath(path10)) {
           if (this.contents == null)
             return false;
           this.contents = null;
           return true;
         }
-        return assertCollection(this.contents) ? this.contents.deleteIn(path8) : false;
+        return assertCollection(this.contents) ? this.contents.deleteIn(path10) : false;
       }
       /**
        * Returns item at `key`, or `undefined` if not found. By default unwraps
@@ -3573,10 +3573,10 @@ var require_Document = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        if (Collection.isEmptyPath(path8))
+      getIn(path10, keepScalar) {
+        if (Collection.isEmptyPath(path10))
           return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
-        return identity.isCollection(this.contents) ? this.contents.getIn(path8, keepScalar) : void 0;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path10, keepScalar) : void 0;
       }
       /**
        * Checks if the document includes a value with the key `key`.
@@ -3587,10 +3587,10 @@ var require_Document = __commonJS({
       /**
        * Checks if the document includes a value at `path`.
        */
-      hasIn(path8) {
-        if (Collection.isEmptyPath(path8))
+      hasIn(path10) {
+        if (Collection.isEmptyPath(path10))
           return this.contents !== void 0;
-        return identity.isCollection(this.contents) ? this.contents.hasIn(path8) : false;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path10) : false;
       }
       /**
        * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -3607,13 +3607,13 @@ var require_Document = __commonJS({
        * Sets a value in this document. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        if (Collection.isEmptyPath(path8)) {
+      setIn(path10, value) {
+        if (Collection.isEmptyPath(path10)) {
           this.contents = value;
         } else if (this.contents == null) {
-          this.contents = Collection.collectionFromPath(this.schema, Array.from(path8), value);
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path10), value);
         } else if (assertCollection(this.contents)) {
-          this.contents.setIn(path8, value);
+          this.contents.setIn(path10, value);
         }
       }
       /**
@@ -5574,9 +5574,9 @@ var require_cst_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path8) => {
+    visit.itemAtPath = (cst, path10) => {
       let item = cst;
-      for (const [field, index] of path8) {
+      for (const [field, index] of path10) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
           item = tok.items[index];
@@ -5585,23 +5585,23 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path8) => {
-      const parent = visit.itemAtPath(cst, path8.slice(0, -1));
-      const field = path8[path8.length - 1][0];
+    visit.parentCollection = (cst, path10) => {
+      const parent = visit.itemAtPath(cst, path10.slice(0, -1));
+      const field = path10[path10.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
         return coll;
       throw new Error("Parent collection not found");
     };
-    function _visit(path8, item, visitor) {
-      let ctrl = visitor(item, path8);
+    function _visit(path10, item, visitor) {
+      let ctrl = visitor(item, path10);
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
         const token = item[field];
         if (token && "items" in token) {
           for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path8.concat([[field, i]])), token.items[i], visitor);
+            const ci = _visit(Object.freeze(path10.concat([[field, i]])), token.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -5612,10 +5612,10 @@ var require_cst_visit = __commonJS({
             }
           }
           if (typeof ctrl === "function" && field === "key")
-            ctrl = ctrl(item, path8);
+            ctrl = ctrl(item, path10);
         }
       }
-      return typeof ctrl === "function" ? ctrl(item, path8) : ctrl;
+      return typeof ctrl === "function" ? ctrl(item, path10) : ctrl;
     }
     exports.visit = visit;
   }
@@ -6917,14 +6917,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs7 = this.flowScalar(this.type);
+              const fs8 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs7, sep: [] });
+                map.items.push({ start, key: fs8, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs7);
+                this.stack.push(fs8);
               } else {
-                Object.assign(it, { key: fs7, sep: [] });
+                Object.assign(it, { key: fs8, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -7052,13 +7052,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs7 = this.flowScalar(this.type);
+              const fs8 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs7, sep: [] });
+                fc.items.push({ start: [], key: fs8, sep: [] });
               else if (it.sep)
-                this.stack.push(fs7);
+                this.stack.push(fs8);
               else
-                Object.assign(it, { key: fs7, sep: [] });
+                Object.assign(it, { key: fs8, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -7664,9 +7664,9 @@ function normalizeGroups(raw) {
   }
   return out;
 }
-function defaultProjectProfile(path8 = "", label = "", groupId = "") {
+function defaultProjectProfile(path10 = "", label = "", groupId = "") {
   return {
-    path: path8,
+    path: path10,
     label,
     groups: groupId === "" ? [] : [groupId],
     actions: [],
@@ -8158,6 +8158,16 @@ function createStore(options = {}) {
         state.groups = groups;
         await writeStateFile(dataDir2, state);
         return entry;
+      });
+    },
+    async clearProjects() {
+      return serialize(async () => {
+        const state = await readState();
+        if (!Array.isArray(state.projects) || state.projects.length === 0) return 0;
+        const count = state.projects.length;
+        state.projects = [];
+        await writeStateFile(dataDir2, state);
+        return count;
       });
     },
     async createGroup(name) {
@@ -8656,15 +8666,6 @@ async function resolveProjectRoot(cwd, projects = []) {
 }
 
 // ../core/src/availability.js
-function findProjectProfile(projects, projectRoot) {
-  if (!Array.isArray(projects) || typeof projectRoot !== "string" || projectRoot === "") return null;
-  const key = canonicalPath(projectRoot);
-  if (key === "") return null;
-  return projects.find((project) => canonicalPath(project.path) === key) ?? null;
-}
-function profileFor(projects, projectRoot, defaultGroup = "") {
-  return findProjectProfile(projects, projectRoot) ?? defaultProjectProfile(typeof projectRoot === "string" ? projectRoot : "", "", defaultGroup);
-}
 function expandGroupIds(groups, selectedIds) {
   const selected = Array.isArray(selectedIds) ? selectedIds : [];
   const byId = new Map((Array.isArray(groups) ? groups : []).map((group) => [group.id, group]));
@@ -8705,11 +8706,72 @@ function actionAvailable(action, profile, groups = []) {
   return Array.isArray(action.groups) && action.groups.some((id) => selected.has(id) && !blocked.has(id));
 }
 
+// ../core/src/project-scope.js
+import { promises as fs6 } from "node:fs";
+import path6 from "node:path";
+var PROJECT_SCOPE_FORMAT = "action-hub/project-scope@1";
+function normalizeIds(value) {
+  const seen = /* @__PURE__ */ new Set();
+  const out = [];
+  for (const item of Array.isArray(value) ? value : []) {
+    if (typeof item !== "string") continue;
+    const id = item.trim();
+    if (id === "" || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+function normalizeProjectScope(input = {}) {
+  return {
+    label: typeof input.label === "string" ? input.label.trim() : "",
+    groups: normalizeIds(input.groups),
+    actions: normalizeIds(input.actions),
+    excludeGroups: normalizeIds(input.excludeGroups),
+    excludeActions: normalizeIds(input.excludeActions)
+  };
+}
+async function readProjectScope(file) {
+  let raw;
+  try {
+    raw = await fs6.readFile(file, "utf8");
+  } catch {
+    return null;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (parsed === null || typeof parsed !== "object") return null;
+  const scope = normalizeProjectScope(parsed);
+  if (typeof parsed.updatedAt === "number") scope.updatedAt = parsed.updatedAt;
+  return scope;
+}
+async function writeProjectScope(file, profile = {}) {
+  const scope = {
+    format: PROJECT_SCOPE_FORMAT,
+    ...normalizeProjectScope(profile),
+    updatedAt: Date.now()
+  };
+  await fs6.mkdir(path6.dirname(file), { recursive: true });
+  const temporary = `${file}.tmp-${process.pid}-${Date.now()}`;
+  await fs6.writeFile(temporary, `${JSON.stringify(scope, null, 2)}
+`, "utf8");
+  await fs6.rename(temporary, file);
+  return scope;
+}
+async function deleteProjectScope(file) {
+  await fs6.rm(file, { force: true });
+}
+
 // src/catalog.js
-async function loadCatalog(store2, cwd = process.cwd()) {
+async function loadCatalog(store2, cwd = process.cwd(), scopeStore2) {
   const data = await store2.read();
-  const root = await resolveProjectRoot(cwd, data.state.projects);
-  const profile = profileFor(data.state.projects, root, data.state.defaultGroup ?? "");
+  const root = await resolveProjectRoot(cwd, []);
+  const scope = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(root ?? "");
+  const profile = scope ?? defaultProjectProfile(root ?? "", "", data.state.defaultGroup ?? "");
   const actions = sortActions(
     data.actions.filter((action) => actionAvailable(action, profile, data.state.groups))
   );
@@ -8722,8 +8784,8 @@ async function loadCatalog(store2, cwd = process.cwd()) {
 }
 
 // src/import-export.js
-import { promises as fs6 } from "node:fs";
-import path6 from "node:path";
+import { promises as fs7 } from "node:fs";
+import path7 from "node:path";
 function notify(ctx, text, kind = "info") {
   try {
     ctx.ui.notify(text, kind);
@@ -8731,12 +8793,12 @@ function notify(ctx, text, kind = "info") {
   }
 }
 async function readPlan(ctx, store2, dataDir2, target) {
-  const stat = await fs6.stat(target).catch(() => void 0);
+  const stat = await fs7.stat(target).catch(() => void 0);
   if (stat === void 0) throw new Error(`\u8DEF\u5F84\u4E0D\u5B58\u5728\uFF1A${target}`);
   if (stat.isDirectory()) {
     return { kind: "folder", preview: await previewFolder(store2, dataDir2, target) };
   }
-  const buffer = await fs6.readFile(target);
+  const buffer = await fs7.readFile(target);
   return { kind: "zip", preview: await previewZipBuffer(store2, dataDir2, buffer), buffer };
 }
 async function importFromPath(ctx, store2, dataDir2, source) {
@@ -8744,7 +8806,7 @@ async function importFromPath(ctx, store2, dataDir2, source) {
     notify(ctx, "\u5BFC\u5165\u529F\u80FD\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
-  const target = path6.resolve(ctx.cwd ?? process.cwd(), source);
+  const target = path7.resolve(ctx.cwd ?? process.cwd(), source);
   const { kind, preview, buffer } = await readPlan(ctx, store2, dataDir2, target);
   const summary = preview.summary;
   const confirmed = await ctx.ui.confirm(
@@ -8786,15 +8848,15 @@ async function exportActions(ctx, store2, dataDir2) {
     if (action === void 0) return;
     selection = [action.id];
   }
-  const defaultPath = path6.join(ctx.cwd ?? process.cwd(), selection === void 0 ? "action-hub.zip" : `${selection[0]}.zip`);
+  const defaultPath = path7.join(ctx.cwd ?? process.cwd(), selection === void 0 ? "action-hub.zip" : `${selection[0]}.zip`);
   const raw = await ctx.ui.input("\u5BFC\u51FA\u8DEF\u5F84", defaultPath);
   if (raw === void 0 || raw.trim() === "") return;
-  const target = path6.resolve(ctx.cwd ?? process.cwd(), raw.trim());
-  const exists = await fs6.stat(target).then(() => true).catch(() => false);
+  const target = path7.resolve(ctx.cwd ?? process.cwd(), raw.trim());
+  const exists = await fs7.stat(target).then(() => true).catch(() => false);
   if (exists && !await ctx.ui.confirm("\u8986\u76D6\u6587\u4EF6", `${target} \u5DF2\u5B58\u5728\uFF0C\u662F\u5426\u8986\u76D6\uFF1F`)) return;
   const exported = await exportZipBuffer(store2, dataDir2, selection);
-  await fs6.mkdir(path6.dirname(target), { recursive: true });
-  await fs6.writeFile(target, exported.buffer);
+  await fs7.mkdir(path7.dirname(target), { recursive: true });
+  await fs7.writeFile(target, exported.buffer);
   notify(ctx, `\u5DF2\u5BFC\u51FA ${exported.count} \u4E2A Action \u5230 ${target}`, "info");
 }
 
@@ -8808,7 +8870,7 @@ async function insertAction(store2, ctx, action, args = "") {
 }
 
 // src/management.js
-import path7 from "node:path";
+import path8 from "node:path";
 
 // src/manager-dashboard.js
 import { Key, matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
@@ -8855,10 +8917,10 @@ var ManagerDashboard = class {
     return this.data.state.groups;
   }
   get projects() {
-    const projects = this.data.state.projects ?? [];
+    const projects = Array.isArray(this.data.projects) ? this.data.projects : [];
     const root = this.data.currentProjectRoot;
     if (root === void 0 || root === "") return projects;
-    const key = root.toLowerCase();
+    const key = String(root).toLowerCase();
     if (projects.some((project) => String(project.path).toLowerCase() === key)) return projects;
     return [...projects, { label: "\u5F53\u524D\u9879\u76EE\uFF08\u672A\u767B\u8BB0\uFF09", path: root, groups: [], actions: [], excludeGroups: [], excludeActions: [] }];
   }
@@ -9612,7 +9674,7 @@ async function deleteGroup(ctx, store2, group) {
     notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
   }
 }
-async function openManager(ctx, store2, dataDir2) {
+async function openManager(ctx, store2, dataDir2, scopeStore2) {
   if (ctx.mode !== "tui") {
     notify2(ctx, "Action Hub \u7BA1\u7406\u754C\u9762\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
@@ -9621,12 +9683,19 @@ async function openManager(ctx, store2, dataDir2) {
   for (; ; ) {
     const data = await store2.read();
     const cwd = ctx.cwd ?? process.cwd();
-    const root = await resolveProjectRoot(cwd, data.state.projects);
+    const root = await resolveProjectRoot(cwd, []);
+    const projectRoot = root ?? path8.resolve(cwd);
+    const scope = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(projectRoot);
     const dashboardData = {
       actions: sortActions(data.actions),
       state: data.state,
+      projects: [{
+        ...scope ?? { groups: [], actions: [], excludeGroups: [], excludeActions: [] },
+        label: scope?.label || path8.basename(projectRoot),
+        path: projectRoot
+      }],
       dataDir: dataDir2,
-      currentProjectRoot: root ?? path7.resolve(cwd)
+      currentProjectRoot: projectRoot
     };
     const result = await ctx.ui.custom(
       (tui, theme, _keybindings, done) => new ManagerDashboard({
@@ -9679,7 +9748,7 @@ async function openManager(ctx, store2, dataDir2) {
       await deleteGroup(ctx, store2, result.group);
     } else if (result.kind === "edit-project") {
       sectionId = "projects";
-      await editProjectScope(ctx, store2, result.project.path);
+      await editProjectScope(ctx, store2, scopeStore2, result.project.path);
     } else if (result.kind === "tool") {
       sectionId = "tools";
       if (result.tool === "import") {
@@ -9774,11 +9843,10 @@ async function manageOneGroup(ctx, store2, group) {
     }
   }
 }
-async function editProjectScope(ctx, store2, projectPath) {
-  const state = await store2.readState();
-  const existing = state.projects.find((project) => project.path.toLowerCase() === projectPath.toLowerCase());
+async function editProjectScope(ctx, store2, scopeStore2, projectPath) {
+  const existing = scopeStore2 === void 0 ? null : await scopeStore2.readForRoot(projectPath);
   let profile = {
-    label: existing?.label ?? path7.basename(projectPath),
+    label: existing?.label || path8.basename(projectPath),
     groups: existing?.groups ?? [],
     actions: existing?.actions ?? [],
     excludeGroups: existing?.excludeGroups ?? [],
@@ -9797,8 +9865,9 @@ async function editProjectScope(ctx, store2, projectPath) {
     if (choice === void 0 || choice === BACK) return;
     if (choice === "\u4FDD\u5B58") {
       try {
-        await store2.setProjectScope(projectPath, profile);
-        notify2(ctx, "\u9879\u76EE\u8303\u56F4\u5DF2\u4FDD\u5B58", "info");
+        if (scopeStore2 === void 0) throw new Error("\u9879\u76EE\u8303\u56F4\u5B58\u50A8\u4E0D\u53EF\u7528");
+        await scopeStore2.writeForRoot(projectPath, profile);
+        notify2(ctx, "\u9879\u76EE\u8303\u56F4\u5DF2\u4FDD\u5B58\uFF08\u4EC5\u5F53\u524D Pi \u5DE5\u4F5C\u76EE\u5F55\uFF09", "info");
       } catch (error) {
         notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
       }
@@ -10017,9 +10086,50 @@ var ActionPalette = class {
   }
 };
 
+// src/project-scopes.js
+import os3 from "node:os";
+import path9 from "node:path";
+function piAgentDir() {
+  const configured = process.env.PI_CODING_AGENT_DIR?.trim();
+  return configured !== void 0 && configured !== "" ? configured : path9.join(os3.homedir(), ".pi", "agent");
+}
+function piWorkdirKey(projectRoot) {
+  return `--${String(projectRoot).replace(/^[/\\]/u, "").replace(/[/\\:]/gu, "-")}--`;
+}
+function createPiProjectScopeStore() {
+  const configuredSessions = process.env.PI_CODING_AGENT_SESSION_DIR?.trim();
+  const sessionsDir = configuredSessions !== void 0 && configuredSessions !== "" ? configuredSessions : path9.join(piAgentDir(), "sessions");
+  const fileForRoot = (projectRoot) => path9.join(sessionsDir, piWorkdirKey(projectRoot), "action-hub", "scope.json");
+  return {
+    sessionsDir,
+    fileForRoot,
+    async readForRoot(projectRoot) {
+      if (typeof projectRoot !== "string" || projectRoot === "") return null;
+      return readProjectScope(fileForRoot(projectRoot));
+    },
+    async writeForRoot(projectRoot, profile) {
+      if (typeof projectRoot !== "string" || projectRoot === "") throw new Error("projectRoot \u4E0D\u80FD\u4E3A\u7A7A");
+      return writeProjectScope(fileForRoot(projectRoot), profile);
+    },
+    async deleteForRoot(projectRoot) {
+      if (typeof projectRoot !== "string" || projectRoot === "") return;
+      await deleteProjectScope(fileForRoot(projectRoot));
+    },
+    async profileForCwd(cwd, defaultGroup = "") {
+      const root = await resolveProjectRoot(cwd, []);
+      const scope = await this.readForRoot(root ?? "");
+      return {
+        root,
+        profile: scope ?? defaultProjectProfile(root ?? "", path9.basename(root ?? ""), defaultGroup)
+      };
+    }
+  };
+}
+
 // extensions/action-hub.js
 var dataDir = defaultDataDir();
 var store = createStore({ dataDir });
+var scopeStore = createPiProjectScopeStore();
 function notify3(ctx, text, kind = "info") {
   try {
     ctx.ui.notify(text, kind);
@@ -10031,7 +10141,7 @@ async function openPalette(ctx, initialQuery = "") {
     notify3(ctx, "Action \u9762\u677F\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
-  const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd());
+  const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd(), scopeStore);
   if (catalog.actions.length === 0) {
     notify3(ctx, "\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u7684 Action\u3002\u4F7F\u7528 /ah import <\u8DEF\u5F84> \u5BFC\u5165\u4E00\u4E2A\u6807\u51C6 Skill \u76EE\u5F55\u3002", "info");
     return;
@@ -10064,7 +10174,7 @@ function actionHub(pi) {
         return;
       }
       if (text === "manage" || text === "\u7BA1\u7406") {
-        await openManager(ctx, store, dataDir);
+        await openManager(ctx, store, dataDir, scopeStore);
         return;
       }
       if (text === "export" || text === "\u5BFC\u51FA") {
@@ -10096,12 +10206,12 @@ function actionHub(pi) {
   pi.registerShortcut("ctrl+alt+a", {
     description: "\u6253\u5F00 Action Hub \u7BA1\u7406\u754C\u9762",
     handler: async (ctx) => {
-      await openManager(ctx, store, dataDir);
+      await openManager(ctx, store, dataDir, scopeStore);
     }
   });
   pi.on("resources_discover", async (event) => {
     try {
-      const catalog = await loadCatalog(store, event.cwd ?? process.cwd());
+      const catalog = await loadCatalog(store, event.cwd ?? process.cwd(), scopeStore);
       return {
         skillPaths: catalog.actions.filter((action) => action.mode === "skill").map((action) => action.dir)
       };

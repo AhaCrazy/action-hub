@@ -4,6 +4,10 @@
 
 ## 0.1.0 — 2026-10-27
 
+- 项目范围改为 DSH 工作区本地数据：以稳定的 workspace ID 保存在
+  `~/.dsh/action-hub/workspaces/<workspace-id>.json`，不再写入共享
+  `state.json`。旧共享项目范围会在首次读取时自动迁移。
+- 删除工作区后，后续状态刷新会清理对应范围文件；工作区改名保留范围。
 - 从原单体插件中拆出 DSH 适配器。适配器现在依赖与 harness 无关的
   `action-hub` 核心，只保留 DSH 专属的 UI、项目发现、Skill provider 和 API 接线。
 - 全新安装会把内置 `skill-import-assistant` 放入核心提供的全局 `Common` 分组。

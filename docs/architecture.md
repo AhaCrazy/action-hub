@@ -22,14 +22,17 @@ adapter（DSH / Pi / ...）
             ▼
 core（本仓库）
   ├─ SKILL.md 库
-  ├─ 状态 schema：模式、分组、范围、屏蔽、使用记录
+  ├─ 共享状态 schema：模式、分组、全局分组、使用记录
+  ├─ 项目范围 schema 与原子读写
   ├─ 可用性解析
   ├─ 搜索与排序
   ├─ 文件夹/ZIP 导入导出
   └─ 存储锁与原子写入
 ```
 
-任何适配器都不应该直接读写 `state.json`。所有修改都经过 core，这样 DSH 和 Pi 才能安全共享同一份库。
+共享状态（Action、分组、全局分组）由 core 统一管理。**项目范围不进入共享库**：它由每个适配器按自己的 workspace 生命周期保存，再作为输入传给 core 的可用性解析。
+
+任何适配器都不应该直接读写共享 `state.json`。所有共享状态的修改都经过 core，这样 DSH 和 Pi 才能安全共享同一份库。
 
 ## 存储归属
 
@@ -38,18 +41,34 @@ core（本仓库）
 ```text
 $ACTION_HUB_HOME/            # 默认 ~/.action-hub
   library/
-  state.json
+  state.json                 # 共享：Action、分组、全局分组
   .lock
+
+DSH 本地
+  ~/.dsh/action-hub/workspaces/<workspaceId>.json
+
+Pi 本地
+  ~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json
 ```
 
 适配器可以把 `ACTION_HUB_HOME` 指向某个 harness 专属目录，但共用默认目录能让用户在所有 harness 中使用同一份可移植库。
 
-写入必须满足：
+项目范围的归属规则：
+
+- 它属于某个 harness 的工作区，而不是项目仓库；
+- DSH 用稳定的 workspace ID 作为键；
+- Pi 用 workdir session 目录作为键；
+- 两个 harness 的项目范围默认不共享；
+- 删除工作区时，对应范围文件由适配器清理或随目录一起删除。
+
+共享状态写入必须满足：
 
 1. 由跨进程锁保护；
 2. 在锁内完成读取—修改—写入；
 3. 写入临时文件后原子重命名；
 4. 写入完成后通过文件监听通知已打开的 UI。
+
+项目范围文件由各适配器原子写入；它们不属于共享锁的临界区。
 
 后续版本可以加入单调递增的 `revision`，用于检测并发编辑冲突。
 

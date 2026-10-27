@@ -10,3 +10,4 @@ export * from './resources.js';
 export * from './skill-doc.js';
 export * from './availability.js';
 export * from './scope.js';
+export * from './project-scope.js';

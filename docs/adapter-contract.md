@@ -68,11 +68,18 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 
 ## 项目范围
 
-core 会把项目根与已登记的项目配置匹配。适配器应该：
+项目范围由适配器拥有，不属于共享 `state.json`。core 只提供 `normalizeProjectScope`、`readProjectScope`、`writeProjectScope` 等 schema/原子读写辅助。
 
-- 传入最具体的已知根目录（cwd、已登记 workspace 或仓库根）；
+适配器应该：
+
+- 用自己稳定的工作区标识保存范围：
+  - DSH：workspace ID；
+  - Pi：workdir session 目录；
+- 在宿主工作区创建/删除时同步创建/清理范围文件；
+- 传入最具体的已知根目录（cwd、workspace 或仓库根）；
 - 没有匹配项目时回退到全局分组；
-- 绝不发明一个会隐藏全局分组的项目身份。
+- 绝不把 A harness 的项目范围自动应用到 B harness；
+- 绝不把路径相同当作跨 harness 的项目身份。
 
 ## 重新加载行为
 

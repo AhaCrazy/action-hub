@@ -77,6 +77,40 @@ test('manager can create an Action through the split-pane dashboard', async () =
   await fs.rm(dataDir, { recursive: true, force: true });
 });
 
+test('manager can save the current Pi workdir scope', async () => {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-scope-'));
+  const store = createStore({ dataDir });
+  const group = await store.createGroup('Scoped');
+  const customResults = [
+    { kind: 'edit-project', project: { path: dataDir } },
+    [group.id],
+    { kind: 'close' },
+  ];
+  const selections = ['启用分组', '保存'];
+  let written = null;
+  const scopeStore = {
+    async readForRoot() { return null; },
+    async writeForRoot(_root, profile) { written = profile; return profile; },
+  };
+  const ctx = {
+    mode: 'tui',
+    cwd: dataDir,
+    ui: {
+      async select() { return selections.shift(); },
+      async input() { return undefined; },
+      async editor() { return ''; },
+      async confirm() { return true; },
+      async custom() { return customResults.shift(); },
+      notify() {},
+      pasteToEditor() {},
+      async reload() {},
+    },
+  };
+  await openManager(ctx, store, dataDir, scopeStore);
+  assert.deepEqual(written.groups, [group.id]);
+  await fs.rm(dataDir, { recursive: true, force: true });
+});
+
 test('insertAction expands commands and uses native skill commands', async () => {
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-insert-'));
   const store = createStore({ dataDir });

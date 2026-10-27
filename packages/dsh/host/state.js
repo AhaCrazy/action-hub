@@ -42,7 +42,6 @@ export async function readAll(store) {
     invalid: state.invalid ?? [],
     builtins,
     groups: state.state.groups,
-    projects: state.state.projects,
     defaultGroup: state.state.defaultGroup ?? '',
     actions: sortActions([
       ...state.actions.filter((action) => !ids.has(action.id)),
