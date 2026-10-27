@@ -43,6 +43,50 @@ test('dashboard renders three columns with section counts and details', () => {
   assert.equal(dashboard.query, 'zzz');
 });
 
+test('opening an Action exposes edit in the action menu', async () => {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-menu-'));
+  const store = createStore({ dataDir });
+  const action = await store.create({ name: 'demo', description: 'Demo', prompt: 'Body.', mode: 'command' });
+  const menus = [];
+  const customResults = [
+    { kind: 'open-action', action },
+    { kind: 'close' },
+  ];
+  const ctx = {
+    mode: 'tui',
+    cwd: dataDir,
+    ui: {
+      async custom() { return customResults.shift(); },
+      async select(_title, items) { menus.push(items); return '返回'; },
+      notify() {},
+    },
+  };
+  await openManager(ctx, store, dataDir);
+  assert.ok(menus[0].includes('编辑'));
+  await fs.rm(dataDir, { recursive: true, force: true });
+});
+
+test('dashboard only closes on escape, not q, and has no edit shortcut', () => {
+  const results = [];
+  const dashboard = new ManagerDashboard({
+    tui: { requestRender() {} },
+    theme: { fg: (_color, value) => value },
+    data: {
+      actions: [{ name: 'alpha', description: 'A', mode: 'command', groups: [] }],
+      state: { groups: [], projects: [] },
+      dataDir: 'E:\\data',
+    },
+    cwd: 'E:\\project',
+    done(result) { results.push(result); },
+  });
+  dashboard.handleInput('q');
+  dashboard.handleInput('e');
+  assert.equal(results.length, 0);
+  dashboard.handleInput('\x1b');
+  assert.equal(results.length, 1);
+  assert.equal(results[0].kind, 'close');
+});
+
 test('dashboard shows the current project by label', () => {
   const dashboard = new ManagerDashboard({
     tui: { requestRender() {} },

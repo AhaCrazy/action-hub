@@ -9058,7 +9058,7 @@ var ManagerDashboard = class {
       }
       return;
     }
-    if (matchesKey(data, Key.escape) || data === "q") {
+    if (matchesKey(data, Key.escape)) {
       this.done({ kind: "close" });
       return;
     }
@@ -9124,9 +9124,6 @@ var ManagerDashboard = class {
     if (item === null) return;
     if (data === "n" && this.sectionId === "actions") this.done({ kind: "new-action" });
     else if (data === "n" && this.sectionId === "groups") this.done({ kind: "new-group" });
-    else if (data === "e" && this.sectionId === "actions") this.done({ kind: "edit-action", action: item });
-    else if (data === "e" && this.sectionId === "groups") this.done({ kind: "open-group", group: item });
-    else if (data === "e" && this.sectionId === "projects") this.done({ kind: "edit-project", project: item });
     else if (data === "d" && this.sectionId === "actions") this.done({ kind: "delete-action", action: item });
     else if (data === "d" && this.sectionId === "groups") this.done({ kind: "delete-group", group: item });
     else if (data === "m" && this.sectionId === "actions") this.done({ kind: "toggle-mode", action: item });
@@ -9159,7 +9156,7 @@ var ManagerDashboard = class {
       lines.push(`${paint("border", "\u2502")}${padRight(left[index] ?? "", leftWidth)}${paint("border", "\u2502")}${padRight(middle[index] ?? "", middleWidth)}${paint("border", "\u2502")}${padRight(right[index] ?? "", rightWidth)}${paint("border", "\u2502")}`);
     }
     lines.push(separator);
-    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "\u2190\u2192 \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00 \xB7 Tab \u63D2\u5165 \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 f \u641C\u7D22 \xB7 q \u5173\u95ED";
+    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "\u2190\u2192 \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00 \xB7 Tab \u63D2\u5165 \xB7 n \u65B0\u5EFA \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 f \u641C\u7D22 \xB7 Esc \u5173\u95ED";
     const helpLine = ` ${help}`;
     const fittedHelp = helpLine.length > inner ? `${helpLine.slice(0, Math.max(0, inner - 1))}\u2026` : helpLine;
     lines.push(`${paint("border", "\u2502")}${padRight(paint("dim", fittedHelp), inner)}${paint("border", "\u2502")}`);
@@ -9580,6 +9577,7 @@ async function manageOneAction(ctx, store2, action, tui) {
   for (; ; ) {
     const choice = await ctx.ui.select(actionLabel(action), [
       "\u63D2\u5165\u5230\u7F16\u8F91\u5668",
+      "\u7F16\u8F91",
       "\u67E5\u770B\u8D44\u6E90",
       "\u5207\u6362 Command / Skill",
       "\u8BBE\u7F6E\u5206\u7EC4",
@@ -9590,6 +9588,10 @@ async function manageOneAction(ctx, store2, action, tui) {
     if (choice === void 0 || choice === BACK) return;
     if (choice === "\u63D2\u5165\u5230\u7F16\u8F91\u5668") {
       await insertSelected(ctx, store2, action, tui);
+      return;
+    }
+    if (choice === "\u7F16\u8F91") {
+      await editAction(ctx, store2, action);
       return;
     }
     if (choice === "\u67E5\u770B\u8D44\u6E90") {
@@ -9609,7 +9611,7 @@ async function manageOneAction(ctx, store2, action, tui) {
     if (choice === "\u5207\u6362 Command / Skill") {
       try {
         await store2.setMode(action.id, action.mode === "skill" ? "command" : "skill");
-        notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1BSkill \u53EF\u89C1\u6027\u53D8\u66F4\u540E\u8BF7 /ah reload\u3002", "info");
+        notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1B\u9000\u51FA\u7BA1\u7406\u754C\u9762\u540E\u4F1A\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D Pi \u8D44\u6E90\u3002", "info");
       } catch (error) {
         notify2(ctx, `\u5207\u6362\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
       }
@@ -9785,10 +9787,6 @@ async function openManager(ctx, store2, dataDir2, scopeStore2, options = {}) {
       sectionId = "actions";
       reloadNeeded = true;
       await manageOneAction(ctx, store2, result.action, dashboardTui);
-    } else if (result.kind === "edit-action") {
-      sectionId = "actions";
-      reloadNeeded = true;
-      await editAction(ctx, store2, result.action);
     } else if (result.kind === "delete-action") {
       sectionId = "actions";
       reloadNeeded = true;

@@ -232,6 +232,7 @@ async function manageOneAction(ctx, store, action, tui) {
   for (;;) {
     const choice = await ctx.ui.select(actionLabel(action), [
       '插入到编辑器',
+      '编辑',
       '查看资源',
       '切换 Command / Skill',
       '设置分组',
@@ -242,6 +243,10 @@ async function manageOneAction(ctx, store, action, tui) {
     if (choice === undefined || choice === BACK) return;
     if (choice === '插入到编辑器') {
       await insertSelected(ctx, store, action, tui);
+      return;
+    }
+    if (choice === '编辑') {
+      await editAction(ctx, store, action);
       return;
     }
     if (choice === '查看资源') {
@@ -261,7 +266,7 @@ async function manageOneAction(ctx, store, action, tui) {
     if (choice === '切换 Command / Skill') {
       try {
         await store.setMode(action.id, action.mode === 'skill' ? 'command' : 'skill');
-        notify(ctx, '模式已切换；Skill 可见性变更后请 /ah reload。', 'info');
+        notify(ctx, '模式已切换；退出管理界面后会自动重新加载 Pi 资源。', 'info');
       } catch (error) {
         notify(ctx, `切换失败：${error instanceof Error ? error.message : String(error)}`, 'error');
       }
@@ -446,10 +451,6 @@ export async function openManager(ctx, store, dataDir, scopeStore, options = {})
       sectionId = 'actions';
       reloadNeeded = true;
       await manageOneAction(ctx, store, result.action, dashboardTui);
-    } else if (result.kind === 'edit-action') {
-      sectionId = 'actions';
-      reloadNeeded = true;
-      await editAction(ctx, store, result.action);
     } else if (result.kind === 'delete-action') {
       sectionId = 'actions';
       reloadNeeded = true;
