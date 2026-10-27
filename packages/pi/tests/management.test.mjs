@@ -63,6 +63,26 @@ test('dashboard shows the current project by label', () => {
   assert.doesNotMatch(text, /undefined/u);
 });
 
+test('dashboard restores the selected action after a mutation', () => {
+  const dashboard = new ManagerDashboard({
+    tui: { requestRender() {} },
+    theme: { fg: (_color, value) => value },
+    data: {
+      actions: [
+        { name: 'alpha', description: 'A', mode: 'command', groups: [] },
+        { name: 'beta', description: 'B', mode: 'command', groups: [] },
+      ],
+      state: { groups: [], projects: [] },
+      dataDir: 'E:\\data',
+    },
+    cwd: 'E:\\project',
+    initialKey: 'beta',
+    done() {},
+  });
+  assert.equal(dashboard.currentKey, 'beta');
+  assert.equal(dashboard.selected, 1);
+});
+
 test('multi-select filters, toggles, and returns checked keys', () => {
   let result;
   const component = new MultiSelect({

@@ -8943,19 +8943,38 @@ function itemLabel(item) {
   return item?.key ?? "";
 }
 var ManagerDashboard = class {
-  constructor({ tui, theme, data, cwd, sectionId = "actions", done }) {
+  constructor({ tui, theme, data, cwd, sectionId = "actions", initialKey = "", initialQuery = "", initialRegex = false, done }) {
     this.tui = tui;
     this.theme = theme;
     this.data = data;
     this.cwd = cwd;
-    this.done = done;
+    const finish = done;
+    this.done = (value) => finish({
+      ...value,
+      selectedKey: this.currentKey,
+      query: this.query,
+      regex: this.regex
+    });
     this.sectionId = sectionId;
     this.focus = "middle";
     this.selected = 0;
-    this.query = "";
+    this.query = initialQuery;
     this.search = false;
-    this.regex = false;
+    this.regex = initialRegex === true;
     this.focused = false;
+    const index = this.filteredItems.findIndex((item) => this.keyOf(item) === initialKey);
+    this.selected = index >= 0 ? index : 0;
+  }
+  keyOf(item) {
+    if (item === null || typeof item !== "object") return "";
+    if (this.sectionId === "actions") return item.name ?? "";
+    if (this.sectionId === "groups") return item.id ?? "";
+    if (this.sectionId === "projects") return item.path ?? "";
+    return item.key ?? "";
+  }
+  get currentKey() {
+    const item = this.currentItem;
+    return item === null ? "" : this.keyOf(item);
   }
   get actions() {
     return this.data.actions;
@@ -9714,6 +9733,9 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
     return;
   }
   let sectionId = "actions";
+  let selectedKey = "";
+  let query = "";
+  let regex = false;
   for (; ; ) {
     const data = await loadAll(store2);
     const cwd = ctx.cwd ?? process.cwd();
@@ -9741,12 +9763,18 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
           data: dashboardData,
           cwd,
           sectionId,
+          initialKey: selectedKey,
+          initialQuery: query,
+          initialRegex: regex,
           done
         });
       },
       { overlay: true, overlayOptions: { width: "94%", maxHeight: "88%" } }
     );
     if (result === void 0 || result === null || result.kind === "close") return;
+    selectedKey = typeof result.selectedKey === "string" ? result.selectedKey : "";
+    query = typeof result.query === "string" ? result.query : "";
+    regex = result.regex === true;
     if (result.kind === "new-action") {
       sectionId = "actions";
       await createAction(ctx, store2);

@@ -40,19 +40,40 @@ function itemLabel(item) {
 }
 
 export class ManagerDashboard {
-  constructor({ tui, theme, data, cwd, sectionId = 'actions', done }) {
+  constructor({ tui, theme, data, cwd, sectionId = 'actions', initialKey = '', initialQuery = '', initialRegex = false, done }) {
     this.tui = tui;
     this.theme = theme;
     this.data = data;
     this.cwd = cwd;
-    this.done = done;
+    const finish = done;
+    this.done = (value) => finish({
+      ...value,
+      selectedKey: this.currentKey,
+      query: this.query,
+      regex: this.regex,
+    });
     this.sectionId = sectionId;
     this.focus = 'middle';
     this.selected = 0;
-    this.query = '';
+    this.query = initialQuery;
     this.search = false;
-    this.regex = false;
+    this.regex = initialRegex === true;
     this.focused = false;
+    const index = this.filteredItems.findIndex((item) => this.keyOf(item) === initialKey);
+    this.selected = index >= 0 ? index : 0;
+  }
+
+  keyOf(item) {
+    if (item === null || typeof item !== 'object') return '';
+    if (this.sectionId === 'actions') return item.name ?? '';
+    if (this.sectionId === 'groups') return item.id ?? '';
+    if (this.sectionId === 'projects') return item.path ?? '';
+    return item.key ?? '';
+  }
+
+  get currentKey() {
+    const item = this.currentItem;
+    return item === null ? '' : this.keyOf(item);
   }
 
   get actions() {

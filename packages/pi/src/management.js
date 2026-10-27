@@ -394,6 +394,9 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
     return;
   }
   let sectionId = 'actions';
+  let selectedKey = '';
+  let query = '';
+  let regex = false;
   for (;;) {
     const data = await loadAll(store);
     const cwd = ctx.cwd ?? process.cwd();
@@ -421,12 +424,18 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
           data: dashboardData,
           cwd,
           sectionId,
+          initialKey: selectedKey,
+          initialQuery: query,
+          initialRegex: regex,
           done,
         });
       },
       { overlay: true, overlayOptions: { width: '94%', maxHeight: '88%' } },
     );
     if (result === undefined || result === null || result.kind === 'close') return;
+    selectedKey = typeof result.selectedKey === 'string' ? result.selectedKey : '';
+    query = typeof result.query === 'string' ? result.query : '';
+    regex = result.regex === true;
     if (result.kind === 'new-action') {
       sectionId = 'actions';
       await createAction(ctx, store);
