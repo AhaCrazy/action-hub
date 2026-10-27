@@ -221,7 +221,7 @@ async function editAction(ctx, store, action) {
   }
 }
 
-async function manageOneAction(ctx, store, action) {
+async function manageOneAction(ctx, store, action, tui) {
   if (action.builtin) {
     for (;;) {
       const choice = await ctx.ui.select(`${actionLabel(action)}（内置，只读）`, [
@@ -232,7 +232,7 @@ async function manageOneAction(ctx, store, action) {
       ]);
       if (choice === undefined || choice === BACK) return;
       if (choice === '插入到编辑器') {
-        await insertSelected(ctx, store, action);
+        await insertSelected(ctx, store, action, tui);
         return;
       }
       if (choice === '查看资源') {
@@ -258,9 +258,7 @@ async function manageOneAction(ctx, store, action) {
     ]);
     if (choice === undefined || choice === BACK) return;
     if (choice === '插入到编辑器') {
-      let args = '';
-      if (action.argsHint) args = await ctx.ui.input('Action 参数', `${action.argsHint}（可留空）`) ?? '';
-      await insertAction(store, ctx, action, args);
+      await insertSelected(ctx, store, action, tui);
       return;
     }
     if (choice === '查看资源') {
@@ -419,10 +417,10 @@ async function setActionGroups(ctx, store, action) {
   }
 }
 
-async function insertSelected(ctx, store, action) {
+async function insertSelected(ctx, store, action, tui) {
   let args = '';
   if (action.argsHint) args = await ctx.ui.input('Action 参数', `${action.argsHint}（可留空）`) ?? '';
-  await insertAction(store, ctx, action, args);
+  await insertAction(store, ctx, action, args, tui);
 }
 
 async function createGroup(ctx, store) {
@@ -469,15 +467,19 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
       dataDir,
       currentProjectRoot: projectRoot,
     };
+    let dashboardTui;
     const result = await ctx.ui.custom(
-      (tui, theme, _keybindings, done) => new ManagerDashboard({
-        tui,
-        theme,
-        data: dashboardData,
-        cwd,
-        sectionId,
-        done,
-      }),
+      (tui, theme, _keybindings, done) => {
+        dashboardTui = tui;
+        return new ManagerDashboard({
+          tui,
+          theme,
+          data: dashboardData,
+          cwd,
+          sectionId,
+          done,
+        });
+      },
       { overlay: true, overlayOptions: { width: '94%', maxHeight: '88%' } },
     );
     if (result === undefined || result === null || result.kind === 'close') return;
@@ -486,7 +488,7 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
       await createAction(ctx, store);
     } else if (result.kind === 'open-action') {
       sectionId = 'actions';
-      await manageOneAction(ctx, store, result.action);
+      await manageOneAction(ctx, store, result.action, dashboardTui);
     } else if (result.kind === 'edit-action') {
       sectionId = 'actions';
       await editAction(ctx, store, result.action);
@@ -507,7 +509,7 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
       await showResources(ctx, result.action);
     } else if (result.kind === 'insert-action') {
       sectionId = 'actions';
-      await insertSelected(ctx, store, result.action);
+      await insertSelected(ctx, store, result.action, dashboardTui);
       return;
     } else if (result.kind === 'new-group') {
       sectionId = 'groups';

@@ -35,15 +35,19 @@ async function openPalette(ctx, initialQuery = '') {
     notify(ctx, '当前没有可用的 Action。使用 /ah import <路径> 导入一个标准 Skill 目录。', 'info');
     return;
   }
+  let paletteTui;
   const selected = await ctx.ui.custom(
-    (tui, theme, _keybindings, done) => new ActionPalette({
-      tui,
-      theme,
-      actions: catalog.actions,
-      groups: catalog.groups,
-      done,
-      initialQuery,
-    }),
+    (tui, theme, _keybindings, done) => {
+      paletteTui = tui;
+      return new ActionPalette({
+        tui,
+        theme,
+        actions: catalog.actions,
+        groups: catalog.groups,
+        done,
+        initialQuery,
+      });
+    },
     { overlay: true },
   );
   if (selected === undefined || selected === null) return;
@@ -51,7 +55,7 @@ async function openPalette(ctx, initialQuery = '') {
   if (selected.argsHint) {
     args = await ctx.ui.input('Action 参数', `${selected.argsHint}（可留空）`) ?? '';
   }
-  await insertAction(store, ctx, selected, args);
+  await insertAction(store, ctx, selected, args, paletteTui);
 }
 
 export default function actionHub(pi) {

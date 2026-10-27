@@ -8937,12 +8937,16 @@ async function exportActions(ctx, store2, dataDir2) {
 }
 
 // src/insert.js
-async function insertAction(store2, ctx, action, args = "") {
+async function insertAction(store2, ctx, action, args = "", tui) {
   const text = action.mode === "skill" ? String(args).trim() === "" ? `/skill:${action.name}` : `/skill:${action.name} ${String(args).trim()}` : expandPrompt(action.prompt ?? "", { args });
   if (text === "") return;
   await store2.touch(action.name).catch(() => {
   });
   ctx.ui.pasteToEditor(text);
+  if (tui !== void 0 && typeof tui.requestRender === "function") {
+    tui.requestRender();
+    setTimeout(() => tui.requestRender(), 0);
+  }
 }
 
 // src/management.js
@@ -9570,7 +9574,7 @@ async function editAction(ctx, store2, action) {
     }
   }
 }
-async function manageOneAction(ctx, store2, action) {
+async function manageOneAction(ctx, store2, action, tui) {
   if (action.builtin) {
     for (; ; ) {
       const choice = await ctx.ui.select(`${actionLabel(action)}\uFF08\u5185\u7F6E\uFF0C\u53EA\u8BFB\uFF09`, [
@@ -9581,7 +9585,7 @@ async function manageOneAction(ctx, store2, action) {
       ]);
       if (choice === void 0 || choice === BACK) return;
       if (choice === "\u63D2\u5165\u5230\u7F16\u8F91\u5668") {
-        await insertSelected(ctx, store2, action);
+        await insertSelected(ctx, store2, action, tui);
         return;
       }
       if (choice === "\u67E5\u770B\u8D44\u6E90") {
@@ -9607,9 +9611,7 @@ async function manageOneAction(ctx, store2, action) {
     ]);
     if (choice === void 0 || choice === BACK) return;
     if (choice === "\u63D2\u5165\u5230\u7F16\u8F91\u5668") {
-      let args = "";
-      if (action.argsHint) args = await ctx.ui.input("Action \u53C2\u6570", `${action.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
-      await insertAction(store2, ctx, action, args);
+      await insertSelected(ctx, store2, action, tui);
       return;
     }
     if (choice === "\u67E5\u770B\u8D44\u6E90") {
@@ -9761,10 +9763,10 @@ async function setActionGroups(ctx, store2, action) {
     notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
   }
 }
-async function insertSelected(ctx, store2, action) {
+async function insertSelected(ctx, store2, action, tui) {
   let args = "";
   if (action.argsHint) args = await ctx.ui.input("Action \u53C2\u6570", `${action.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
-  await insertAction(store2, ctx, action, args);
+  await insertAction(store2, ctx, action, args, tui);
 }
 async function createGroup(ctx, store2) {
   const value = await askInput(ctx, "\u5206\u7EC4\u540D");
@@ -9808,15 +9810,19 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
       dataDir: dataDir2,
       currentProjectRoot: projectRoot
     };
+    let dashboardTui;
     const result = await ctx.ui.custom(
-      (tui, theme, _keybindings, done) => new ManagerDashboard({
-        tui,
-        theme,
-        data: dashboardData,
-        cwd,
-        sectionId,
-        done
-      }),
+      (tui, theme, _keybindings, done) => {
+        dashboardTui = tui;
+        return new ManagerDashboard({
+          tui,
+          theme,
+          data: dashboardData,
+          cwd,
+          sectionId,
+          done
+        });
+      },
       { overlay: true, overlayOptions: { width: "94%", maxHeight: "88%" } }
     );
     if (result === void 0 || result === null || result.kind === "close") return;
@@ -9825,7 +9831,7 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
       await createAction(ctx, store2);
     } else if (result.kind === "open-action") {
       sectionId = "actions";
-      await manageOneAction(ctx, store2, result.action);
+      await manageOneAction(ctx, store2, result.action, dashboardTui);
     } else if (result.kind === "edit-action") {
       sectionId = "actions";
       await editAction(ctx, store2, result.action);
@@ -9846,7 +9852,7 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
       await showResources(ctx, result.action);
     } else if (result.kind === "insert-action") {
       sectionId = "actions";
-      await insertSelected(ctx, store2, result.action);
+      await insertSelected(ctx, store2, result.action, dashboardTui);
       return;
     } else if (result.kind === "new-group") {
       sectionId = "groups";
@@ -10259,15 +10265,19 @@ async function openPalette(ctx, initialQuery = "") {
     notify3(ctx, "\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u7684 Action\u3002\u4F7F\u7528 /ah import <\u8DEF\u5F84> \u5BFC\u5165\u4E00\u4E2A\u6807\u51C6 Skill \u76EE\u5F55\u3002", "info");
     return;
   }
+  let paletteTui;
   const selected = await ctx.ui.custom(
-    (tui, theme, _keybindings, done) => new ActionPalette({
-      tui,
-      theme,
-      actions: catalog.actions,
-      groups: catalog.groups,
-      done,
-      initialQuery
-    }),
+    (tui, theme, _keybindings, done) => {
+      paletteTui = tui;
+      return new ActionPalette({
+        tui,
+        theme,
+        actions: catalog.actions,
+        groups: catalog.groups,
+        done,
+        initialQuery
+      });
+    },
     { overlay: true }
   );
   if (selected === void 0 || selected === null) return;
@@ -10275,7 +10285,7 @@ async function openPalette(ctx, initialQuery = "") {
   if (selected.argsHint) {
     args = await ctx.ui.input("Action \u53C2\u6570", `${selected.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
   }
-  await insertAction(store, ctx, selected, args);
+  await insertAction(store, ctx, selected, args, paletteTui);
 }
 function actionHub(pi) {
   pi.registerCommand("ah", {

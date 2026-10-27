@@ -115,17 +115,20 @@ test('insertAction expands commands and uses native skill commands', async () =>
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-insert-'));
   const store = createStore({ dataDir });
   const pasted = [];
+  let renders = 0;
   const ctx = { ui: { pasteToEditor(text) { pasted.push(text); } } };
+  const tui = { requestRender() { renders += 1; } };
   await insertAction(store, ctx, {
     name: 'demo',
     mode: 'command',
     prompt: 'Do {{args}}.',
-  }, 'work');
+  }, 'work', tui);
   await insertAction(store, ctx, {
     name: 'review',
     mode: 'skill',
     prompt: 'Review.',
   }, 'src/a.ts');
   assert.deepEqual(pasted, ['Do work.', '/skill:review src/a.ts']);
+  assert.ok(renders >= 1);
   await fs.rm(dataDir, { recursive: true, force: true });
 });
