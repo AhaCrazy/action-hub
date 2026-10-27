@@ -20,6 +20,15 @@ omp plugin install git:github.com/AhaCrazy/action-hub
 
 安装后重启对应的 harness。
 
+OMP 更新与卸载：
+
+```powershell
+omp plugin install git:github.com/AhaCrazy/action-hub --force
+omp plugin uninstall action-hub-workspace
+```
+
+OMP 插件包名是 `action-hub-workspace`；OMP 不通过 Pi 的 release `.tgz` 安装。
+
 ## 打开面板
 
 ```text
@@ -115,6 +124,12 @@ OMP:
 C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
 ```
 
+使用 OMP profile 时，范围位于：
+
+```text
+C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<workdir>\action-hub\scope.json
+```
+
 项目范围使用当前 session 的实际目录，因此在 Pi、OMP 以及 OMP profile 之间各自独立；删除该 workdir 的 session 目录时，范围会一起删除。
 
 ## 平台差异
@@ -123,3 +138,6 @@ C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
 - Pi / OMP 的 Skill 入口使用原生 `/skill:<name>`。
 - 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。
 - OMP 通过其 Pi 兼容层加载本扩展；项目范围跟随 OMP 的实际 session 目录，包括 `--profile`。
+- OMP 的 `Alt+A` 属于内置 Agent Hub；Action 面板使用 `/ah` 或 `Alt+Shift+A`。
+- 修改模式、分组或项目范围后，退出管理界面会自动重新加载；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。
+- 管理界面的当前焦点栏标题前显示 `▶`，非焦点栏内容变暗。

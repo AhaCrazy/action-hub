@@ -45,7 +45,7 @@ interface HarnessAdapter {
 
 ## Skill 投影
 
-对于每次 `resources_discover`（Pi）或 provider list（DSH）：
+对于每次 `resources_discover`（Pi / OMP）或 provider list（DSH）：
 
 1. 从 `cwd` 解析项目根；
 2. 从 core 加载 Action；
@@ -61,10 +61,10 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 选中后，渲染提示词并交给宿主：
 
 - DSH：插入引用 chip 或展开后的提示词；
-- Pi：`ctx.ui.pasteToEditor(rendered)`；
+- Pi / OMP：`ctx.ui.pasteToEditor(rendered)`；
 - 其他宿主：使用等价的插入 API。
 
-从面板选中的 Skill 也可以插入宿主原生的 Skill 调用（Pi 上是 `/skill:name`），让宿主自行加载正文。
+从面板选中的 Skill 也可以插入宿主原生的 Skill 调用（Pi / OMP 上是 `/skill:name`），让宿主自行加载正文。
 
 ## 项目范围
 
@@ -80,6 +80,15 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 - 没有匹配项目时回退到全局分组；
 - 绝不把 A harness 的项目范围自动应用到 B harness；
 - 绝不把路径相同当作跨 harness 的项目身份。
+
+## OMP 兼容
+
+OMP 不新增独立适配器包，而是复用 Pi 适配器：
+
+- 包同时声明 `pi` 和 `omp` manifest；
+- OMP 的 legacy Pi 兼容层负责映射 `@earendil-works/pi-*` 导入；
+- 项目范围必须从 `ctx.sessionManager.getSessionDir()` 取得实际 session 目录，不能硬编码 `~/.pi`；
+- OMP 的 `Alt+A` 属于内置 Agent Hub，适配器应提供不冲突的面板入口（当前为 `/ah` 与 `Alt+Shift+A`）。
 
 ## 重新加载行为
 

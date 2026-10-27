@@ -1,15 +1,29 @@
 # OMP 版 Action Hub
 
-Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 OMP（Oh My Pi）中的安装与功能。
+Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。
+
+本文只说明 OMP（Oh My Pi）中的安装与功能。当前验证环境：`omp 18.1.16`。
 
 ## 一、安装说明
 
+### 前置条件
+
+- 已安装 OMP CLI，`omp --version` 可用；
+- 使用 OMP 的交互 TUI 模式（面板和管理界面依赖 TUI）；
+- 如果已有共享 Action 库，无需重新导入。
+
 ### 安装
 
-OMP 使用自己的插件安装器，并兼容本包的 `pi`/`omp` manifest：
+OMP 使用自己的插件安装器，并兼容本包的 `pi` / `omp` manifest：
 
 ```powershell
 omp plugin install git:github.com/AhaCrazy/action-hub
+```
+
+安装后 OMP 中的插件包名是：
+
+```text
+action-hub-workspace
 ```
 
 安装完成后重启 OMP。
@@ -19,6 +33,8 @@ omp plugin install git:github.com/AhaCrazy/action-hub
 ```powershell
 omp plugin install git:github.com/AhaCrazy/action-hub --force
 ```
+
+OMP 不会自动跟踪 Git 更新；升级后需要重启 OMP。
 
 ### 卸载
 
@@ -34,17 +50,28 @@ omp plugin uninstall action-hub-workspace
 /ah
 ```
 
-打开 Action Hub 面板。
+应打开 Action 面板。
 
-OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，因此 Action Hub 额外提供：
+OMP 默认把 `Alt+A` 绑定给内置 **Agent Hub**，因此 Action Hub 额外提供：
 
 ```text
 Alt+Shift+A
 ```
 
-作为面板快捷键；管理界面仍使用 `Ctrl+Alt+A`。
+作为面板快捷键；管理界面仍使用：
 
-如果 OMP 的按键被其他插件占用，可以直接使用 `/ah` 命令。
+```text
+Ctrl+Alt+A
+```
+
+如果快捷键被其他插件占用，始终可以直接使用 `/ah`。
+
+### 安装失败排查
+
+- `omp plugin list` 应能看到 `action-hub-workspace`；
+- 如果安装后没有 `/ah`，先重启 OMP；
+- Windows 上用本地路径安装可能因 symlink 权限报 `EPERM`，改用 Git 安装；
+- OMP 不通过 Pi 的 release `.tgz` 安装，而是使用 Git 安装。
 
 ## 二、功能说明
 
@@ -101,11 +128,30 @@ Skill 也可以由用户主动调用：
 右：选中项详情
 ```
 
+当前焦点栏的标题前显示 `▶`，非焦点栏内容变暗。
+
+常用按键：
+
+| 按键 | 作用 |
+| --- | --- |
+| `←` / `→` | 切换左栏和中栏焦点 |
+| `↑` / `↓` | 移动选中项 |
+| `Enter` | 打开选中项；Action 菜单中包含编辑 |
+| `Tab` | 插入当前 Action |
+| `n` | 新建 Action / 分组 |
+| `d` | 删除 |
+| `m` | 切换 Command / Skill |
+| `p` | 固定 / 取消固定 |
+| `g` | 设置分组 |
+| `f` 或 `/` | 搜索 |
+| `Alt+R` | 切换正则搜索 |
+| `Esc` | 关闭 |
+
 支持：
 
-- **Action**：新建、编辑、删除、切换 Command / Skill、设置分组、固定、设置参数提示、查看资源、插入；
+- **Action**：通过 `Enter` 打开菜单后编辑、删除、切换 Command / Skill、设置分组、固定、设置参数提示、查看资源、插入；
 - **分组**：新建、改名、删除、设为全局、设置成员与子分组；
-- **项目范围**：只配置当前 OMP 工作区；直接启用或屏蔽分组/Action；修改项目显示名；
+- **项目范围**：只配置当前 OMP 工作区；直接启用或屏蔽分组 / Action；修改项目显示名；
 - **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill；
 - **导出**：导出全部或单个 Action 的 ZIP；
 - **设置**：数据目录、新项目默认分组、重新加载资源。
@@ -163,6 +209,8 @@ C:\Users\<你>\.action-hub
   state.json
 ```
 
+如果 OMP 与 Pi 使用的 `ACTION_HUB_HOME` 不同，它们会看到不同的库。管理界面的“数据目录”可以确认当前值。
+
 ### 内置内容
 
 新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command：
@@ -178,6 +226,41 @@ C:\Users\<你>\.action-hub
 /ah export
 /ah import <路径>
 ```
+
+### 常见问题
+
+#### 按 `Alt+A` 打开的是 Agent Hub
+
+这是 OMP 内置的 Agent Hub，不是 Action Hub。改用：
+
+```text
+/ah
+```
+
+或：
+
+```text
+Alt+Shift+A
+```
+
+![OMP Agent Hub（Alt+A）](assets/omp-agent-hub.png)
+
+#### `/ah` 能用，但列表是空的
+
+检查：
+
+1. 管理界面的“数据目录”是否和 Pi 一致；
+2. 共享库里是否有 Action；
+3. 当前工作区的项目范围是否屏蔽了分组或 Action；
+4. 是否只有 Command，而当前面板搜索词过滤掉了它们。
+
+#### `/ah` 不存在
+
+```powershell
+omp plugin list
+```
+
+确认 `action-hub-workspace` 已安装，然后重启 OMP。
 
 ### 限制
 

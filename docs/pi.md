@@ -1,6 +1,6 @@
 # Pi 版 Action Hub
 
-Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 Pi 中的安装与功能。
+Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 Pi 中的安装与功能。当前验证环境：`@earendil-works/pi-coding-agent@1.4.0`。
 
 ## 一、安装说明
 
@@ -77,6 +77,8 @@ Skill 也可以由用户主动调用：
 ```
 
 或按 `Ctrl+Alt+A`。
+
+![Pi Action Hub 管理界面](assets/pi-manager.png)
 
 三栏布局：
 

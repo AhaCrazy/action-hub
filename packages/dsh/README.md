@@ -8,7 +8,20 @@ DSH 的标准 Agent Skill 库：同一份 `SKILL.md`，可以当模型可调用�
 
 ## 安装
 
-DSH Desktop 默认 profile 是 `desktop`。一条命令安装：
+DSH Desktop 默认 profile 是 `desktop`。
+
+### 通过 DSH 插件页安装
+
+1. 打开 DSH Desktop；
+2. 左侧栏进入 **插件**；
+3. 点击 **添加插件** 旁的箭头，选择 **安装第三方插件**；
+4. 粘贴：
+   ```text
+   https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+   ```
+5. 点击 **安装**，完成后重启 DSH。
+
+### 通过命令行安装
 
 ```powershell
 dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
@@ -23,6 +36,21 @@ dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases
 ```
 
 安装后重启 DSH。
+
+### 升级与卸载
+
+DSH 插件页通常需要先卸载再安装。命令行方式：
+
+```powershell
+dsh plugin --profile desktop remove dsh-action-hub
+dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+```
+
+只卸载：
+
+```powershell
+dsh plugin --profile desktop remove dsh-action-hub
+```
 
 ## 使用
 
@@ -103,13 +131,7 @@ C:\Users\<你>\.dsh\dsh-action-hub
 - 分组可以标记为**全局分组**，所有工作区自动可用；
 - 项目可以只启用指定分组/Action；
 - 项目可以屏蔽继承来的分组/Action，而不影响其他工作区；
-- 项目范围只对当前 DSH 工作区生效，不会同步到 Pi 或其他 harness。
-
-## 卸载
-
-```powershell
-dsh plugin --profile desktop remove dsh-action-hub
-```
+- 项目范围只对当前 DSH 工作区生效，不会同步到 Pi / OMP 或其他 harness。
 
 ## 常见问题
 

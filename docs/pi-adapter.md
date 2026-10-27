@@ -32,20 +32,22 @@
 
 ```text
 packages/pi/
-  package.json        # pi manifest、pi-package keyword、peerDependencies
+  package.json        # pi / omp manifest、pi-package keyword、peerDependencies
   extensions/         # 源码入口
   src/                # 面板、管理界面、catalog、导入导出
   dist/action-hub.js  # 发布用自包含 bundle（含 core）
 ```
 
 安装方式：发布后使用 `pi install npm:pi-action-hub`，或从仓库根执行
-`pi install git:github.com/AhaCrazy/action-hub`。Pi 在自己的进程内运行扩展；
+`pi install git:github.com/AhaCrazy/action-hub`；OMP 使用
+`omp plugin install git:github.com/AhaCrazy/action-hub`。Pi / OMP 在自己的进程内运行扩展；
 没有服务、端口或浏览器窗口。
 
-## Pi 1.4.0 的限制
+## Pi 1.4.0 / OMP 18.x 的限制
 
 - `ctx.ui.custom` 只在 TUI 模式可用；print/JSON 模式没有 UI。
 - 命令和快捷键只在交互模式可用。
 - Skill 在启动、`/ah reload` 或管理界面退出后的自动加载时发现。
-- 使用 Pi 的主题和 `KeybindingsManager`，不要硬编码颜色或终端按键处理。
+- 使用 Pi / OMP 的主题和 `KeybindingsManager`，不要硬编码颜色或终端按键处理。
 - 扩展工厂里不要启动 watcher/timer；应在 `session_start` 启动，在 `session_shutdown` 清理。
+- OMP 的 `Alt+A` 已被内置 Agent Hub 占用，Action Hub 使用 `/ah` 或 `Alt+Shift+A`。

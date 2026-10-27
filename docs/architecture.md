@@ -14,7 +14,7 @@
 ## 分层
 
 ```text
-adapter（DSH / Pi / ...）
+adapter（DSH / Pi / OMP / ...）
   ├─ harness 上下文：cwd、项目根、会话身份
   ├─ 原生 UI：面板、对话框、快捷键、主题、键位
   ├─ 插入：composer / editor / host prompt API
@@ -33,7 +33,7 @@ core（本仓库）
 
 共享状态（Action、分组、全局分组）由 core 统一管理。**项目范围不进入共享库**：它由每个适配器按自己的 workspace 生命周期保存，再作为输入传给 core 的可用性解析。
 
-任何适配器都不应该直接读写共享 `state.json`。所有共享状态的修改都经过 core，这样 DSH 和 Pi 才能安全共享同一份库。
+任何适配器都不应该直接读写共享 `state.json`。所有共享状态的修改都经过 core，这样 DSH、Pi 和 OMP 才能安全共享同一份库。
 
 ## 存储归属
 
@@ -63,7 +63,7 @@ OMP 本地
 - 它属于某个 harness 的工作区，而不是项目仓库；
 - DSH 用稳定的 workspace ID 作为键；
 - Pi / OMP 用当前 session 目录作为键；
-- 两个 harness 的项目范围默认不共享；
+- 三个 harness 的项目范围默认不共享；
 - 删除工作区时，对应范围文件由适配器清理或随目录一起删除。
 
 共享状态写入必须满足：

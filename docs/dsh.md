@@ -65,6 +65,8 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 `Alt+A` 或输入框工具行按钮打开：
 
+![DSH Action Hub 面板](../packages/dsh/assets/screenshots/01-palette.png)
+
 - 按名称、描述、正文搜索；
 - 输入框右侧 `.*` 或 `Alt+R` 切换正则搜索；
 - 每行标记 `[Command]` 或 `[Skill]`；
@@ -80,7 +82,11 @@ Skill：插入 Skill 引用，由 DSH 自行加载正文。
 
 ### 管理页面
 
-`Ctrl+Alt+A` 或管理页进入，支持：
+`Ctrl+Alt+A` 或管理页进入：
+
+![DSH Action Hub 管理页](../packages/dsh/assets/screenshots/02-library.png)
+
+支持：
 
 - 新建、编辑、删除标准 Skill；
 - 切换 Command / Skill；
