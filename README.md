@@ -1,107 +1,122 @@
 # Action Hub
 
-一套可移植的 Action 库，在每个 harness 中提供原生使用体验。
+一套可移植的 Action 库，在 DSH 和 Pi 中提供原生使用体验。
 
-**Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录既可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组、全局分组、项目范围和项目级屏蔽都保存在本地状态里，不写进可移植的 Skill 文档。
+**Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组、项目范围和全局分组保存在本地状态中，不写进 Skill 文件。
 
-本仓库采用 monorepo 结构：
+## 安装
 
-```text
-packages/
-  core/   action-hub       与 harness 无关的通用库和状态模型
-  dsh/    dsh-action-hub   DSH Cordis 适配器（原生 Web UI、Alt+A）
-  pi/     pi-action-hub    Pi 包（原生 TUI 面板、Alt+A）
-docs/     架构与适配器契约
-```
+### DSH
 
-core 刻意不依赖 Cordis、DSH、Pi、React 或终端 UI。每个适配器只负责 harness 原生的 UI、快捷键、插入方式、项目识别和 Skill 注册。
-
-## 开发
-
-```bash
-npm install
-npm test
-```
-
-`npm test` 会依次运行 core、DSH 适配器和 Pi 适配器的测试。
-
-开发态通过 workspace 内的 `file:../core` 链接共享核心；对外发布时，两个适配器会把 core 打进各自的 `dist`，成为两个自包含的安装包。
-
-## 两个发布包
-
-这个仓库对外提供两个独立的安装产物：
-
-```text
-pi-action-hub     Pi 包
-dsh-action-hub    DSH bundle
-```
-
-两个包都自带 core，运行时不需要额外安装 `action-hub` 包。
-
-### 构建与打包
-
-```bash
-npm run build
-npm run pack:pi
-npm run pack:dsh
-```
-
-生成：
-
-```text
-pi-action-hub-0.1.0.tgz
-dsh-action-hub-0.1.0.tgz
-```
-
-### Pi 安装
+DSH Desktop 默认 profile 是 `desktop`。一条命令安装：
 
 ```powershell
-pi install npm:pi-action-hub
+dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
 ```
 
-或者直接从本仓库的 Git 根安装：
+如果 `dsh` 不在 PATH 中，使用 DSH 安装目录下的 CLI：
+
+```powershell
+& "D:\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" `
+  plugin --profile desktop add `
+  https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+```
+
+如果你使用的是别的 profile，把 `desktop` 换成对应名称。
+
+安装完成后重启 DSH，打开 Action Hub 页面，或按 `Alt+A`。
+
+### Pi
+
+一条命令安装：
 
 ```powershell
 pi install git:github.com/AhaCrazy/action-hub
 ```
 
-### DSH 安装
-
-在 DSH 插件管理器中安装 `packages/dsh` 目录，或安装发布后的 `dsh-action-hub` bundle。
-
-本地构建后也可以直接安装目录：
+安装完成后重启 Pi，输入：
 
 ```text
-E:\Data\Projs\action-hub\packages\dsh
+/ah
 ```
 
-## 包说明
+或按 `Alt+A`。
 
-- [`packages/core`](packages/core) — 库、`state.json`、分组、范围、搜索、导入导出。
-- [`packages/dsh`](packages/dsh) — DSH bundle，构建产物在 `dist/`。
-- [`packages/pi`](packages/pi) — Pi 包，构建产物在 `dist/`。
+## 第一次使用
 
-## 数据目录
+新库默认是空的，只有一个全局 `Common` 分组。
 
-所有适配器默认使用同一份数据：
+- DSH：在 Action Hub 页面里导入一个标准 Skill 目录；
+- Pi：使用 `/ah import <目录路径>` 导入。
+
+导入后即可在面板里搜索、选择和插入 Action。
+
+## 升级
+
+重新执行安装命令即可：
+
+```powershell
+# DSH
+dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+
+# Pi
+pi install git:github.com/AhaCrazy/action-hub
+```
+
+## 卸载
+
+```powershell
+# DSH
+dsh plugin --profile desktop remove dsh-action-hub
+
+# Pi
+pi remove git:github.com/AhaCrazy/action-hub
+```
+
+## 数据
+
+DSH 和 Pi 默认共用：
 
 ```text
-$ACTION_HUB_HOME/            # 默认 ~/.action-hub
-  library/<skill-name>/
-    SKILL.md
+C:\Users\<你>\.action-hub
+  library\
+    <skill-name>\
+      SKILL.md
   state.json
 ```
 
-`SKILL.md` 是可移植产物；`state.json` 只是本地元数据，不会写入导出包。
+`SKILL.md` 是可移植的 Skill 内容；`state.json` 是本地分组、范围和使用记录，不会进入导出包。
 
-core 的写入使用跨进程锁和原子替换 `state.json`，因此 DSH 进程和 Pi 进程可以安全共享同一份库。
+旧版 DSH 插件的数据在：
 
-## 文档
+```text
+C:\Users\<你>\.dsh\dsh-action-hub
+```
 
-- [架构说明](docs/architecture.md)
-- [适配器契约](docs/adapter-contract.md)
-- [Pi 适配器设计](docs/pi-adapter.md)
+想沿用旧数据，需要把旧目录里的 `library` 和 `state.json` 复制到 `.action-hub`，或者在 DSH 配置里把 `dataDir` 指向旧目录。
 
-## 状态
+## 常见问题
 
-仓库刚完成合并。包边界和存储 schema 已经足够稳定，可以先用于验证；公共 API 尚未冻结。
+### 安装后没有 `/ah` 或 Alt+A 没反应
+
+- 确认安装命令执行成功；
+- 重启对应的 harness；
+- 检查 DSH 是否还有旧版 Action Hub 同时启用。新旧适配器使用相同的插件标识，应该只保留一个。
+
+### `pi install npm:pi-action-hub` 报 404
+
+npm 包还没有发布。请使用本文档里的 Git 或 release 安装命令。
+
+### DSH 安装后入口可见但没有 Action
+
+这是正常的首次状态，先导入一个标准 Skill 目录。
+
+## 支持范围
+
+- DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
+- Pi：原生 TUI 面板、`Alt+A`、编辑器插入、`resources_discover`。
+- 其他 harness：可基于同一套核心继续增加适配器。
+
+## 开发
+
+开发、构建和发布说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
