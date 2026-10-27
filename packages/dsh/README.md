@@ -4,6 +4,8 @@ DSH 的标准 Agent Skill 库：同一份 `SKILL.md`，可以当模型可调用�
 
 本文把 **Skill** 和 **Command** 统称为 **Action**。可用范围只影响 Action 在哪个项目中可见、可调用，不写进 `SKILL.md`。
 
+完整安装与功能说明：[docs/dsh.md](https://github.com/AhaCrazy/action-hub/blob/main/docs/dsh.md)。
+
 ## 安装
 
 DSH Desktop 默认 profile 是 `desktop`。一条命令安装：

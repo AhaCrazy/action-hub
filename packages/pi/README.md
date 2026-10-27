@@ -2,6 +2,8 @@
 
 在 Pi 或 OMP 中使用共享 Action 库：同一个标准 Skill 可以当模型可调用的 Skill，也可以只作为用户主动调用的 Command。
 
+完整安装与功能说明：[Pi](https://github.com/AhaCrazy/action-hub/blob/main/docs/pi.md) · [OMP](https://github.com/AhaCrazy/action-hub/blob/main/docs/omp.md)。
+
 ## 安装
 
 Pi：

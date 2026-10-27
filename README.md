@@ -4,6 +4,14 @@
 
 **Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组和全局分组保存在共享状态中；项目范围跟随各自 harness 的工作区，不写进 Skill 文件。
 
+每个 harness 的完整说明（安装 + 功能）：
+
+| Harness | 文档 |
+| --- | --- |
+| DSH | [docs/dsh.md](docs/dsh.md) |
+| Pi | [docs/pi.md](docs/pi.md) |
+| OMP | [docs/omp.md](docs/omp.md) |
+
 ## 安装
 
 ### DSH
