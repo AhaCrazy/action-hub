@@ -10168,18 +10168,27 @@ import os3 from "node:os";
 import path10 from "node:path";
 function piAgentDir() {
   const configured = process.env.PI_CODING_AGENT_DIR?.trim();
-  return configured !== void 0 && configured !== "" ? configured : path10.join(os3.homedir(), ".pi", "agent");
+  if (configured !== void 0 && configured !== "") return configured;
+  const configDir = process.env.PI_CONFIG_DIR?.trim();
+  if (configDir !== void 0 && configDir !== "") return path10.join(os3.homedir(), configDir, "agent");
+  return path10.join(os3.homedir(), ".pi", "agent");
 }
 function piWorkdirKey(projectRoot) {
   return `--${String(projectRoot).replace(/^[/\\]/u, "").replace(/[/\\:]/gu, "-")}--`;
 }
-function createPiProjectScopeStore() {
+function createPiProjectScopeStore(options = {}) {
   const configuredSessions = process.env.PI_CODING_AGENT_SESSION_DIR?.trim();
-  const sessionsDir = configuredSessions !== void 0 && configuredSessions !== "" ? configuredSessions : path10.join(piAgentDir(), "sessions");
+  let sessionsDir = options.sessionsDir ?? (configuredSessions !== void 0 && configuredSessions !== "" ? configuredSessions : path10.join(piAgentDir(), "sessions"));
   const fileForRoot = (projectRoot) => path10.join(sessionsDir, piWorkdirKey(projectRoot), "action-hub", "scope.json");
   return {
-    sessionsDir,
+    get sessionsDir() {
+      return sessionsDir;
+    },
     fileForRoot,
+    configure(ctx) {
+      const actual = ctx?.sessionManager?.getSessionDir?.();
+      if (typeof actual === "string" && actual.trim() !== "") sessionsDir = actual;
+    },
     async readForRoot(projectRoot) {
       if (typeof projectRoot !== "string" || projectRoot === "") return null;
       return readProjectScope(fileForRoot(projectRoot));
@@ -10218,6 +10227,7 @@ async function openPalette(ctx, initialQuery = "") {
     notify3(ctx, "Action \u9762\u677F\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
+  scopeStore.configure(ctx);
   await seedDefaultBuiltin(store).catch(() => {
   });
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd(), scopeStore);
@@ -10262,6 +10272,7 @@ async function submitReloadThroughEditor(ctx, tui) {
   return false;
 }
 async function openManagerWithReload(ctx) {
+  scopeStore.configure(ctx);
   await seedDefaultBuiltin(store).catch(() => {
   });
   let tui;
@@ -10292,6 +10303,7 @@ function actionHub(pi) {
     description: "\u6253\u5F00 Action Hub \u9762\u677F\u6216\u7BA1\u7406\u754C\u9762",
     handler: async (args, ctx) => {
       const text = typeof args === "string" ? args.trim() : "";
+      scopeStore.configure(ctx);
       if (text === "reload") {
         await ctx.reload();
         return;
@@ -10337,6 +10349,9 @@ function actionHub(pi) {
       });
       await openManagerWithReload(ctx);
     }
+  });
+  pi.on("session_start", (_event, ctx) => {
+    scopeStore.configure(ctx);
   });
   pi.on("resources_discover", async (event) => {
     try {

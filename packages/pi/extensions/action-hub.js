@@ -29,6 +29,7 @@ async function openPalette(ctx, initialQuery = '') {
     notify(ctx, 'Action 面板只在 Pi 交互 TUI 模式可用。', 'warning');
     return;
   }
+  scopeStore.configure(ctx);
   await seedDefaultBuiltin(store).catch(() => {});
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd(), scopeStore);
   if (catalog.actions.length === 0) {
@@ -75,6 +76,7 @@ export async function submitReloadThroughEditor(ctx, tui) {
 }
 
 async function openManagerWithReload(ctx) {
+  scopeStore.configure(ctx);
   await seedDefaultBuiltin(store).catch(() => {});
   let tui;
   const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore, {
@@ -106,6 +108,7 @@ export default function actionHub(pi) {
     description: '打开 Action Hub 面板或管理界面',
     handler: async (args, ctx) => {
       const text = typeof args === 'string' ? args.trim() : '';
+      scopeStore.configure(ctx);
       if (text === 'reload') {
         await ctx.reload();
         return;
@@ -152,6 +155,10 @@ export default function actionHub(pi) {
       await seedDefaultBuiltin(store).catch(() => {});
       await openManagerWithReload(ctx);
     },
+  });
+
+  pi.on('session_start', (_event, ctx) => {
+    scopeStore.configure(ctx);
   });
 
   pi.on('resources_discover', async (event) => {

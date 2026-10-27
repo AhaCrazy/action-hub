@@ -20,23 +20,31 @@ import {
 
 export function piAgentDir() {
   const configured = process.env.PI_CODING_AGENT_DIR?.trim();
-  return configured !== undefined && configured !== '' ? configured : path.join(os.homedir(), '.pi', 'agent');
+  if (configured !== undefined && configured !== '') return configured;
+  const configDir = process.env.PI_CONFIG_DIR?.trim();
+  if (configDir !== undefined && configDir !== '') return path.join(os.homedir(), configDir, 'agent');
+  return path.join(os.homedir(), '.pi', 'agent');
 }
 
 export function piWorkdirKey(projectRoot) {
   return `--${String(projectRoot).replace(/^[/\\]/u, '').replace(/[/\\:]/gu, '-')}--`;
 }
 
-export function createPiProjectScopeStore() {
+export function createPiProjectScopeStore(options = {}) {
   const configuredSessions = process.env.PI_CODING_AGENT_SESSION_DIR?.trim();
-  const sessionsDir = configuredSessions !== undefined && configuredSessions !== ''
-    ? configuredSessions
-    : path.join(piAgentDir(), 'sessions');
+  let sessionsDir = options.sessionsDir
+    ?? (configuredSessions !== undefined && configuredSessions !== '' ? configuredSessions : path.join(piAgentDir(), 'sessions'));
   const fileForRoot = (projectRoot) => path.join(sessionsDir, piWorkdirKey(projectRoot), 'action-hub', 'scope.json');
 
   return {
-    sessionsDir,
+    get sessionsDir() {
+      return sessionsDir;
+    },
     fileForRoot,
+    configure(ctx) {
+      const actual = ctx?.sessionManager?.getSessionDir?.();
+      if (typeof actual === 'string' && actual.trim() !== '') sessionsDir = actual;
+    },
     async readForRoot(projectRoot) {
       if (typeof projectRoot !== 'string' || projectRoot === '') return null;
       return readProjectScope(fileForRoot(projectRoot));

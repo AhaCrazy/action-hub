@@ -37,6 +37,11 @@
       "./dist/action-hub.js"
     ]
   },
+  "omp": {
+    "extensions": [
+      "./dist/action-hub.js"
+    ]
+  },
   "devDependencies": {
     "action-hub": "file:../core"
   },

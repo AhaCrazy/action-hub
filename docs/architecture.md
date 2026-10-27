@@ -8,6 +8,7 @@
 
 - DSH：Cordis 插件、Alt+A 面板、composer 插入、Skill provider。
 - Pi：Pi 包、TUI 面板、`resources_discover`、编辑器插入。
+- OMP：复用 Pi 适配器，通过 OMP 的 legacy Pi 兼容层加载；项目范围跟随 OMP session 目录。
 - 其他 harness：使用各自的扩展点。
 
 ## 分层
@@ -49,6 +50,10 @@ DSH 本地
 
 Pi 本地
   ~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json
+
+OMP 本地
+  ~/.omp/agent/sessions/<encoded-cwd>/action-hub/scope.json
+  （--profile 时在 ~/.omp/profiles/<profile>/agent/sessions）
 ```
 
 适配器可以把 `ACTION_HUB_HOME` 指向某个 harness 专属目录，但共用默认目录能让用户在所有 harness 中使用同一份可移植库。
@@ -57,7 +62,7 @@ Pi 本地
 
 - 它属于某个 harness 的工作区，而不是项目仓库；
 - DSH 用稳定的 workspace ID 作为键；
-- Pi 用 workdir session 目录作为键；
+- Pi / OMP 用当前 session 目录作为键；
 - 两个 harness 的项目范围默认不共享；
 - 删除工作区时，对应范围文件由适配器清理或随目录一起删除。
 

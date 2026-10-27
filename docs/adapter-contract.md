@@ -74,7 +74,7 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 
 - 用自己稳定的工作区标识保存范围：
   - DSH：workspace ID；
-  - Pi：workdir session 目录；
+  - Pi / OMP：当前 session 目录；
 - 在宿主工作区创建/删除时同步创建/清理范围文件；
 - 传入最具体的已知根目录（cwd、workspace 或仓库根）；
 - 没有匹配项目时回退到全局分组；
@@ -83,4 +83,4 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 
 ## 重新加载行为
 
-DSH 的 Skill provider 可以在进程内刷新。Pi 只在启动和 `/reload` 时发现 Skill；如果管理操作改变了 Skill 可见性，Pi 适配器应关闭面板并调用 `ctx.reload()`，或者明确提示用户执行 `/reload`。
+DSH 的 Skill provider 可以在进程内刷新。Pi / OMP 只在启动或 reload 时发现 Skill；如果管理操作改变了 Skill 可见性，适配器应在退出管理界面时调用 `ctx.reload()`，或在无法自动 reload 的上下文提示用户执行 `/ah reload`。

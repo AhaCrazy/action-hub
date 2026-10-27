@@ -1,16 +1,22 @@
-# Pi 版 Action Hub
+# Pi / OMP 版 Action Hub
 
-在 Pi 中使用共享 Action 库：同一个标准 Skill 可以当模型可调用的 Skill，也可以只作为用户主动调用的 Command。
+在 Pi 或 OMP 中使用共享 Action 库：同一个标准 Skill 可以当模型可调用的 Skill，也可以只作为用户主动调用的 Command。
 
 ## 安装
 
-一条命令：
+Pi：
 
 ```powershell
 pi install git:github.com/AhaCrazy/action-hub
 ```
 
-安装后重启 Pi。
+OMP：
+
+```powershell
+omp plugin install git:github.com/AhaCrazy/action-hub
+```
+
+安装后重启对应的 harness。
 
 ## 打开面板
 
@@ -96,16 +102,21 @@ C:\Users\<你>\.action-hub
 
 `state.json` 只保存共享的 Action 元数据、分组和全局分组。
 
-项目范围保存在当前 Pi workdir 的 session 目录中：
+项目范围保存在当前 harness 的 session 目录中：
 
 ```text
+Pi:
 C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+
+OMP:
+C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
 ```
 
-同一个项目在 DSH 和 Pi 中的范围是独立的；删除该 Pi workdir 的 session 目录时，范围会一起删除。
+项目范围使用当前 session 的实际目录，因此在 Pi、OMP 以及 OMP profile 之间各自独立；删除该 workdir 的 session 目录时，范围会一起删除。
 
 ## 平台差异
 
-- Pi 没有 DSH 的侧边栏和 composer chip；Action 直接插入 Pi 编辑器。
-- Pi 的 Skill 入口使用原生 `/skill:<name>`。
-- 修改模式、分组或项目范围后，退出管理界面会自动重新加载 Pi 资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。
+- Pi / OMP 没有 DSH 的侧边栏和 composer chip；Action 直接插入编辑器。
+- Pi / OMP 的 Skill 入口使用原生 `/skill:<name>`。
+- 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。
+- OMP 通过其 Pi 兼容层加载本扩展；项目范围跟随 OMP 的实际 session 目录，包括 `--profile`。
