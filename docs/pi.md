@@ -78,8 +78,6 @@ Skill 也可以由用户主动调用：
 
 或按 `Ctrl+Alt+A`。
 
-![Pi Action Hub 管理界面](assets/pi-manager.png)
-
 三栏布局：
 
 ```text
@@ -118,15 +116,15 @@ Skill 也可以由用户主动调用：
 
 ### 项目范围
 
-项目范围跟随 Pi 当前 session 的 workdir：
+项目范围保存在当前 Pi session 存储目录下；子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）：
 
 ```text
-C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 ```
 
-- 每个 Pi 工作目录独立；
-- 同一工作目录的多个会话共享范围；
-- 删除对应 session 工作目录时，范围文件一起删除；
+- 每个项目根独立；
+- 同一项目根的多个 Pi 会话共享范围；
+- 删除对应 session 子目录时，范围文件一起删除；
 - 同一个项目在 DSH、Pi、OMP 中的范围互相独立。
 
 ### Skill 自动发现与重载

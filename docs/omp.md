@@ -71,7 +71,7 @@ Ctrl+Alt+A
 - `omp plugin list` 应能看到 `action-hub-workspace`；
 - 如果安装后没有 `/ah`，先重启 OMP；
 - Windows 上用本地路径安装可能因 symlink 权限报 `EPERM`，改用 Git 安装；
-- OMP 不通过 Pi 的 release `.tgz` 安装，而是使用 Git 安装。
+- 推荐使用 Git 安装（插件名 `action-hub-workspace`）；Pi 的 release `.tgz` 不是官方 OMP 安装路径，包名和更新方式不同。
 
 ## 二、功能说明
 
@@ -158,23 +158,23 @@ Skill 也可以由用户主动调用：
 
 ### 项目范围
 
-OMP 的项目范围跟随当前 session 的实际目录，而不是硬编码 `~/.pi`：
+OMP 的项目范围保存在当前 session 存储目录下；子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd），而不是硬编码 `~/.pi`：
 
 ```text
-C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.omp\agent\sessions\<encoded-project-root>\action-hub\scope.json
 ```
 
 使用 OMP profile 时：
 
 ```text
-C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\action-hub\scope.json
 ```
 
 使用 `--session-dir` 时跟随自定义目录。
 
-- 每个 OMP 工作区独立；
-- 同一个工作区在 Pi、OMP、DSH 中的范围互相独立；
-- 删除对应 session 工作目录时，范围文件一起删除。
+- 每个项目根独立；
+- 同一个项目在 Pi、OMP、DSH 中的范围互相独立；
+- 删除对应 session 子目录时，范围文件一起删除。
 
 ### Skill 自动发现与重载
 

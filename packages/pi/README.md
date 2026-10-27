@@ -27,7 +27,7 @@ omp plugin install git:github.com/AhaCrazy/action-hub --force
 omp plugin uninstall action-hub-workspace
 ```
 
-OMP 插件包名是 `action-hub-workspace`；OMP 不通过 Pi 的 release `.tgz` 安装。
+OMP 插件包名是 `action-hub-workspace`；推荐使用 Git 安装，Pi 的 release `.tgz` 不是官方 OMP 路径。
 
 ## 打开面板
 
@@ -114,30 +114,28 @@ C:\Users\<你>\.action-hub
 
 `state.json` 只保存共享的 Action 元数据、分组和全局分组。
 
-项目范围保存在当前 harness 的 session 目录中：
+项目范围保存在当前 harness 的 session 存储目录中，子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）：
 
 ```text
 Pi:
-C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 
 OMP:
-C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.omp\agent\sessions\<encoded-project-root>\action-hub\scope.json
 ```
 
 使用 OMP profile 时，范围位于：
 
 ```text
-C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\action-hub\scope.json
 ```
 
-项目范围使用当前 session 的实际目录，因此在 Pi、OMP 以及 OMP profile 之间各自独立；删除该 workdir 的 session 目录时，范围会一起删除。
+项目范围使用当前 session 的存储根 + 项目根编码，因此在 Pi、OMP 以及 OMP profile 之间各自独立；删除对应 session 子目录时，范围会一起删除。
 
 ## 平台差异
 
 - Pi / OMP 没有 DSH 的侧边栏和 composer chip；Action 直接插入编辑器。
 - Pi / OMP 的 Skill 入口使用原生 `/skill:<name>`。
 - 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。
-- OMP 通过其 Pi 兼容层加载本扩展；项目范围跟随 OMP 的实际 session 目录，包括 `--profile`。
 - OMP 的 `Alt+A` 属于内置 Agent Hub；Action 面板使用 `/ah` 或 `Alt+Shift+A`。
-- 修改模式、分组或项目范围后，退出管理界面会自动重新加载；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。
 - 管理界面的当前焦点栏标题前显示 `▶`，非焦点栏内容变暗。

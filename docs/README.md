@@ -53,11 +53,35 @@ $ACTION_HUB_HOME（默认 ~/.action-hub）
 
 ```text
 DSH:  ~/.dsh/action-hub/workspaces/<workspace-id>.json
-Pi:   ~/.pi/agent/sessions/<workdir>/action-hub/scope.json
-OMP:  ~/.omp/agent/sessions/<workdir>/action-hub/scope.json
+Pi:   ~/.pi/agent/sessions/<encoded-project-root>/action-hub/scope.json
+OMP:  ~/.omp/agent/sessions/<encoded-project-root>/action-hub/scope.json
 ```
 
+Pi / OMP 的 `<encoded-project-root>` 由项目根编码：最近的已登记工作区或 `.git` 祖先，没有则使用 cwd。`--profile` / `--session-dir` 改变 session 存储根，不改变键规则。
+
 ## 公共 FAQ
+
+### Skill 会占上下文或被自动调用吗
+
+会。Skill 模式的 Action 会进入模型可见的 Skill 目录，模型可能自动读取；Command 不进入模型目录，只有用户插入后才进入对话。
+
+### 如何从旧 DSH 数据迁移
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.action-hub" | Out-Null
+Copy-Item "$env:USERPROFILE\.dsh\dsh-action-hub\library" "$env:USERPROFILE\.action-hub\library" -Recurse -Force
+Copy-Item "$env:USERPROFILE\.dsh\dsh-action-hub\state.json" "$env:USERPROFILE\.action-hub\state.json" -Force
+```
+
+迁移前先退出对应 harness；旧项目范围由 DSH 首次读取时迁移。
+
+### 如何让多个 harness 使用不同的库
+
+设置各自的 `ACTION_HUB_HOME`。默认共用 `~/.action-hub`；如果某个 harness 指向别的目录，它就会看到另一份库。
+
+### 卸载会删除 Action 数据吗
+
+不会。卸载插件不会删除 `~/.action-hub`；需要时手动删除该目录。
 
 ### 安装后没有 `/ah`
 
@@ -98,7 +122,7 @@ Pi / OMP 会先发现自己的 Skill 目录，再加载 Action Hub 的 Skill。�
 ### 项目范围看起来不对
 
 - 项目范围不跨 harness 共享；
-- Pi / OMP 的范围跟随当前 session 目录，OMP profile 会改变目录；
+- Pi / OMP 的范围位于当前 session 存储根下，以项目根编码为子目录；OMP profile 会改变 session 存储根；
 - DSH 的范围跟随 workspace ID，不是仓库路径。
 
 ## 文档维护

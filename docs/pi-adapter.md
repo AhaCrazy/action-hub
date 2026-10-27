@@ -18,7 +18,7 @@
 - **Skill 类型 Action** → 在 `resources_discover` 中返回它的目录；Pi 会把它放进模型目录，并提供 `/skill:<name>`。
 - **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
 - **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
-- **项目范围** → 按当前 harness 的实际 session 目录保存：`<sessionDir>/<encoded-cwd>/action-hub/scope.json`。Pi 默认在 `~/.pi/agent/sessions`，OMP 默认在 `~/.omp/agent/sessions`（profile 在 `~/.omp/profiles/<profile>/agent/sessions`）；删除该 session 工作目录会一起删除范围。
+- **项目范围** → 按当前 harness 的实际 session 存储根保存：`<sessionDir>/<encoded-project-root>/action-hub/scope.json`。项目根取最近的已登记工作区或 `.git` 祖先，没有则取 cwd。Pi 默认在 `~/.pi/agent/sessions`，OMP 默认在 `~/.omp/agent/sessions`（profile 在 `~/.omp/profiles/<profile>/agent/sessions`）；删除该 session 子目录会一起删除范围。
 - **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。通过 `/ah manage` 进入时使用原生 reload；快捷键入口会尝试通过编辑器提交 `/ah reload` 自动重载，编辑器有草稿或提交失败时提示手动执行 `/ah reload`。
 
 ## OMP 兼容
@@ -38,8 +38,7 @@ packages/pi/
   dist/action-hub.js  # 发布用自包含 bundle（含 core）
 ```
 
-安装方式：发布后使用 `pi install npm:pi-action-hub`，或从仓库根执行
-`pi install git:github.com/AhaCrazy/action-hub`；OMP 使用
+安装方式：npm 包尚未发布，当前使用 `pi install git:github.com/AhaCrazy/action-hub`；OMP 使用
 `omp plugin install git:github.com/AhaCrazy/action-hub`。Pi / OMP 在自己的进程内运行扩展；
 没有服务、端口或浏览器窗口。
 

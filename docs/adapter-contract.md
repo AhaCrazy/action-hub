@@ -74,7 +74,7 @@ Command 是**仅用户可见**的提示词模板，默认绝不能注册成模�
 
 - 用自己稳定的工作区标识保存范围：
   - DSH：workspace ID；
-  - Pi / OMP：当前 session 目录；
+  - Pi / OMP：当前 session 存储根；项目根编码作为子目录；
 - 在宿主工作区创建/删除时同步创建/清理范围文件；
 - 传入最具体的已知根目录（cwd、workspace 或仓库根）；
 - 没有匹配项目时回退到全局分组；
@@ -87,7 +87,7 @@ OMP 不新增独立适配器包，而是复用 Pi 适配器：
 
 - 包同时声明 `pi` 和 `omp` manifest；
 - OMP 的 legacy Pi 兼容层负责映射 `@earendil-works/pi-*` 导入；
-- 项目范围必须从 `ctx.sessionManager.getSessionDir()` 取得实际 session 目录，不能硬编码 `~/.pi`；
+- 项目范围必须从 `ctx.sessionManager.getSessionDir()` 取得实际 session 存储根，不能硬编码 `~/.pi`；子目录键由项目根编码；
 - OMP 的 `Alt+A` 属于内置 Agent Hub，适配器应提供不冲突的面板入口（当前为 `/ah` 与 `Alt+Shift+A`）。
 
 ## 重新加载行为

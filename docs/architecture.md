@@ -42,27 +42,29 @@ core（本仓库）
 ```text
 $ACTION_HUB_HOME/            # 默认 ~/.action-hub
   library/
-  state.json                 # 共享：Action、分组、全局分组
-  .lock
+  state.json                 # 共享：Action、分组、全局分组、使用记录
+  .write.lock/               # 跨进程写锁
 
 DSH 本地
   ~/.dsh/action-hub/workspaces/<workspaceId>.json
 
 Pi 本地
-  ~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json
+  ~/.pi/agent/sessions/<encoded-project-root>/action-hub/scope.json
 
 OMP 本地
-  ~/.omp/agent/sessions/<encoded-cwd>/action-hub/scope.json
+  ~/.omp/agent/sessions/<encoded-project-root>/action-hub/scope.json
   （--profile 时在 ~/.omp/profiles/<profile>/agent/sessions）
 ```
 
 适配器可以把 `ACTION_HUB_HOME` 指向某个 harness 专属目录，但共用默认目录能让用户在所有 harness 中使用同一份可移植库。
 
+Pi / OMP 的 `<encoded-project-root>` 由项目根编码：最近的已登记工作区或 `.git` 祖先，没有则使用 cwd；session 存储根只决定 `scope.json` 放在哪个 session 根下。
+
 项目范围的归属规则：
 
 - 它属于某个 harness 的工作区，而不是项目仓库；
 - DSH 用稳定的 workspace ID 作为键；
-- Pi / OMP 用当前 session 目录作为键；
+- Pi / OMP 用项目根编码作为 session 目录下的子目录键；
 - 三个 harness 的项目范围默认不共享；
 - 删除工作区时，对应范围文件由适配器清理或随目录一起删除。
 
@@ -71,7 +73,9 @@ OMP 本地
 1. 由跨进程锁保护；
 2. 在锁内完成读取—修改—写入；
 3. 写入临时文件后原子重命名；
-4. 写入完成后通过文件监听通知已打开的 UI。
+4. 写入完成后由适配器显式失效缓存或 reload。
+
+当前没有 `fs.watch` 文件监听；UI 刷新依赖显式 invalidate、管理界面退出时的 reload 或 `/ah reload`。文件监听属于后续项。
 
 项目范围文件由各适配器原子写入；它们不属于共享锁的临界区。
 

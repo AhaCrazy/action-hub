@@ -65,11 +65,9 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 `Alt+A` 或输入框工具行按钮打开：
 
-![DSH Action Hub 面板](../packages/dsh/assets/screenshots/01-palette.png)
-
 - 按名称、描述、正文搜索；
 - 输入框右侧 `.*` 或 `Alt+R` 切换正则搜索；
-- 每行标记 `[Command]` 或 `[Skill]`；
+- 每行标记 `Command` 或 `Skill`；
 - `Enter` / `Tab` 插入；
 - `Ctrl/⌘ + Enter` 直接发送。
 
@@ -78,13 +76,11 @@ Command 插入行为：
 - 无参数：插入引用 chip；
 - 有参数：插入展开后的正文。
 
-Skill：插入 Skill 引用，由 DSH 自行加载正文。
+Skill：插入展开后的技能正文，由用户显式调用；模型侧仍通过 Skill provider 自动发现。
 
 ### 管理页面
 
-`Ctrl+Alt+A` 或管理页进入：
-
-![DSH Action Hub 管理页](../packages/dsh/assets/screenshots/02-library.png)
+`Ctrl+Alt+A`（macOS `⌘+⌥+A`）或管理页进入：
 
 支持：
 
@@ -127,7 +123,7 @@ C:\Users\<你>\.action-hub
   state.json
 ```
 
-`SKILL.md` 是可移植内容；`state.json` 保存动作元数据、分组和全局分组，不进入导出包。
+`SKILL.md` 是可移植内容；`state.json` 保存动作元数据、分组、全局分组和使用记录，不进入导出包。
 
 旧版插件数据在：
 

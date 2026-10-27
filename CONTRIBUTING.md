@@ -22,7 +22,7 @@ action-hub/
 - `dsh-action-hub`
 - `pi-action-hub`
 
-OMP 不单独发布包，而是通过 OMP 的 legacy Pi 兼容层加载 `pi-action-hub`。两个发布包在构建时都会把 core 打进自己的 `dist`，因此不需要单独发布 core npm 包。
+OMP 不单独发布包：它从仓库根安装，OMP 插件名是 `action-hub-workspace`，内部复用 `packages/pi` 适配器。两个发布包在构建时都会把 core 打进自己的 `dist`，因此不需要单独发布 core npm 包。
 
 ## 开发环境
 
@@ -88,7 +88,7 @@ pi-action-hub-0.1.0.tgz
 ### DSH
 
 ```powershell
-dsh plugin --profile desktop add E:\Data\Projs\action-hub\packages\dsh
+dsh plugin --profile desktop add .\packages\dsh
 ```
 
 安装后重启 DSH，验证 Action Hub 页面和 `Alt+A`。
@@ -96,7 +96,7 @@ dsh plugin --profile desktop add E:\Data\Projs\action-hub\packages\dsh
 ### Pi
 
 ```powershell
-pi install E:\Data\Projs\action-hub\packages\pi
+pi install .\packages\pi
 ```
 
 临时加载 Pi 扩展：
@@ -124,7 +124,7 @@ omp plugin install git:github.com/AhaCrazy/action-hub --force
 - `/ah` 能打开 Action 面板；
 - `Alt+Shift+A` 能打开 Action 面板（OMP 的 `Alt+A` 属于 Agent Hub）；
 - `Ctrl+Alt+A` 能打开管理界面；
-- 项目范围写入 OMP 的 session 目录，而不是 `~/.pi`。
+- 项目范围写入 OMP 的 session 存储根 + 项目根编码，而不是 `~/.pi`。
 
 ## 发布
 
@@ -137,7 +137,7 @@ npm publish --workspace pi-action-hub --access public
 
 ### DSH
 
-发布 `dsh-action-hub` 到 npm 或 DSH 插件市场，然后更新 GitHub Release 产物。
+发布 `dsh-action-hub` 到 npm 或 DSH 插件市场属于可选渠道；用户安装只依赖 GitHub Release 的 `.tgz`。
 
 ### GitHub Release
 
@@ -152,6 +152,22 @@ npm publish --workspace pi-action-hub --access public
    - `pi-action-hub.tgz`
    - `pi-action-hub-<version>.tgz`
 5. 更新 Release 说明。
+
+稳定别名由版本化文件复制生成：
+
+```powershell
+Copy-Item pi-action-hub-0.1.0.tgz pi-action-hub.tgz
+Copy-Item dsh-action-hub-0.1.0.tgz dsh-action-hub.tgz
+```
+
+发布后校验：
+
+- 4 个资产的字节数与本地 `.tgz` 一致；
+- `sha256` 与本地文件一致；
+- `releases/latest/download/dsh-action-hub.tgz` 返回 200；
+- 包内 README、`dist` 产物来自同一个 docs 冻结后的 commit。
+
+当前没有 CI，发布与资产上传为手动流程。先冻结文档和代码，再执行 `build` / `pack`，避免包内 README 落后于 main。
 
 Release 说明至少包含：
 

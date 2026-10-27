@@ -56,11 +56,11 @@ npm test
 
 - DSH：[`../dsh`](../dsh) — Cordis 插件，提供原生 Web UI、Alt+A 面板、composer chip 和 Skill provider。
 - Pi：[`../pi`](../pi) — Pi 包，提供原生 TUI 面板和 `resources_discover`。
-- OMP：通过 OMP 的 legacy Pi 兼容层加载 [`../pi`](../pi)，不新增独立包；项目范围跟随 OMP 实际 session 目录。
+- OMP：通过 OMP 的 legacy Pi 兼容层加载 [`../pi`](../pi)，不新增独立包；项目范围使用 OMP session 存储根 + 项目根编码。
 
 开发态 DSH / Pi 适配器都通过 `file:../core` 链接本核心；发布构建会把本核心打进各自的
 `dist`，因此对外只有 `pi-action-hub` 和 `dsh-action-hub` 两个安装包，不需要单独发布
-core npm 包。OMP 使用 `pi-action-hub` 的 Git 安装。
+core npm 包。OMP 从仓库根安装（插件名 `action-hub-workspace`），使用 Git 安装。
 
 参见 [../../docs/architecture.md](../../docs/architecture.md) 和
 [../../docs/adapter-contract.md](../../docs/adapter-contract.md)。

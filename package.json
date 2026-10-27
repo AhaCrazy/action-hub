@@ -2,12 +2,13 @@
   "name": "action-hub-workspace",
   "version": "0.1.0",
   "private": true,
-  "description": "Action Hub monorepo：与 harness 无关的通用核心，以及 DSH、Pi 适配器。",
+  "description": "Action Hub monorepo：与 harness 无关的通用核心，以及 DSH、Pi、OMP 适配器。",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "pi",
+    "omp",
     "action-hub",
     "dsh-plugin"
   ],

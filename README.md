@@ -159,14 +159,14 @@ DSH:
 C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json
 
 Pi:
-C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 
 OMP:
-C:\Users\<你>\.omp\agent\sessions\<workdir>\action-hub\scope.json
+C:\Users\<你>\.omp\agent\sessions\<encoded-project-root>\action-hub\scope.json
 （使用 --profile 时位于 .omp\profiles\<profile>\agent\sessions）
 ```
 
-项目范围使用当前 harness 实际的 session 目录，所以 Pi、OMP 各自跟随自己的工作区；同一个项目在 DSH、Pi、OMP 中可以有不同范围。删除对应工作区时，范围文件也会一起清理。
+项目范围保存在当前 harness 的 session 存储目录下，子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）。因此 Pi、OMP 各自跟随自己的工作区；同一个项目在 DSH、Pi、OMP 中可以有不同范围。删除对应 session 子目录时，范围文件也会一起清理。
 
 旧版 DSH 插件的数据在：
 
@@ -215,7 +215,7 @@ npm 包还没有发布。请使用本文档里的 Git 安装命令。
 
 - DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
 - Pi：原生 TUI 面板、`Alt+A`、`Ctrl+Alt+A` 管理界面、编辑器插入、Action / 分组 / 项目范围 / 导入导出管理、`resources_discover`。
-- OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入、项目范围和 `resources_discover`；项目范围跟随 OMP 实际 session 目录。
+- OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入、项目范围和 `resources_discover`；项目范围使用 OMP session 存储根 + 项目根编码。
 - 其他 harness：可基于同一套核心继续增加适配器。
 
 ## 开发
