@@ -12,6 +12,7 @@ import { readResourcePreviews } from 'action-hub';
 
 import { exportActions, importFromPath } from './import-export.js';
 import { insertAction } from './insert.js';
+import { ManagerDashboard } from './manager-dashboard.js';
 import { MultiSelect } from './multi-select.js';
 
 const BACK = '返回';
@@ -329,20 +330,167 @@ async function manageCategories(ctx, store) {
   }
 }
 
-async function manageActions(ctx, store) {
+async function showResources(ctx, action) {
+  const resources = await readResourcePreviews(action.dir);
+  if (resources.length === 0) {
+    notify(ctx, '这个 Action 没有额外资源文件。', 'info');
+    return;
+  }
+  const labels = resources.map((resource) => `${resource.name} (${resource.bytes} B)`);
+  const picked = await ctx.ui.select('资源文件', [...labels, BACK]);
+  if (picked === undefined || picked === BACK) return;
+  const resource = resources[labels.indexOf(picked)];
+  if (resource === undefined) return;
+  notify(ctx, resource.text === undefined ? `${resource.name}（二进制或大文件，请在文件系统中查看）` : resource.text, 'info');
+}
+
+async function deleteAction(ctx, store, action) {
+  if (!(await ctx.ui.confirm('删除 Action', `确定删除 ${action.name}？此操作不可恢复。`))) return;
+  try {
+    await store.remove(action.id);
+    notify(ctx, `已删除 ${action.name}`, 'info');
+  } catch (error) {
+    notify(ctx, `删除失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+async function toggleMode(ctx, store, action) {
+  try {
+    await store.setMode(action.id, action.mode === 'skill' ? 'command' : 'skill');
+    notify(ctx, '模式已切换；Skill 可见性变化后请 /ah reload。', 'info');
+  } catch (error) {
+    notify(ctx, `切换失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+async function togglePin(ctx, store, action) {
+  try {
+    await store.update(action.id, { pinned: !action.pinned });
+    notify(ctx, action.pinned ? '已取消固定' : '已固定', 'info');
+  } catch (error) {
+    notify(ctx, `保存失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+async function setActionGroups(ctx, store, action) {
+  const groups = await pickGroups(ctx, store, `为 ${action.name} 选择分组`, action.groups);
+  if (groups === undefined) return;
+  try {
+    await store.setActionGroups(action.id, groups);
+    notify(ctx, '分组已更新', 'info');
+  } catch (error) {
+    notify(ctx, `保存失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+async function insertSelected(ctx, store, action) {
+  let args = '';
+  if (action.argsHint) args = await ctx.ui.input('Action 参数', `${action.argsHint}（可留空）`) ?? '';
+  await insertAction(store, ctx, action, args);
+}
+
+async function createGroup(ctx, store) {
+  const value = await askInput(ctx, '分组名');
+  if (!value) return;
+  try {
+    await store.createGroup(value);
+    notify(ctx, '分组已创建', 'info');
+  } catch (error) {
+    notify(ctx, `创建失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+async function deleteGroup(ctx, store, group) {
+  if (!(await ctx.ui.confirm('删除分组', `确定删除 ${group.name}？其中的成员会失去这个分组。`))) return;
+  try {
+    await store.deleteGroup(group.id);
+    notify(ctx, '分组已删除', 'info');
+  } catch (error) {
+    notify(ctx, `删除失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+  }
+}
+
+export async function openManager(ctx, store, dataDir) {
+  if (ctx.mode !== 'tui') {
+    notify(ctx, 'Action Hub 管理界面只在 Pi 交互 TUI 模式可用。', 'warning');
+    return;
+  }
+  let sectionId = 'actions';
   for (;;) {
-    const choice = await ctx.ui.select('管理 Action', ['新建 Action', '管理已有 Action', '分类管理', BACK]);
-    if (choice === undefined || choice === BACK) return;
-    if (choice === '新建 Action') {
+    const data = await store.read();
+    const cwd = ctx.cwd ?? process.cwd();
+    const root = await resolveProjectRoot(cwd, data.state.projects);
+    const dashboardData = {
+      actions: sortActions(data.actions),
+      state: data.state,
+      dataDir,
+      currentProjectRoot: root ?? path.resolve(cwd),
+    };
+    const result = await ctx.ui.custom(
+      (tui, theme, _keybindings, done) => new ManagerDashboard({
+        tui,
+        theme,
+        data: dashboardData,
+        cwd,
+        sectionId,
+        done,
+      }),
+      { overlay: true, overlayOptions: { width: '94%', maxHeight: '88%' } },
+    );
+    if (result === undefined || result === null || result.kind === 'close') return;
+    if (result.kind === 'new-action') {
+      sectionId = 'actions';
       await createAction(ctx, store);
-      continue;
+    } else if (result.kind === 'open-action') {
+      sectionId = 'actions';
+      await manageOneAction(ctx, store, result.action);
+    } else if (result.kind === 'edit-action') {
+      sectionId = 'actions';
+      await editAction(ctx, store, result.action);
+    } else if (result.kind === 'delete-action') {
+      sectionId = 'actions';
+      await deleteAction(ctx, store, result.action);
+    } else if (result.kind === 'toggle-mode') {
+      sectionId = 'actions';
+      await toggleMode(ctx, store, result.action);
+    } else if (result.kind === 'pin-action') {
+      sectionId = 'actions';
+      await togglePin(ctx, store, result.action);
+    } else if (result.kind === 'groups-action') {
+      sectionId = 'actions';
+      await setActionGroups(ctx, store, result.action);
+    } else if (result.kind === 'resources-action') {
+      sectionId = 'actions';
+      await showResources(ctx, result.action);
+    } else if (result.kind === 'insert-action') {
+      sectionId = 'actions';
+      await insertSelected(ctx, store, result.action);
+      return;
+    } else if (result.kind === 'new-group') {
+      sectionId = 'groups';
+      await createGroup(ctx, store);
+    } else if (result.kind === 'open-group') {
+      sectionId = 'groups';
+      await manageOneGroup(ctx, store, result.group);
+    } else if (result.kind === 'delete-group') {
+      sectionId = 'groups';
+      await deleteGroup(ctx, store, result.group);
+    } else if (result.kind === 'edit-project') {
+      sectionId = 'projects';
+      await editProjectScope(ctx, store, result.project.path);
+    } else if (result.kind === 'tool') {
+      sectionId = 'tools';
+      if (result.tool === 'import') {
+        const source = await ctx.ui.input('导入路径', '标准 Skill 目录或 ZIP 的绝对路径');
+        if (source !== undefined && source.trim() !== '') await importFromPath(ctx, store, dataDir, source.trim());
+      } else if (result.tool === 'export') {
+        await exportActions(ctx, store, dataDir);
+      } else if (result.tool === 'categories') {
+        await manageCategories(ctx, store);
+      } else if (result.tool === 'settings') {
+        await manageSettings(ctx, store, dataDir);
+      }
     }
-    if (choice === '分类管理') {
-      await manageCategories(ctx, store);
-      continue;
-    }
-    const action = await pickAction(ctx, store);
-    if (action !== null) await manageOneAction(ctx, store, action);
   }
 }
 
@@ -556,39 +704,6 @@ async function manageSettings(ctx, store, dataDir) {
     if (choice === '重新加载 Pi 资源') {
       await ctx.reload();
       return;
-    }
-  }
-}
-
-export async function openManager(ctx, store, dataDir) {
-  if (ctx.mode !== 'tui') {
-    notify(ctx, 'Action Hub 管理界面只在 Pi 交互 TUI 模式可用。', 'warning');
-    return;
-  }
-  for (;;) {
-    const choice = await ctx.ui.select('Action Hub 管理', [
-      'Action 管理',
-      '分组管理',
-      '项目范围',
-      '导入 Action',
-      '导出 Action',
-      '设置',
-      '关闭',
-    ]);
-    if (choice === undefined || choice === '关闭') return;
-    if (choice === 'Action 管理') {
-      await manageActions(ctx, store);
-    } else if (choice === '分组管理') {
-      await manageGroups(ctx, store);
-    } else if (choice === '项目范围') {
-      await manageProjects(ctx, store);
-    } else if (choice === '导入 Action') {
-      const source = await ctx.ui.input('导入路径', '标准 Skill 目录或 ZIP 的绝对路径');
-      if (source !== undefined && source.trim() !== '') await importFromPath(ctx, store, dataDir, source.trim());
-    } else if (choice === '导出 Action') {
-      await exportActions(ctx, store, dataDir);
-    } else if (choice === '设置') {
-      await manageSettings(ctx, store, dataDir);
     }
   }
 }

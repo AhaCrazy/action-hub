@@ -8810,9 +8810,9 @@ async function insertAction(store2, ctx, action, args = "") {
 // src/management.js
 import path7 from "node:path";
 
-// src/multi-select.js
+// src/manager-dashboard.js
 import { Key, matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-var MAX_ROWS = 14;
+var HEIGHT = 18;
 function matcherFor(query, regex) {
   const text = query.trim();
   if (text === "") return () => true;
@@ -8830,6 +8830,313 @@ function matcherFor(query, regex) {
 function padRight(value, width) {
   return value + " ".repeat(Math.max(0, width - visibleWidth(value)));
 }
+function fit(value, width) {
+  return truncateToWidth(String(value ?? ""), width);
+}
+var ManagerDashboard = class {
+  constructor({ tui, theme, data, cwd, sectionId = "actions", done }) {
+    this.tui = tui;
+    this.theme = theme;
+    this.data = data;
+    this.cwd = cwd;
+    this.done = done;
+    this.sectionId = sectionId;
+    this.focus = "middle";
+    this.selected = 0;
+    this.query = "";
+    this.search = false;
+    this.regex = false;
+    this.focused = false;
+  }
+  get actions() {
+    return this.data.actions;
+  }
+  get groups() {
+    return this.data.state.groups;
+  }
+  get projects() {
+    const projects = this.data.state.projects ?? [];
+    const root = this.data.currentProjectRoot;
+    if (root === void 0 || root === "") return projects;
+    const key = root.toLowerCase();
+    if (projects.some((project) => String(project.path).toLowerCase() === key)) return projects;
+    return [...projects, { label: "\u5F53\u524D\u9879\u76EE\uFF08\u672A\u767B\u8BB0\uFF09", path: root, groups: [], actions: [], excludeGroups: [], excludeActions: [] }];
+  }
+  get sections() {
+    return [
+      { id: "actions", label: "Action", count: this.actions.length },
+      { id: "groups", label: "\u5206\u7EC4", count: this.groups.length },
+      { id: "projects", label: "\u9879\u76EE", count: this.projects.length },
+      { id: "tools", label: "\u5DE5\u5177", count: 4 }
+    ];
+  }
+  get items() {
+    if (this.sectionId === "actions") return this.actions;
+    if (this.sectionId === "groups") return this.groups;
+    if (this.sectionId === "projects") return this.projects;
+    return [
+      { key: "import", name: "\u5BFC\u5165 Action", description: "\u4ECE\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u5BFC\u5165" },
+      { key: "export", name: "\u5BFC\u51FA Action", description: "\u5BFC\u51FA\u5168\u90E8\u6216\u5355\u4E2A Action \u4E3A ZIP" },
+      { key: "categories", name: "\u5206\u7C7B\u7BA1\u7406", description: "\u91CD\u547D\u540D\u6216\u6E05\u7A7A\u5206\u7C7B" },
+      { key: "settings", name: "\u8BBE\u7F6E", description: "\u6570\u636E\u76EE\u5F55\u3001\u9ED8\u8BA4\u5206\u7EC4\u3001\u91CD\u65B0\u52A0\u8F7D" }
+    ];
+  }
+  get filteredItems() {
+    const matches = matcherFor(this.query, this.regex);
+    return this.items.filter((item) => matches([
+      item.name,
+      item.description,
+      item.category,
+      ...item.tags ?? []
+    ].filter(Boolean).join(" ")));
+  }
+  get currentItem() {
+    return this.filteredItems[this.selected] ?? null;
+  }
+  setSection(id) {
+    this.sectionId = id;
+    this.selected = 0;
+    this.query = "";
+    this.search = false;
+    this.tui.requestRender();
+  }
+  handleInput(data) {
+    if (matchesKey(data, "alt+r")) {
+      this.regex = !this.regex;
+      this.tui.requestRender();
+      return;
+    }
+    if (this.search) {
+      if (matchesKey(data, Key.escape)) {
+        this.query = "";
+        this.search = false;
+        this.selected = 0;
+        this.tui.requestRender();
+        return;
+      }
+      if (matchesKey(data, Key.return)) {
+        this.search = false;
+        this.tui.requestRender();
+        return;
+      }
+      if (matchesKey(data, Key.backspace) || data === "\x7F") {
+        this.query = this.query.slice(0, -1);
+        this.selected = 0;
+        this.tui.requestRender();
+        return;
+      }
+      if (data.length === 1 && data.charCodeAt(0) >= 32) {
+        this.query += data;
+        this.selected = 0;
+        this.tui.requestRender();
+      }
+      return;
+    }
+    if (matchesKey(data, Key.escape) || data === "q") {
+      this.done({ kind: "close" });
+      return;
+    }
+    if (matchesKey(data, "tab")) {
+      this.focus = this.focus === "middle" ? "left" : "middle";
+      this.tui.requestRender();
+      return;
+    }
+    if (data === "/") {
+      this.search = true;
+      this.query = "";
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, Key.up)) {
+      if (this.focus === "left") {
+        const index = this.sections.findIndex((section) => section.id === this.sectionId);
+        this.setSection(this.sections[Math.max(0, index - 1)].id);
+      } else {
+        this.selected = Math.max(0, this.selected - 1);
+        this.tui.requestRender();
+      }
+      return;
+    }
+    if (matchesKey(data, Key.down)) {
+      if (this.focus === "left") {
+        const index = this.sections.findIndex((section) => section.id === this.sectionId);
+        this.setSection(this.sections[Math.min(this.sections.length - 1, index + 1)].id);
+      } else {
+        this.selected = Math.min(this.filteredItems.length - 1, this.selected + 1);
+        this.tui.requestRender();
+      }
+      return;
+    }
+    if (matchesKey(data, Key.return)) {
+      if (this.focus === "left") {
+        this.focus = "middle";
+        this.tui.requestRender();
+        return;
+      }
+      const item2 = this.currentItem;
+      if (item2 === null) return;
+      if (this.sectionId === "actions") this.done({ kind: "open-action", action: item2 });
+      else if (this.sectionId === "groups") this.done({ kind: "open-group", group: item2 });
+      else if (this.sectionId === "projects") this.done({ kind: "edit-project", project: item2 });
+      else this.done({ kind: "tool", tool: item2.key });
+      return;
+    }
+    if (this.focus !== "middle") return;
+    const item = this.currentItem;
+    if (item === null) return;
+    if (data === "n" && this.sectionId === "actions") this.done({ kind: "new-action" });
+    else if (data === "n" && this.sectionId === "groups") this.done({ kind: "new-group" });
+    else if (data === "e" && this.sectionId === "actions") this.done({ kind: "edit-action", action: item });
+    else if (data === "e" && this.sectionId === "groups") this.done({ kind: "open-group", group: item });
+    else if (data === "e" && this.sectionId === "projects") this.done({ kind: "edit-project", project: item });
+    else if (data === "d" && this.sectionId === "actions") this.done({ kind: "delete-action", action: item });
+    else if (data === "d" && this.sectionId === "groups") this.done({ kind: "delete-group", group: item });
+    else if (data === "m" && this.sectionId === "actions") this.done({ kind: "toggle-mode", action: item });
+    else if (data === "p" && this.sectionId === "actions") this.done({ kind: "pin-action", action: item });
+    else if (data === "g" && this.sectionId === "actions") this.done({ kind: "groups-action", action: item });
+    else if (data === "r" && this.sectionId === "actions") this.done({ kind: "resources-action", action: item });
+    else if (data === "i" && this.sectionId === "actions") this.done({ kind: "insert-action", action: item });
+  }
+  invalidate() {
+  }
+  dispose() {
+  }
+  render(width) {
+    const theme = this.theme;
+    const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
+    const outer = Math.max(72, Math.min(width, 118));
+    const inner = outer - 2;
+    const leftWidth = Math.min(20, Math.max(16, Math.floor(inner * 0.18)));
+    const middleWidth = Math.min(42, Math.max(28, Math.floor(inner * 0.34)));
+    const rightWidth = inner - leftWidth - middleWidth - 2;
+    const top = paint("border", `\u256D${"\u2500".repeat(inner)}\u256E`);
+    const separator = paint("border", `\u251C${"\u2500".repeat(leftWidth)}\u252C${"\u2500".repeat(middleWidth)}\u252C${"\u2500".repeat(rightWidth)}\u2524`);
+    const bottom = paint("border", `\u2570${"\u2500".repeat(leftWidth)}\u2534${"\u2500".repeat(middleWidth)}\u2534${"\u2500".repeat(rightWidth)}\u256F`);
+    const title = ` Action Hub \u7BA1\u7406  ${paint("dim", this.cwd)}`;
+    const lines = [top, `${paint("border", "\u2502")}${padRight(fit(title, inner), inner)}${paint("border", "\u2502")}`, separator];
+    const left = this.renderLeft(leftWidth);
+    const middle = this.renderMiddle(middleWidth);
+    const right = this.renderRight(rightWidth);
+    for (let index = 0; index < HEIGHT; index += 1) {
+      lines.push(`${paint("border", "\u2502")}${padRight(left[index] ?? "", leftWidth)}${paint("border", "\u2502")}${padRight(middle[index] ?? "", middleWidth)}${paint("border", "\u2502")}${padRight(right[index] ?? "", rightWidth)}${paint("border", "\u2502")}`);
+    }
+    lines.push(separator);
+    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "Tab \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00/\u6267\u884C \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 i \u63D2\u5165 \xB7 / \u641C\u7D22 \xB7 q \u5173\u95ED";
+    const helpLine = ` ${help}`;
+    const fittedHelp = helpLine.length > inner ? `${helpLine.slice(0, Math.max(0, inner - 1))}\u2026` : helpLine;
+    lines.push(`${paint("border", "\u2502")}${padRight(paint("dim", fittedHelp), inner)}${paint("border", "\u2502")}`);
+    lines.push(bottom);
+    return lines;
+  }
+  renderLeft(width) {
+    const theme = this.theme;
+    const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
+    const out = [fit(" " + paint("dim", "\u5BFC\u822A"), width - 1)];
+    this.sections.forEach((section) => {
+      const active = section.id === this.sectionId;
+      const focused = active && this.focus === "left";
+      const marker = active ? paint("accent", focused ? "\u25B8" : "\u2022") : " ";
+      const label = active ? paint("accent", section.label) : section.label;
+      out.push(fit(` ${marker} ${label} ${paint("dim", String(section.count))}`, width - 1));
+    });
+    out.push("");
+    out.push(fit(" " + paint("dim", "\u6570\u636E\u76EE\u5F55"), width - 1));
+    const dir = String(this.data.dataDir ?? "").replace(/^.*[\\/]/u, "");
+    out.push(paint("dim", fit(` ${dir}`, width - 1)));
+    return out;
+  }
+  renderMiddle(width) {
+    const theme = this.theme;
+    const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
+    const out = [` ${paint("dim", this.sectionId === "actions" ? "Actions" : this.sectionId === "groups" ? "\u5206\u7EC4" : this.sectionId === "projects" ? "\u9879\u76EE" : "\u5DE5\u5177")}`];
+    const queryLine = this.search ? `${paint("accent", "\u641C\u7D22:")} ${this.query}${paint("accent", "\u258C")}${this.regex ? paint("warning", " .*") : ""}` : `${paint("dim", "\u641C\u7D22:")} ${this.query}${this.regex ? paint("warning", " .*") : ""}  ${paint("dim", "/ \u8F93\u5165")}`;
+    out.push(fit(queryLine, width - 2));
+    out.push("");
+    const items = this.filteredItems;
+    if (items.length === 0) {
+      out.push(` ${paint("dim", "\u6CA1\u6709\u5339\u914D\u9879")}`);
+      return out;
+    }
+    const visible = Math.max(1, HEIGHT - 5);
+    const start = Math.max(0, Math.min(this.selected - Math.floor(visible / 2), items.length - visible));
+    for (let index = start; index < Math.min(items.length, start + visible); index += 1) {
+      const item = items[index];
+      const active = index === this.selected;
+      const marker = active ? paint("accent", "\u276F") : " ";
+      const label = active ? paint("accent", item.name) : item.name;
+      const mode = this.sectionId === "actions" ? item.mode === "skill" ? paint("success", "S") : paint("dim", "C") : this.sectionId === "groups" ? item.global ? paint("warning", "G") : " " : " ";
+      out.push(fit(` ${marker}${mode} ${label}`, width - 1));
+    }
+    if (items.length > visible) out.push(` ${paint("dim", `${this.selected + 1}/${items.length}`)}`);
+    return out;
+  }
+  renderRight(width) {
+    const theme = this.theme;
+    const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
+    const out = [" " + paint("dim", "\u8BE6\u60C5")];
+    const item = this.currentItem;
+    if (item === null) {
+      out.push(` ${paint("dim", "\u6CA1\u6709\u9009\u4E2D\u9879")}`);
+      return out;
+    }
+    const push = (label, value) => {
+      out.push(fit(` ${paint("dim", `${label}:`)} ${value ?? ""}`, width - 1));
+    };
+    if (this.sectionId === "actions") {
+      push("\u540D\u79F0", item.name);
+      push("\u6A21\u5F0F", item.mode === "skill" ? "Skill" : "Command");
+      push("\u63CF\u8FF0", item.description);
+      push("\u5206\u7C7B", item.category || "\u2014");
+      push("\u6807\u7B7E", (item.tags ?? []).join(", ") || "\u2014");
+      push("\u53C2\u6570", item.argsHint || "\u2014");
+      push("\u56FA\u5B9A", item.pinned ? "\u662F" : "\u5426");
+      push("\u4F7F\u7528", String(item.usage?.count ?? 0));
+      push("\u5206\u7EC4", (item.groups ?? []).join(", ") || "\u2014");
+      push("\u8D44\u6E90", String((item.resources ?? []).length));
+    } else if (this.sectionId === "groups") {
+      push("\u540D\u79F0", item.name);
+      push("ID", item.id);
+      push("\u5168\u5C40", item.global ? "\u662F" : "\u5426");
+      const names = new Map(this.groups.map((group) => [group.id, group.name]));
+      push("\u5305\u542B", (item.includes ?? []).map((id) => names.get(id) ?? id).join(", ") || "\u2014");
+      const members = this.actions.filter((action) => (action.groups ?? []).includes(item.id)).map((action) => action.name);
+      push("\u6210\u5458", members.join(", ") || "\u2014");
+    } else if (this.sectionId === "projects") {
+      push("\u540D\u79F0", item.label);
+      push("\u8DEF\u5F84", item.path);
+      const names = new Map(this.groups.map((group) => [group.id, group.name]));
+      push("\u76F4\u63A5\u5206\u7EC4", (item.groups ?? []).map((id) => names.get(id) ?? id).join(", ") || "\u2014");
+      push("\u76F4\u63A5 Action", (item.actions ?? []).join(", ") || "\u2014");
+      push("\u5C4F\u853D\u5206\u7EC4", (item.excludeGroups ?? []).map((id) => names.get(id) ?? id).join(", ") || "\u2014");
+      push("\u5C4F\u853D Action", (item.excludeActions ?? []).join(", ") || "\u2014");
+    } else {
+      push("\u4F5C\u7528", item.description);
+      push("\u63D0\u793A", this.sectionId === "tools" ? "Enter \u6267\u884C" : "");
+    }
+    return out;
+  }
+};
+
+// src/multi-select.js
+import { Key as Key2, matchesKey as matchesKey2, truncateToWidth as truncateToWidth2, visibleWidth as visibleWidth2 } from "@earendil-works/pi-tui";
+var MAX_ROWS = 14;
+function matcherFor2(query, regex) {
+  const text = query.trim();
+  if (text === "") return () => true;
+  if (!regex) {
+    const needle = text.toLowerCase();
+    return (value) => String(value ?? "").toLowerCase().includes(needle);
+  }
+  try {
+    const pattern = new RegExp(text, "i");
+    return (value) => pattern.test(String(value ?? ""));
+  } catch {
+    return () => false;
+  }
+}
+function padRight2(value, width) {
+  return value + " ".repeat(Math.max(0, width - visibleWidth2(value)));
+}
 var MultiSelect = class {
   constructor({ tui, theme, title, items, initialSelected = [], done }) {
     this.tui = tui;
@@ -8845,38 +9152,38 @@ var MultiSelect = class {
     this.focused = false;
   }
   get filtered() {
-    const matches = matcherFor(this.query, this.regex);
+    const matches = matcherFor2(this.query, this.regex);
     return this.items.filter((item) => matches(`${item.label} ${item.description ?? ""}`));
   }
   get current() {
     return this.filtered[this.index] ?? null;
   }
   handleInput(data) {
-    if (matchesKey(data, Key.escape)) {
+    if (matchesKey2(data, Key2.escape)) {
       this.done(void 0);
       return;
     }
-    if (matchesKey(data, Key.up)) {
+    if (matchesKey2(data, Key2.up)) {
       this.index = Math.max(0, this.index - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.down)) {
+    if (matchesKey2(data, Key2.down)) {
       this.index = Math.min(this.filtered.length - 1, this.index + 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, "alt+r")) {
+    if (matchesKey2(data, "alt+r")) {
       this.regex = !this.regex;
       this.index = 0;
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.return)) {
+    if (matchesKey2(data, Key2.return)) {
       this.done([...this.selected]);
       return;
     }
-    if (matchesKey(data, Key.space) || data === " ") {
+    if (matchesKey2(data, Key2.space) || data === " ") {
       const item = this.current;
       if (item !== null) {
         if (this.selected.has(item.key)) this.selected.delete(item.key);
@@ -8885,7 +9192,7 @@ var MultiSelect = class {
       }
       return;
     }
-    if (matchesKey(data, Key.backspace) || data === "\x7F") {
+    if (matchesKey2(data, Key2.backspace) || data === "\x7F") {
       if (this.cursor > 0) {
         this.query = this.query.slice(0, this.cursor - 1) + this.query.slice(this.cursor);
         this.cursor -= 1;
@@ -8894,12 +9201,12 @@ var MultiSelect = class {
       }
       return;
     }
-    if (matchesKey(data, Key.left)) {
+    if (matchesKey2(data, Key2.left)) {
       this.cursor = Math.max(0, this.cursor - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.right)) {
+    if (matchesKey2(data, Key2.right)) {
       this.cursor = Math.min(this.query.length, this.cursor + 1);
       this.tui.requestRender();
       return;
@@ -8919,7 +9226,7 @@ var MultiSelect = class {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
     const inner = Math.max(44, Math.min(width, 88) - 2);
-    const row = (value) => paint("border", "\u2502") + padRight(value, inner) + paint("border", "\u2502");
+    const row = (value) => paint("border", "\u2502") + padRight2(value, inner) + paint("border", "\u2502");
     const currentText = this.cursor < this.query.length ? `${this.query.slice(0, this.cursor)}${paint("accent", "\u258C")}${this.query.slice(this.cursor + 1)}` : `${this.query}${paint("accent", "\u258C")}`;
     const lines = [paint("border", `\u256D${"\u2500".repeat(inner)}\u256E`), row(` ${paint("accent", ` ${this.title} `)}`), row("")];
     lines.push(row(` ${paint("dim", "\u641C\u7D22:")} ${currentText}${this.regex ? paint("warning", "  .*") : ""}`));
@@ -8936,7 +9243,7 @@ var MultiSelect = class {
         const marker = active ? paint("accent", "\u276F") : " ";
         const box = checked ? paint("success", "[x]") : paint("dim", "[ ]");
         const label = active ? paint("accent", item.label) : item.label;
-        const description = truncateToWidth(` ${item.description ?? ""}`, Math.max(8, inner - 24));
+        const description = truncateToWidth2(` ${item.description ?? ""}`, Math.max(8, inner - 24));
         lines.push(row(` ${marker} ${box} ${label} ${paint("dim", description)}`));
       }
       if (filtered.length > MAX_ROWS) {
@@ -8986,17 +9293,6 @@ async function pickChecklist(ctx, { title, items, selected }) {
 async function loadAll(store2) {
   const data = await store2.read();
   return { state: data.state, actions: sortActions(data.actions) };
-}
-async function pickAction(ctx, store2, title = "\u9009\u62E9 Action") {
-  const { actions } = await loadAll(store2);
-  if (actions.length === 0) {
-    notify2(ctx, "\u5F53\u524D\u6CA1\u6709 Action\u3002", "info");
-    return null;
-  }
-  const labels = actions.map(actionLabel);
-  const choice = await ctx.ui.select(title, labels);
-  if (choice === void 0) return null;
-  return actions[labels.indexOf(choice)] ?? null;
 }
 async function pickGroups(ctx, store2, title, selected = []) {
   const state = await store2.readState();
@@ -9244,20 +9540,159 @@ async function manageCategories(ctx, store2) {
     }
   }
 }
-async function manageActions(ctx, store2) {
+async function showResources(ctx, action) {
+  const resources = await readResourcePreviews(action.dir);
+  if (resources.length === 0) {
+    notify2(ctx, "\u8FD9\u4E2A Action \u6CA1\u6709\u989D\u5916\u8D44\u6E90\u6587\u4EF6\u3002", "info");
+    return;
+  }
+  const labels = resources.map((resource2) => `${resource2.name} (${resource2.bytes} B)`);
+  const picked = await ctx.ui.select("\u8D44\u6E90\u6587\u4EF6", [...labels, BACK]);
+  if (picked === void 0 || picked === BACK) return;
+  const resource = resources[labels.indexOf(picked)];
+  if (resource === void 0) return;
+  notify2(ctx, resource.text === void 0 ? `${resource.name}\uFF08\u4E8C\u8FDB\u5236\u6216\u5927\u6587\u4EF6\uFF0C\u8BF7\u5728\u6587\u4EF6\u7CFB\u7EDF\u4E2D\u67E5\u770B\uFF09` : resource.text, "info");
+}
+async function deleteAction(ctx, store2, action) {
+  if (!await ctx.ui.confirm("\u5220\u9664 Action", `\u786E\u5B9A\u5220\u9664 ${action.name}\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\u3002`)) return;
+  try {
+    await store2.remove(action.id);
+    notify2(ctx, `\u5DF2\u5220\u9664 ${action.name}`, "info");
+  } catch (error) {
+    notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function toggleMode(ctx, store2, action) {
+  try {
+    await store2.setMode(action.id, action.mode === "skill" ? "command" : "skill");
+    notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1BSkill \u53EF\u89C1\u6027\u53D8\u5316\u540E\u8BF7 /ah reload\u3002", "info");
+  } catch (error) {
+    notify2(ctx, `\u5207\u6362\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function togglePin(ctx, store2, action) {
+  try {
+    await store2.update(action.id, { pinned: !action.pinned });
+    notify2(ctx, action.pinned ? "\u5DF2\u53D6\u6D88\u56FA\u5B9A" : "\u5DF2\u56FA\u5B9A", "info");
+  } catch (error) {
+    notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function setActionGroups(ctx, store2, action) {
+  const groups = await pickGroups(ctx, store2, `\u4E3A ${action.name} \u9009\u62E9\u5206\u7EC4`, action.groups);
+  if (groups === void 0) return;
+  try {
+    await store2.setActionGroups(action.id, groups);
+    notify2(ctx, "\u5206\u7EC4\u5DF2\u66F4\u65B0", "info");
+  } catch (error) {
+    notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function insertSelected(ctx, store2, action) {
+  let args = "";
+  if (action.argsHint) args = await ctx.ui.input("Action \u53C2\u6570", `${action.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
+  await insertAction(store2, ctx, action, args);
+}
+async function createGroup(ctx, store2) {
+  const value = await askInput(ctx, "\u5206\u7EC4\u540D");
+  if (!value) return;
+  try {
+    await store2.createGroup(value);
+    notify2(ctx, "\u5206\u7EC4\u5DF2\u521B\u5EFA", "info");
+  } catch (error) {
+    notify2(ctx, `\u521B\u5EFA\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function deleteGroup(ctx, store2, group) {
+  if (!await ctx.ui.confirm("\u5220\u9664\u5206\u7EC4", `\u786E\u5B9A\u5220\u9664 ${group.name}\uFF1F\u5176\u4E2D\u7684\u6210\u5458\u4F1A\u5931\u53BB\u8FD9\u4E2A\u5206\u7EC4\u3002`)) return;
+  try {
+    await store2.deleteGroup(group.id);
+    notify2(ctx, "\u5206\u7EC4\u5DF2\u5220\u9664", "info");
+  } catch (error) {
+    notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function openManager(ctx, store2, dataDir2) {
+  if (ctx.mode !== "tui") {
+    notify2(ctx, "Action Hub \u7BA1\u7406\u754C\u9762\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
+    return;
+  }
+  let sectionId = "actions";
   for (; ; ) {
-    const choice = await ctx.ui.select("\u7BA1\u7406 Action", ["\u65B0\u5EFA Action", "\u7BA1\u7406\u5DF2\u6709 Action", "\u5206\u7C7B\u7BA1\u7406", BACK]);
-    if (choice === void 0 || choice === BACK) return;
-    if (choice === "\u65B0\u5EFA Action") {
+    const data = await store2.read();
+    const cwd = ctx.cwd ?? process.cwd();
+    const root = await resolveProjectRoot(cwd, data.state.projects);
+    const dashboardData = {
+      actions: sortActions(data.actions),
+      state: data.state,
+      dataDir: dataDir2,
+      currentProjectRoot: root ?? path7.resolve(cwd)
+    };
+    const result = await ctx.ui.custom(
+      (tui, theme, _keybindings, done) => new ManagerDashboard({
+        tui,
+        theme,
+        data: dashboardData,
+        cwd,
+        sectionId,
+        done
+      }),
+      { overlay: true, overlayOptions: { width: "94%", maxHeight: "88%" } }
+    );
+    if (result === void 0 || result === null || result.kind === "close") return;
+    if (result.kind === "new-action") {
+      sectionId = "actions";
       await createAction(ctx, store2);
-      continue;
+    } else if (result.kind === "open-action") {
+      sectionId = "actions";
+      await manageOneAction(ctx, store2, result.action);
+    } else if (result.kind === "edit-action") {
+      sectionId = "actions";
+      await editAction(ctx, store2, result.action);
+    } else if (result.kind === "delete-action") {
+      sectionId = "actions";
+      await deleteAction(ctx, store2, result.action);
+    } else if (result.kind === "toggle-mode") {
+      sectionId = "actions";
+      await toggleMode(ctx, store2, result.action);
+    } else if (result.kind === "pin-action") {
+      sectionId = "actions";
+      await togglePin(ctx, store2, result.action);
+    } else if (result.kind === "groups-action") {
+      sectionId = "actions";
+      await setActionGroups(ctx, store2, result.action);
+    } else if (result.kind === "resources-action") {
+      sectionId = "actions";
+      await showResources(ctx, result.action);
+    } else if (result.kind === "insert-action") {
+      sectionId = "actions";
+      await insertSelected(ctx, store2, result.action);
+      return;
+    } else if (result.kind === "new-group") {
+      sectionId = "groups";
+      await createGroup(ctx, store2);
+    } else if (result.kind === "open-group") {
+      sectionId = "groups";
+      await manageOneGroup(ctx, store2, result.group);
+    } else if (result.kind === "delete-group") {
+      sectionId = "groups";
+      await deleteGroup(ctx, store2, result.group);
+    } else if (result.kind === "edit-project") {
+      sectionId = "projects";
+      await editProjectScope(ctx, store2, result.project.path);
+    } else if (result.kind === "tool") {
+      sectionId = "tools";
+      if (result.tool === "import") {
+        const source = await ctx.ui.input("\u5BFC\u5165\u8DEF\u5F84", "\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u7684\u7EDD\u5BF9\u8DEF\u5F84");
+        if (source !== void 0 && source.trim() !== "") await importFromPath(ctx, store2, dataDir2, source.trim());
+      } else if (result.tool === "export") {
+        await exportActions(ctx, store2, dataDir2);
+      } else if (result.tool === "categories") {
+        await manageCategories(ctx, store2);
+      } else if (result.tool === "settings") {
+        await manageSettings(ctx, store2, dataDir2);
+      }
     }
-    if (choice === "\u5206\u7C7B\u7BA1\u7406") {
-      await manageCategories(ctx, store2);
-      continue;
-    }
-    const action = await pickAction(ctx, store2);
-    if (action !== null) await manageOneAction(ctx, store2, action);
   }
 }
 async function manageOneGroup(ctx, store2, group) {
@@ -9339,27 +9774,6 @@ async function manageOneGroup(ctx, store2, group) {
     }
   }
 }
-async function manageGroups(ctx, store2) {
-  for (; ; ) {
-    const state = await store2.readState();
-    const labels = state.groups.map(groupLabel);
-    const choice = await ctx.ui.select("\u7BA1\u7406\u5206\u7EC4", ["\u65B0\u5EFA\u5206\u7EC4", ...labels, BACK]);
-    if (choice === void 0 || choice === BACK) return;
-    if (choice === "\u65B0\u5EFA\u5206\u7EC4") {
-      const value = await askInput(ctx, "\u5206\u7EC4\u540D");
-      if (!value) continue;
-      try {
-        await store2.createGroup(value);
-        notify2(ctx, "\u5206\u7EC4\u5DF2\u521B\u5EFA", "info");
-      } catch (error) {
-        notify2(ctx, `\u521B\u5EFA\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
-      }
-      continue;
-    }
-    const index = labels.indexOf(choice);
-    if (index >= 0) await manageOneGroup(ctx, store2, state.groups[index]);
-  }
-}
 async function editProjectScope(ctx, store2, projectPath) {
   const state = await store2.readState();
   const existing = state.projects.find((project) => project.path.toLowerCase() === projectPath.toLowerCase());
@@ -9418,24 +9832,6 @@ async function editProjectScope(ctx, store2, projectPath) {
     }
   }
 }
-async function manageProjects(ctx, store2) {
-  for (; ; ) {
-    const state = await store2.readState();
-    const cwd = ctx.cwd ?? process.cwd();
-    const root = await resolveProjectRoot(cwd, state.projects);
-    const target = root ?? path7.resolve(cwd);
-    const labels = state.projects.map((project) => `${project.label}  ${project.path}`);
-    const currentLabel = `\u5F53\u524D\u9879\u76EE\uFF1A${path7.basename(target)}  ${target}`;
-    const choice = await ctx.ui.select("\u9879\u76EE\u8303\u56F4", [currentLabel, ...labels, BACK]);
-    if (choice === void 0 || choice === BACK) return;
-    if (choice === currentLabel) {
-      await editProjectScope(ctx, store2, target);
-      continue;
-    }
-    const index = labels.indexOf(choice);
-    if (index >= 0) await editProjectScope(ctx, store2, state.projects[index].path);
-  }
-}
 async function manageSettings(ctx, store2, dataDir2) {
   for (; ; ) {
     const state = await store2.readState();
@@ -9469,41 +9865,9 @@ async function manageSettings(ctx, store2, dataDir2) {
     }
   }
 }
-async function openManager(ctx, store2, dataDir2) {
-  if (ctx.mode !== "tui") {
-    notify2(ctx, "Action Hub \u7BA1\u7406\u754C\u9762\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
-    return;
-  }
-  for (; ; ) {
-    const choice = await ctx.ui.select("Action Hub \u7BA1\u7406", [
-      "Action \u7BA1\u7406",
-      "\u5206\u7EC4\u7BA1\u7406",
-      "\u9879\u76EE\u8303\u56F4",
-      "\u5BFC\u5165 Action",
-      "\u5BFC\u51FA Action",
-      "\u8BBE\u7F6E",
-      "\u5173\u95ED"
-    ]);
-    if (choice === void 0 || choice === "\u5173\u95ED") return;
-    if (choice === "Action \u7BA1\u7406") {
-      await manageActions(ctx, store2);
-    } else if (choice === "\u5206\u7EC4\u7BA1\u7406") {
-      await manageGroups(ctx, store2);
-    } else if (choice === "\u9879\u76EE\u8303\u56F4") {
-      await manageProjects(ctx, store2);
-    } else if (choice === "\u5BFC\u5165 Action") {
-      const source = await ctx.ui.input("\u5BFC\u5165\u8DEF\u5F84", "\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u7684\u7EDD\u5BF9\u8DEF\u5F84");
-      if (source !== void 0 && source.trim() !== "") await importFromPath(ctx, store2, dataDir2, source.trim());
-    } else if (choice === "\u5BFC\u51FA Action") {
-      await exportActions(ctx, store2, dataDir2);
-    } else if (choice === "\u8BBE\u7F6E") {
-      await manageSettings(ctx, store2, dataDir2);
-    }
-  }
-}
 
 // src/palette.js
-import { Key as Key2, matchesKey as matchesKey2, truncateToWidth as truncateToWidth2, visibleWidth as visibleWidth2 } from "@earendil-works/pi-tui";
+import { Key as Key3, matchesKey as matchesKey3, truncateToWidth as truncateToWidth3, visibleWidth as visibleWidth3 } from "@earendil-works/pi-tui";
 var MAX_ROWS2 = 12;
 function compileMatcher(query, regex) {
   const text = query.trim();
@@ -9519,8 +9883,8 @@ function compileMatcher(query, regex) {
     return () => false;
   }
 }
-function padRight2(value, width) {
-  return value + " ".repeat(Math.max(0, width - visibleWidth2(value)));
+function padRight3(value, width) {
+  return value + " ".repeat(Math.max(0, width - visibleWidth3(value)));
 }
 var ActionPalette = class {
   constructor({ tui, theme, actions, groups = [], done, initialQuery = "" }) {
@@ -9553,32 +9917,32 @@ var ActionPalette = class {
     return this.matches[this.selected] ?? null;
   }
   handleInput(data) {
-    if (matchesKey2(data, Key2.escape)) {
+    if (matchesKey3(data, Key3.escape)) {
       this.done(void 0);
       return;
     }
-    if (matchesKey2(data, Key2.up)) {
+    if (matchesKey3(data, Key3.up)) {
       this.selected = Math.max(0, this.selected - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey2(data, Key2.down)) {
+    if (matchesKey3(data, Key3.down)) {
       this.selected = Math.min(this.matches.length - 1, this.selected + 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey2(data, "alt+r")) {
+    if (matchesKey3(data, "alt+r")) {
       this.regex = !this.regex;
       this.selected = 0;
       this.tui.requestRender();
       return;
     }
-    if (matchesKey2(data, Key2.return) || matchesKey2(data, "tab")) {
+    if (matchesKey3(data, Key3.return) || matchesKey3(data, "tab")) {
       const action = this.current;
       if (action !== null) this.done(action);
       return;
     }
-    if (matchesKey2(data, Key2.backspace) || data === "\x7F") {
+    if (matchesKey3(data, Key3.backspace) || data === "\x7F") {
       if (this.cursor > 0) {
         this.query = this.query.slice(0, this.cursor - 1) + this.query.slice(this.cursor);
         this.cursor -= 1;
@@ -9587,12 +9951,12 @@ var ActionPalette = class {
       }
       return;
     }
-    if (matchesKey2(data, Key2.left)) {
+    if (matchesKey3(data, Key3.left)) {
       this.cursor = Math.max(0, this.cursor - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey2(data, Key2.right)) {
+    if (matchesKey3(data, Key3.right)) {
       this.cursor = Math.min(this.query.length, this.cursor + 1);
       this.tui.requestRender();
       return;
@@ -9612,7 +9976,7 @@ var ActionPalette = class {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
     const inner = Math.max(40, Math.min(width, 88) - 2);
-    const row = (value) => paint("border", "\u2502") + padRight2(value, inner) + paint("border", "\u2502");
+    const row = (value) => paint("border", "\u2502") + padRight3(value, inner) + paint("border", "\u2502");
     const header = `${paint("accent", " Action Hub ")}${paint("dim", "  /ah  \xB7  Alt+A")}`;
     const lines = [paint("border", `\u256D${"\u2500".repeat(inner)}\u256E`), row(` ${header}`)];
     const cursor = this.cursor < this.query.length ? `${this.query.slice(0, this.cursor)}${paint("accent", "\u258C")}${this.query.slice(this.cursor + 1)}` : `${this.query}${paint("accent", "\u258C")}`;
@@ -9634,7 +9998,7 @@ var ActionPalette = class {
           action.pinned ? "\u2605" : "",
           ...(action.groups ?? []).map((id) => groupNames.get(id)).filter(Boolean)
         ].filter(Boolean).join(" ");
-        const details = truncateToWidth2(` ${action.description ?? ""}`, Math.max(8, inner - 24 - badges.length));
+        const details = truncateToWidth3(` ${action.description ?? ""}`, Math.max(8, inner - 24 - badges.length));
         lines.push(row(` ${marker} ${mode} ${name} ${badges ? paint("warning", badges) : ""} ${paint("dim", details)}`));
       }
       if (matches.length > MAX_ROWS2) {

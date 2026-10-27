@@ -5,9 +5,30 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { createStore } from 'action-hub';
+import { ManagerDashboard } from '../src/manager-dashboard.js';
 import { MultiSelect } from '../src/multi-select.js';
 import { openManager } from '../src/management.js';
 import { insertAction } from '../src/insert.js';
+
+test('dashboard renders three columns with section counts and details', () => {
+  const dashboard = new ManagerDashboard({
+    tui: { requestRender() {} },
+    theme: { fg: (_color, value) => value },
+    data: {
+      actions: [{ name: 'commit', description: 'Commit', mode: 'command', groups: [] }],
+      state: { groups: [{ id: 'common', name: 'Common', global: true, includes: [] }], projects: [] },
+      dataDir: 'E:\\data',
+    },
+    cwd: 'E:\\project',
+    done() {},
+  });
+  const lines = dashboard.render(110);
+  assert.ok(lines.length > 15);
+  const text = lines.join('\n');
+  assert.match(text, /Action/u);
+  assert.match(text, /commit/u);
+  assert.match(text, /详情/u);
+});
 
 test('multi-select filters, toggles, and returns checked keys', () => {
   let result;
@@ -27,10 +48,11 @@ test('multi-select filters, toggles, and returns checked keys', () => {
   assert.deepEqual(result, []);
 });
 
-test('manager can create an Action through the native dialog sequence', async () => {
+test('manager can create an Action through the split-pane dashboard', async () => {
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-manager-'));
   const store = createStore({ dataDir });
-  const selections = ['Action 管理', '新建 Action', 'Command（仅用户调用）', '返回', '关闭'];
+  const customResults = [{ kind: 'new-action' }, [], { kind: 'close' }];
+  const selections = ['Command（仅用户调用）'];
   const inputs = ['demo-action', '演示 Action'];
   const editors = ['演示正文'];
   const ctx = {
@@ -41,7 +63,7 @@ test('manager can create an Action through the native dialog sequence', async ()
       async input() { return inputs.shift(); },
       async editor() { return editors.shift(); },
       async confirm() { return true; },
-      async custom() { return []; },
+      async custom() { return customResults.shift(); },
       notify() {},
       pasteToEditor() {},
       async reload() {},
