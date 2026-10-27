@@ -113,17 +113,17 @@ var require_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path7) {
-      const ctrl = callVisitor(key, node, visitor, path7);
+    function visit_(key, node, visitor, path8) {
+      const ctrl = callVisitor(key, node, visitor, path8);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path7, ctrl);
-        return visit_(key, ctrl, visitor, path7);
+        replaceNode(key, path8, ctrl);
+        return visit_(key, ctrl, visitor, path8);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path7 = Object.freeze(path7.concat(node));
+          path8 = Object.freeze(path8.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path7);
+            const ci = visit_(i, node.items[i], visitor, path8);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -134,13 +134,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path7 = Object.freeze(path7.concat(node));
-          const ck = visit_("key", node.key, visitor, path7);
+          path8 = Object.freeze(path8.concat(node));
+          const ck = visit_("key", node.key, visitor, path8);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = visit_("value", node.value, visitor, path7);
+          const cv = visit_("value", node.value, visitor, path8);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -161,17 +161,17 @@ var require_visit = __commonJS({
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path7) {
-      const ctrl = await callVisitor(key, node, visitor, path7);
+    async function visitAsync_(key, node, visitor, path8) {
+      const ctrl = await callVisitor(key, node, visitor, path8);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path7, ctrl);
-        return visitAsync_(key, ctrl, visitor, path7);
+        replaceNode(key, path8, ctrl);
+        return visitAsync_(key, ctrl, visitor, path8);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path7 = Object.freeze(path7.concat(node));
+          path8 = Object.freeze(path8.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path7);
+            const ci = await visitAsync_(i, node.items[i], visitor, path8);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -182,13 +182,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path7 = Object.freeze(path7.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path7);
+          path8 = Object.freeze(path8.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path8);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path7);
+          const cv = await visitAsync_("value", node.value, visitor, path8);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -215,23 +215,23 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path7) {
+    function callVisitor(key, node, visitor, path8) {
       if (typeof visitor === "function")
-        return visitor(key, node, path7);
+        return visitor(key, node, path8);
       if (identity.isMap(node))
-        return visitor.Map?.(key, node, path7);
+        return visitor.Map?.(key, node, path8);
       if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path7);
+        return visitor.Seq?.(key, node, path8);
       if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path7);
+        return visitor.Pair?.(key, node, path8);
       if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path7);
+        return visitor.Scalar?.(key, node, path8);
       if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path7);
+        return visitor.Alias?.(key, node, path8);
       return void 0;
     }
-    function replaceNode(key, path7, node) {
-      const parent = path7[path7.length - 1];
+    function replaceNode(key, path8, node) {
+      const parent = path8[path8.length - 1];
       if (identity.isCollection(parent)) {
         parent.items[key] = node;
       } else if (identity.isPair(parent)) {
@@ -843,10 +843,10 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node = require_Node();
-    function collectionFromPath(schema, path7, value) {
+    function collectionFromPath(schema, path8, value) {
       let v = value;
-      for (let i = path7.length - 1; i >= 0; --i) {
-        const k = path7[i];
+      for (let i = path8.length - 1; i >= 0; --i) {
+        const k = path8[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
           a[k] = v;
@@ -865,7 +865,7 @@ var require_Collection = __commonJS({
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
-    var isEmptyPath = (path7) => path7 == null || typeof path7 === "object" && !!path7[Symbol.iterator]().next().done;
+    var isEmptyPath = (path8) => path8 == null || typeof path8 === "object" && !!path8[Symbol.iterator]().next().done;
     var Collection = class extends Node.NodeBase {
       constructor(type, schema) {
         super(type);
@@ -895,11 +895,11 @@ var require_Collection = __commonJS({
        * be a Pair instance or a `{ key, value }` object, which may not have a key
        * that already exists in the map.
        */
-      addIn(path7, value) {
-        if (isEmptyPath(path7))
+      addIn(path8, value) {
+        if (isEmptyPath(path8))
           this.add(value);
         else {
-          const [key, ...rest] = path7;
+          const [key, ...rest] = path8;
           const node = this.get(key, true);
           if (identity.isCollection(node))
             node.addIn(rest, value);
@@ -913,8 +913,8 @@ var require_Collection = __commonJS({
        * Removes a value from the collection.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path7) {
-        const [key, ...rest] = path7;
+      deleteIn(path8) {
+        const [key, ...rest] = path8;
         if (rest.length === 0)
           return this.delete(key);
         const node = this.get(key, true);
@@ -928,8 +928,8 @@ var require_Collection = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path7, keepScalar) {
-        const [key, ...rest] = path7;
+      getIn(path8, keepScalar) {
+        const [key, ...rest] = path8;
         const node = this.get(key, true);
         if (rest.length === 0)
           return !keepScalar && identity.isScalar(node) ? node.value : node;
@@ -947,8 +947,8 @@ var require_Collection = __commonJS({
       /**
        * Checks if the collection includes a value with the key `key`.
        */
-      hasIn(path7) {
-        const [key, ...rest] = path7;
+      hasIn(path8) {
+        const [key, ...rest] = path8;
         if (rest.length === 0)
           return this.has(key);
         const node = this.get(key, true);
@@ -958,8 +958,8 @@ var require_Collection = __commonJS({
        * Sets a value in this collection. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path7, value) {
-        const [key, ...rest] = path7;
+      setIn(path8, value) {
+        const [key, ...rest] = path8;
         if (rest.length === 0) {
           this.set(key, value);
         } else {
@@ -3474,9 +3474,9 @@ var require_Document = __commonJS({
           this.contents.add(value);
       }
       /** Adds a value to the document. */
-      addIn(path7, value) {
+      addIn(path8, value) {
         if (assertCollection(this.contents))
-          this.contents.addIn(path7, value);
+          this.contents.addIn(path8, value);
       }
       /**
        * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
@@ -3551,14 +3551,14 @@ var require_Document = __commonJS({
        * Removes a value from the document.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path7) {
-        if (Collection.isEmptyPath(path7)) {
+      deleteIn(path8) {
+        if (Collection.isEmptyPath(path8)) {
           if (this.contents == null)
             return false;
           this.contents = null;
           return true;
         }
-        return assertCollection(this.contents) ? this.contents.deleteIn(path7) : false;
+        return assertCollection(this.contents) ? this.contents.deleteIn(path8) : false;
       }
       /**
        * Returns item at `key`, or `undefined` if not found. By default unwraps
@@ -3573,10 +3573,10 @@ var require_Document = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path7, keepScalar) {
-        if (Collection.isEmptyPath(path7))
+      getIn(path8, keepScalar) {
+        if (Collection.isEmptyPath(path8))
           return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
-        return identity.isCollection(this.contents) ? this.contents.getIn(path7, keepScalar) : void 0;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path8, keepScalar) : void 0;
       }
       /**
        * Checks if the document includes a value with the key `key`.
@@ -3587,10 +3587,10 @@ var require_Document = __commonJS({
       /**
        * Checks if the document includes a value at `path`.
        */
-      hasIn(path7) {
-        if (Collection.isEmptyPath(path7))
+      hasIn(path8) {
+        if (Collection.isEmptyPath(path8))
           return this.contents !== void 0;
-        return identity.isCollection(this.contents) ? this.contents.hasIn(path7) : false;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path8) : false;
       }
       /**
        * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -3607,13 +3607,13 @@ var require_Document = __commonJS({
        * Sets a value in this document. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path7, value) {
-        if (Collection.isEmptyPath(path7)) {
+      setIn(path8, value) {
+        if (Collection.isEmptyPath(path8)) {
           this.contents = value;
         } else if (this.contents == null) {
-          this.contents = Collection.collectionFromPath(this.schema, Array.from(path7), value);
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path8), value);
         } else if (assertCollection(this.contents)) {
-          this.contents.setIn(path7, value);
+          this.contents.setIn(path8, value);
         }
       }
       /**
@@ -5574,9 +5574,9 @@ var require_cst_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path7) => {
+    visit.itemAtPath = (cst, path8) => {
       let item = cst;
-      for (const [field, index] of path7) {
+      for (const [field, index] of path8) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
           item = tok.items[index];
@@ -5585,23 +5585,23 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path7) => {
-      const parent = visit.itemAtPath(cst, path7.slice(0, -1));
-      const field = path7[path7.length - 1][0];
+    visit.parentCollection = (cst, path8) => {
+      const parent = visit.itemAtPath(cst, path8.slice(0, -1));
+      const field = path8[path8.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
         return coll;
       throw new Error("Parent collection not found");
     };
-    function _visit(path7, item, visitor) {
-      let ctrl = visitor(item, path7);
+    function _visit(path8, item, visitor) {
+      let ctrl = visitor(item, path8);
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
         const token = item[field];
         if (token && "items" in token) {
           for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path7.concat([[field, i]])), token.items[i], visitor);
+            const ci = _visit(Object.freeze(path8.concat([[field, i]])), token.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -5612,10 +5612,10 @@ var require_cst_visit = __commonJS({
             }
           }
           if (typeof ctrl === "function" && field === "key")
-            ctrl = ctrl(item, path7);
+            ctrl = ctrl(item, path8);
         }
       }
-      return typeof ctrl === "function" ? ctrl(item, path7) : ctrl;
+      return typeof ctrl === "function" ? ctrl(item, path8) : ctrl;
     }
     exports.visit = visit;
   }
@@ -7366,10 +7366,6 @@ var require_dist = __commonJS({
   }
 });
 
-// extensions/action-hub.js
-import { promises as fs6 } from "node:fs";
-import path6 from "node:path";
-
 // ../core/src/store.js
 import { createHash as createHash2, randomUUID } from "node:crypto";
 import { promises as fs3 } from "node:fs";
@@ -7513,6 +7509,9 @@ var PREVIEW_TEXT_LIMIT = 64 * 1024;
 function safeRelativeName(raw) {
   return String(raw).replace(/\\/gu, "/").split("/").filter((part) => part !== "" && part !== "." && part !== "..").join("/");
 }
+function resourcePath(dir, name) {
+  return path2.join(dir, ...safeRelativeName(name).split("/"));
+}
 async function listResources(dir) {
   const out = [];
   async function walk(prefix) {
@@ -7536,6 +7535,28 @@ async function listResources(dir) {
   }
   await walk("");
   return out.sort((left, right) => left.name.localeCompare(right.name));
+}
+function normalizeResourceMeta(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry) => entry !== null && typeof entry === "object" && typeof entry.name === "string").map((entry) => ({ name: safeRelativeName(entry.name), bytes: Number.isFinite(entry.bytes) ? entry.bytes : 0 })).filter((entry) => entry.name !== "" && entry.name !== SKILL_FILE);
+}
+async function readResourcePreviews(dir, meta) {
+  const entries = Array.isArray(meta) && meta.length > 0 ? normalizeResourceMeta(meta) : await listResources(dir);
+  const out = [];
+  for (const entry of entries) {
+    const stat = await fs2.stat(resourcePath(dir, entry.name)).catch(() => void 0);
+    if (stat === void 0) continue;
+    const next = { name: entry.name, bytes: stat.size };
+    if (stat.size <= PREVIEW_TEXT_LIMIT) {
+      try {
+        const buffer = await fs2.readFile(resourcePath(dir, entry.name));
+        if (!buffer.includes(0)) next.text = buffer.toString("utf8");
+      } catch {
+      }
+    }
+    out.push(next);
+  }
+  return out;
 }
 
 // ../core/src/store.js
@@ -7643,9 +7664,9 @@ function normalizeGroups(raw) {
   }
   return out;
 }
-function defaultProjectProfile(path7 = "", label = "", groupId = "") {
+function defaultProjectProfile(path8 = "", label = "", groupId = "") {
   return {
-    path: path7,
+    path: path8,
     label,
     groups: groupId === "" ? [] : [groupId],
     actions: [],
@@ -8276,6 +8297,76 @@ var CRC_TABLE = (() => {
   }
   return table;
 })();
+function crc32(buffer) {
+  let crc = 4294967295;
+  for (const byte of buffer) crc = CRC_TABLE[(crc ^ byte) & 255] ^ crc >>> 8;
+  return (crc ^ 4294967295) >>> 0;
+}
+function dosDateTime(date) {
+  const value = date instanceof Date ? date : /* @__PURE__ */ new Date();
+  const year = Math.max(1980, value.getFullYear());
+  const dosTime = value.getHours() << 11 | value.getMinutes() << 5 | Math.floor(value.getSeconds() / 2);
+  const dosDate = year - 1980 << 9 | value.getMonth() + 1 << 5 | value.getDate();
+  return { dosTime: dosTime & 65535, dosDate: dosDate & 65535 };
+}
+function createZip(entries) {
+  const locals = [];
+  const central = [];
+  let offset = 0;
+  for (const entry of entries) {
+    if (entries.length > MAX_ENTRIES) throw new Error("ZIP \u6761\u76EE\u8FC7\u591A");
+    const name = Buffer.from(String(entry.name), "utf8");
+    const data = Buffer.from(entry.data);
+    const method = data.length === 0 ? 0 : 8;
+    const compressed = method === 8 ? zlib.deflateRawSync(data) : data;
+    const crc = crc32(data);
+    const { dosTime, dosDate } = dosDateTime(entry.mtime);
+    const local = Buffer.alloc(30);
+    local.writeUInt32LE(LOCAL_SIG, 0);
+    local.writeUInt16LE(20, 4);
+    local.writeUInt16LE(2048, 6);
+    local.writeUInt16LE(method, 8);
+    local.writeUInt16LE(dosTime, 10);
+    local.writeUInt16LE(dosDate, 12);
+    local.writeUInt32LE(crc, 14);
+    local.writeUInt32LE(compressed.length, 18);
+    local.writeUInt32LE(data.length, 22);
+    local.writeUInt16LE(name.length, 26);
+    local.writeUInt16LE(0, 28);
+    locals.push(local, name, compressed);
+    const header = Buffer.alloc(46);
+    header.writeUInt32LE(CENTRAL_SIG, 0);
+    header.writeUInt16LE(20, 4);
+    header.writeUInt16LE(20, 6);
+    header.writeUInt16LE(2048, 8);
+    header.writeUInt16LE(method, 10);
+    header.writeUInt16LE(dosTime, 12);
+    header.writeUInt16LE(dosDate, 14);
+    header.writeUInt32LE(crc, 16);
+    header.writeUInt32LE(compressed.length, 20);
+    header.writeUInt32LE(data.length, 24);
+    header.writeUInt16LE(name.length, 28);
+    header.writeUInt16LE(0, 30);
+    header.writeUInt16LE(0, 32);
+    header.writeUInt16LE(0, 34);
+    header.writeUInt16LE(0, 36);
+    header.writeUInt32LE(0, 38);
+    header.writeUInt32LE(offset, 42);
+    central.push(header, name);
+    offset += local.length + name.length + compressed.length;
+  }
+  const centralBuffer = Buffer.concat(central);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(EOCD_SIG, 0);
+  eocd.writeUInt16LE(0, 4);
+  eocd.writeUInt16LE(0, 6);
+  eocd.writeUInt16LE(entries.length, 8);
+  eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(centralBuffer.length, 12);
+  eocd.writeUInt32LE(offset, 16);
+  eocd.writeUInt16LE(0, 20);
+  return Buffer.concat([...locals, centralBuffer, eocd]);
+}
 function readZip(buffer) {
   const input = Buffer.from(buffer);
   let eocd = -1;
@@ -8328,6 +8419,21 @@ function readZip(buffer) {
 }
 
 // ../core/src/bundle.js
+async function exportZipBuffer(store2, dataDir2, selection = void 0) {
+  const { actions } = await store2.read();
+  const ids = selection === void 0 ? null : typeof selection === "string" ? [selection] : [...selection];
+  const selected = ids === null ? actions : actions.filter((entry) => ids.includes(entry.id));
+  if (selected.length === 0) throw new Error("\u6CA1\u6709\u53EF\u5BFC\u51FA\u7684\u6280\u80FD");
+  const entries = [];
+  for (const action of selected) {
+    const folder = action.name;
+    for (const relative of [SKILL_FILE, ...await listFiles(action.dir)]) {
+      entries.push({ name: `${folder}/${relative}`, data: await fs4.readFile(path4.join(action.dir, relative)) });
+    }
+  }
+  const filename = ids === null ? "action-hub.zip" : ids.length === 1 ? `${selected[0].name}.zip` : "action-hub-selection.zip";
+  return { buffer: createZip(entries), count: selected.length, filename };
+}
 async function collectFolderSkills(root) {
   const direct = await readSkillDir(root);
   if (direct.error === "") return [direct];
@@ -8614,19 +8720,100 @@ async function loadCatalog(store2, cwd = process.cwd()) {
     actions
   };
 }
-function renderAction(action, args = "") {
-  if (action === null || typeof action !== "object") return "";
-  const trimmed = typeof args === "string" ? args.trim() : "";
-  if (action.mode === "skill") {
-    return trimmed === "" ? `/skill:${action.name}` : `/skill:${action.name} ${trimmed}`;
+
+// src/import-export.js
+import { promises as fs6 } from "node:fs";
+import path6 from "node:path";
+function notify(ctx, text, kind = "info") {
+  try {
+    ctx.ui.notify(text, kind);
+  } catch {
   }
-  return expandPrompt(action.prompt ?? "", { args: trimmed });
+}
+async function readPlan(ctx, store2, dataDir2, target) {
+  const stat = await fs6.stat(target).catch(() => void 0);
+  if (stat === void 0) throw new Error(`\u8DEF\u5F84\u4E0D\u5B58\u5728\uFF1A${target}`);
+  if (stat.isDirectory()) {
+    return { kind: "folder", preview: await previewFolder(store2, dataDir2, target) };
+  }
+  const buffer = await fs6.readFile(target);
+  return { kind: "zip", preview: await previewZipBuffer(store2, dataDir2, buffer), buffer };
+}
+async function importFromPath(ctx, store2, dataDir2, source) {
+  if (ctx.mode !== "tui") {
+    notify(ctx, "\u5BFC\u5165\u529F\u80FD\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
+    return;
+  }
+  const target = path6.resolve(ctx.cwd ?? process.cwd(), source);
+  const { kind, preview, buffer } = await readPlan(ctx, store2, dataDir2, target);
+  const summary = preview.summary;
+  const confirmed = await ctx.ui.confirm(
+    "\u5BFC\u5165 Action",
+    `\u5171 ${summary.total} \u9879\uFF1A\u65B0\u589E ${summary.new}\uFF0C\u91CD\u590D ${summary.duplicate}\uFF0C\u66F4\u65B0 ${summary.update}\uFF0C\u51B2\u7A81 ${summary.conflict}\u3002`
+  );
+  if (!confirmed) return;
+  const mode = await ctx.ui.select("\u65B0\u589E Action \u7684\u5BFC\u5165\u65B9\u5F0F", ["Command\uFF08\u4EC5\u7528\u6237\u8C03\u7528\uFF09", "Skill\uFF08\u6A21\u578B\u53EF\u8C03\u7528\uFF09"]);
+  const createMode = mode === void 0 ? void 0 : mode.startsWith("Skill") ? "create-skill" : "create-command";
+  if (createMode === void 0) return;
+  const update = summary.update > 0 ? await ctx.ui.confirm("\u66F4\u65B0\u5DF2\u6709 Action", `\u68C0\u6D4B\u5230 ${summary.update} \u4E2A\u5DF2\u6709 Action\uFF0C\u662F\u5426\u7528\u5BFC\u5165\u5185\u5BB9\u66F4\u65B0\uFF1F`) : false;
+  const decisions = preview.items.map((item) => {
+    if (item.status === "new") return { key: item.key, mode: createMode };
+    if (item.status === "update" && update) return { key: item.key, mode: "update" };
+    return { key: item.key, mode: "skip" };
+  });
+  const result = kind === "folder" ? await applyFolderPlan(store2, dataDir2, target, decisions, []) : await applyZipPlan(store2, dataDir2, buffer, decisions, []);
+  notify(ctx, `\u5BFC\u5165\u5B8C\u6210\uFF1A\u65B0\u589E ${result.imported}\uFF0C\u66F4\u65B0 ${result.updated}\uFF0C\u8DF3\u8FC7 ${result.skipped}\uFF0C\u51B2\u7A81 ${result.conflicts}\u3002`, "info");
+  await ctx.reload();
+}
+async function exportActions(ctx, store2, dataDir2) {
+  if (ctx.mode !== "tui") {
+    notify(ctx, "\u5BFC\u51FA\u529F\u80FD\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
+    return;
+  }
+  const { actions } = await store2.read();
+  if (actions.length === 0) {
+    notify(ctx, "\u5F53\u524D\u6CA1\u6709\u53EF\u5BFC\u51FA\u7684 Action\u3002", "info");
+    return;
+  }
+  const scope = await ctx.ui.select("\u5BFC\u51FA\u8303\u56F4", ["\u5168\u90E8 Action", "\u9009\u62E9\u4E00\u4E2A Action"]);
+  let selection;
+  if (scope === void 0) return;
+  if (scope.startsWith("\u9009\u62E9")) {
+    const labels = actions.map((action2) => `${action2.name} \u2014 ${action2.description}`);
+    const choice = await ctx.ui.select("\u9009\u62E9\u8981\u5BFC\u51FA\u7684 Action", labels);
+    if (choice === void 0) return;
+    const action = actions[labels.indexOf(choice)];
+    if (action === void 0) return;
+    selection = [action.id];
+  }
+  const defaultPath = path6.join(ctx.cwd ?? process.cwd(), selection === void 0 ? "action-hub.zip" : `${selection[0]}.zip`);
+  const raw = await ctx.ui.input("\u5BFC\u51FA\u8DEF\u5F84", defaultPath);
+  if (raw === void 0 || raw.trim() === "") return;
+  const target = path6.resolve(ctx.cwd ?? process.cwd(), raw.trim());
+  const exists = await fs6.stat(target).then(() => true).catch(() => false);
+  if (exists && !await ctx.ui.confirm("\u8986\u76D6\u6587\u4EF6", `${target} \u5DF2\u5B58\u5728\uFF0C\u662F\u5426\u8986\u76D6\uFF1F`)) return;
+  const exported = await exportZipBuffer(store2, dataDir2, selection);
+  await fs6.mkdir(path6.dirname(target), { recursive: true });
+  await fs6.writeFile(target, exported.buffer);
+  notify(ctx, `\u5DF2\u5BFC\u51FA ${exported.count} \u4E2A Action \u5230 ${target}`, "info");
 }
 
-// src/palette.js
+// src/insert.js
+async function insertAction(store2, ctx, action, args = "") {
+  const text = action.mode === "skill" ? String(args).trim() === "" ? `/skill:${action.name}` : `/skill:${action.name} ${String(args).trim()}` : expandPrompt(action.prompt ?? "", { args });
+  if (text === "") return;
+  await store2.touch(action.name).catch(() => {
+  });
+  ctx.ui.pasteToEditor(text);
+}
+
+// src/management.js
+import path7 from "node:path";
+
+// src/multi-select.js
 import { Key, matchesKey, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-var MAX_ROWS = 12;
-function compileMatcher(query, regex) {
+var MAX_ROWS = 14;
+function matcherFor(query, regex) {
   const text = query.trim();
   if (text === "") return () => true;
   if (!regex) {
@@ -8643,6 +8830,698 @@ function compileMatcher(query, regex) {
 function padRight(value, width) {
   return value + " ".repeat(Math.max(0, width - visibleWidth(value)));
 }
+var MultiSelect = class {
+  constructor({ tui, theme, title, items, initialSelected = [], done }) {
+    this.tui = tui;
+    this.theme = theme;
+    this.title = title;
+    this.items = items;
+    this.selected = new Set(initialSelected);
+    this.done = done;
+    this.query = "";
+    this.cursor = 0;
+    this.index = 0;
+    this.regex = false;
+    this.focused = false;
+  }
+  get filtered() {
+    const matches = matcherFor(this.query, this.regex);
+    return this.items.filter((item) => matches(`${item.label} ${item.description ?? ""}`));
+  }
+  get current() {
+    return this.filtered[this.index] ?? null;
+  }
+  handleInput(data) {
+    if (matchesKey(data, Key.escape)) {
+      this.done(void 0);
+      return;
+    }
+    if (matchesKey(data, Key.up)) {
+      this.index = Math.max(0, this.index - 1);
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, Key.down)) {
+      this.index = Math.min(this.filtered.length - 1, this.index + 1);
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, "alt+r")) {
+      this.regex = !this.regex;
+      this.index = 0;
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, Key.return)) {
+      this.done([...this.selected]);
+      return;
+    }
+    if (matchesKey(data, Key.space) || data === " ") {
+      const item = this.current;
+      if (item !== null) {
+        if (this.selected.has(item.key)) this.selected.delete(item.key);
+        else this.selected.add(item.key);
+        this.tui.requestRender();
+      }
+      return;
+    }
+    if (matchesKey(data, Key.backspace) || data === "\x7F") {
+      if (this.cursor > 0) {
+        this.query = this.query.slice(0, this.cursor - 1) + this.query.slice(this.cursor);
+        this.cursor -= 1;
+        this.index = 0;
+        this.tui.requestRender();
+      }
+      return;
+    }
+    if (matchesKey(data, Key.left)) {
+      this.cursor = Math.max(0, this.cursor - 1);
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, Key.right)) {
+      this.cursor = Math.min(this.query.length, this.cursor + 1);
+      this.tui.requestRender();
+      return;
+    }
+    if (data.length === 1 && data.charCodeAt(0) >= 32) {
+      this.query = this.query.slice(0, this.cursor) + data + this.query.slice(this.cursor);
+      this.cursor += 1;
+      this.index = 0;
+      this.tui.requestRender();
+    }
+  }
+  invalidate() {
+  }
+  dispose() {
+  }
+  render(width) {
+    const theme = this.theme;
+    const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
+    const inner = Math.max(44, Math.min(width, 88) - 2);
+    const row = (value) => paint("border", "\u2502") + padRight(value, inner) + paint("border", "\u2502");
+    const currentText = this.cursor < this.query.length ? `${this.query.slice(0, this.cursor)}${paint("accent", "\u258C")}${this.query.slice(this.cursor + 1)}` : `${this.query}${paint("accent", "\u258C")}`;
+    const lines = [paint("border", `\u256D${"\u2500".repeat(inner)}\u256E`), row(` ${paint("accent", ` ${this.title} `)}`), row("")];
+    lines.push(row(` ${paint("dim", "\u641C\u7D22:")} ${currentText}${this.regex ? paint("warning", "  .*") : ""}`));
+    lines.push(row(""));
+    const filtered = this.filtered;
+    if (filtered.length === 0) {
+      lines.push(row(` ${paint("dim", "\u6CA1\u6709\u5339\u914D\u9879")}`));
+    } else {
+      const start = Math.max(0, Math.min(this.index - Math.floor(MAX_ROWS / 2), filtered.length - MAX_ROWS));
+      for (let offset = start; offset < Math.min(filtered.length, start + MAX_ROWS); offset += 1) {
+        const item = filtered[offset];
+        const active = offset === this.index;
+        const checked = this.selected.has(item.key);
+        const marker = active ? paint("accent", "\u276F") : " ";
+        const box = checked ? paint("success", "[x]") : paint("dim", "[ ]");
+        const label = active ? paint("accent", item.label) : item.label;
+        const description = truncateToWidth(` ${item.description ?? ""}`, Math.max(8, inner - 24));
+        lines.push(row(` ${marker} ${box} ${label} ${paint("dim", description)}`));
+      }
+      if (filtered.length > MAX_ROWS) {
+        lines.push(row(` ${paint("dim", `${this.index + 1}/${filtered.length}`)}`));
+      }
+    }
+    lines.push(row(""));
+    lines.push(row(` ${paint("dim", `\u5DF2\u9009 ${this.selected.size} \u9879 \xB7 \u7A7A\u683C\u52FE\u9009 \xB7 Enter \u5B8C\u6210 \xB7 Esc \u53D6\u6D88 \xB7 Alt+R \u6B63\u5219`)}`));
+    lines.push(paint("border", `\u2570${"\u2500".repeat(inner)}\u256F`));
+    return lines;
+  }
+};
+
+// src/management.js
+var BACK = "\u8FD4\u56DE";
+function notify2(ctx, text, kind = "info") {
+  try {
+    ctx.ui.notify(text, kind);
+  } catch {
+  }
+}
+function actionLabel(action) {
+  const mode = action.mode === "skill" ? "Skill" : "Command";
+  return `${action.name}  [${mode}]  ${action.description}`;
+}
+function groupLabel(group) {
+  return `${group.name}${group.global ? "\uFF08\u5168\u5C40\uFF09" : ""}  [${group.id}]`;
+}
+async function askInput(ctx, title, placeholder = "") {
+  const value = await ctx.ui.input(title, placeholder);
+  if (value === void 0) return void 0;
+  return value.trim();
+}
+async function pickChecklist(ctx, { title, items, selected }) {
+  return ctx.ui.custom(
+    (tui, theme, _keybindings, done) => new MultiSelect({
+      tui,
+      theme,
+      title,
+      items,
+      initialSelected: selected,
+      done
+    }),
+    { overlay: true }
+  );
+}
+async function loadAll(store2) {
+  const data = await store2.read();
+  return { state: data.state, actions: sortActions(data.actions) };
+}
+async function pickAction(ctx, store2, title = "\u9009\u62E9 Action") {
+  const { actions } = await loadAll(store2);
+  if (actions.length === 0) {
+    notify2(ctx, "\u5F53\u524D\u6CA1\u6709 Action\u3002", "info");
+    return null;
+  }
+  const labels = actions.map(actionLabel);
+  const choice = await ctx.ui.select(title, labels);
+  if (choice === void 0) return null;
+  return actions[labels.indexOf(choice)] ?? null;
+}
+async function pickGroups(ctx, store2, title, selected = []) {
+  const state = await store2.readState();
+  if (state.groups.length === 0) {
+    notify2(ctx, "\u5F53\u524D\u6CA1\u6709\u5206\u7EC4\u3002", "info");
+    return void 0;
+  }
+  return pickChecklist(ctx, {
+    title,
+    items: state.groups.map((group) => ({
+      key: group.id,
+      label: groupLabel(group),
+      description: `\u5305\u542B ${group.includes.length} \u4E2A\u5B50\u5206\u7EC4`
+    })),
+    selected
+  });
+}
+async function pickActionNames(ctx, store2, title, selected = []) {
+  const { actions } = await loadAll(store2);
+  if (actions.length === 0) {
+    notify2(ctx, "\u5F53\u524D\u6CA1\u6709 Action\u3002", "info");
+    return void 0;
+  }
+  return pickChecklist(ctx, {
+    title,
+    items: actions.map((action) => ({
+      key: action.name,
+      label: action.name,
+      description: action.description
+    })),
+    selected
+  });
+}
+function parseTags(value) {
+  return value.split(/[,，\s]+/u).map((tag) => tag.trim()).filter(Boolean);
+}
+async function pickMode(ctx, current = "command") {
+  const choice = await ctx.ui.select("\u9009\u62E9\u6A21\u5F0F", ["Command\uFF08\u4EC5\u7528\u6237\u8C03\u7528\uFF09", "Skill\uFF08\u6A21\u578B\u53EF\u8C03\u7528\uFF09"]);
+  if (choice === void 0) return void 0;
+  return choice.startsWith("Skill") ? "skill" : "command";
+}
+async function createAction(ctx, store2) {
+  const name = await askInput(ctx, "Action \u540D\u79F0\uFF08kebab-case\uFF09");
+  if (!name) return;
+  const description = await askInput(ctx, "\u4E00\u53E5\u8BDD\u63CF\u8FF0");
+  if (!description) return;
+  const prompt = await ctx.ui.editor("Action \u6B63\u6587");
+  if (prompt === void 0 || prompt.trim() === "") return;
+  const mode = await pickMode(ctx);
+  if (mode === void 0) return;
+  const groups = await pickGroups(ctx, store2, "\u9009\u62E9\u6240\u5C5E\u5206\u7EC4", []);
+  if (groups === void 0) return;
+  try {
+    await store2.create({ name, description, prompt, mode, groups });
+    notify2(ctx, `\u5DF2\u521B\u5EFA ${name}`, "info");
+  } catch (error) {
+    notify2(ctx, `\u521B\u5EFA\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+  }
+}
+async function editAction(ctx, store2, action) {
+  const patch = {};
+  let current = action;
+  for (; ; ) {
+    const choice = await ctx.ui.select(`\u7F16\u8F91 ${action.name}`, [
+      "\u540D\u79F0",
+      "\u63CF\u8FF0",
+      "\u6B63\u6587",
+      "\u6A21\u5F0F",
+      "\u5206\u7EC4",
+      "\u5206\u7C7B",
+      "\u6807\u7B7E",
+      "\u53C2\u6570\u63D0\u793A",
+      "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A",
+      "\u4FDD\u5B58\u5E76\u8FD4\u56DE",
+      "\u8FD4\u56DE\u4E0D\u4FDD\u5B58"
+    ]);
+    if (choice === void 0 || choice === "\u8FD4\u56DE\u4E0D\u4FDD\u5B58") return;
+    if (choice === "\u4FDD\u5B58\u5E76\u8FD4\u56DE") {
+      if (Object.keys(patch).length === 0) return;
+      try {
+        current = await store2.update(action.id, patch);
+        notify2(ctx, `\u5DF2\u4FDD\u5B58 ${current.name}`, "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u540D\u79F0") {
+      const value = await askInput(ctx, "\u65B0\u540D\u79F0\uFF08kebab-case\uFF09", current.name);
+      if (value === void 0) continue;
+      if (value === "") continue;
+      patch.name = value;
+      current = { ...current, name: value };
+    } else if (choice === "\u63CF\u8FF0") {
+      const value = await askInput(ctx, "\u65B0\u63CF\u8FF0\uFF08\u7559\u7A7A\u4FDD\u6301\u4E0D\u53D8\uFF09", current.description);
+      if (value === void 0 || value === "") continue;
+      patch.description = value;
+      current = { ...current, description: value };
+    } else if (choice === "\u6B63\u6587") {
+      const value = await ctx.ui.editor("\u7F16\u8F91\u6B63\u6587", current.prompt);
+      if (value === void 0 || value.trim() === "") continue;
+      patch.prompt = value;
+      current = { ...current, prompt: value };
+    } else if (choice === "\u6A21\u5F0F") {
+      const mode = await pickMode(ctx, current.mode);
+      if (mode === void 0) continue;
+      patch.mode = mode;
+      current = { ...current, mode };
+    } else if (choice === "\u5206\u7EC4") {
+      const groups = await pickGroups(ctx, store2, `\u4E3A ${current.name} \u9009\u62E9\u5206\u7EC4`, current.groups);
+      if (groups === void 0) continue;
+      patch.groups = groups;
+      current = { ...current, groups };
+    } else if (choice === "\u5206\u7C7B") {
+      const value = await askInput(ctx, "\u5206\u7C7B\uFF08\u7559\u7A7A\u4FDD\u6301\u4E0D\u53D8\uFF09", current.category ?? "");
+      if (value === void 0) continue;
+      patch.category = value;
+      current = { ...current, category: value };
+    } else if (choice === "\u6807\u7B7E") {
+      const value = await askInput(ctx, "\u6807\u7B7E\uFF0C\u7528\u7A7A\u683C\u6216\u9017\u53F7\u5206\u9694\uFF08\u7559\u7A7A\u4FDD\u6301\u4E0D\u53D8\uFF09", (current.tags ?? []).join(" "));
+      if (value === void 0) continue;
+      patch.tags = parseTags(value);
+      current = { ...current, tags: patch.tags };
+    } else if (choice === "\u53C2\u6570\u63D0\u793A") {
+      const value = await askInput(ctx, "\u53C2\u6570\u63D0\u793A\uFF08\u53EF\u7559\u7A7A\uFF09", current.argsHint ?? "");
+      if (value === void 0) continue;
+      patch.argsHint = value;
+      current = { ...current, argsHint: value };
+    } else if (choice === "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A") {
+      patch.pinned = !current.pinned;
+      current = { ...current, pinned: patch.pinned };
+      notify2(ctx, patch.pinned ? "\u5DF2\u56FA\u5B9A" : "\u5DF2\u53D6\u6D88\u56FA\u5B9A", "info");
+    }
+  }
+}
+async function manageOneAction(ctx, store2, action) {
+  for (; ; ) {
+    const choice = await ctx.ui.select(actionLabel(action), [
+      "\u63D2\u5165\u5230\u7F16\u8F91\u5668",
+      "\u7F16\u8F91",
+      "\u67E5\u770B\u8D44\u6E90",
+      "\u5207\u6362 Command / Skill",
+      "\u8BBE\u7F6E\u5206\u7EC4",
+      "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A",
+      "\u5220\u9664",
+      BACK
+    ]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u63D2\u5165\u5230\u7F16\u8F91\u5668") {
+      let args = "";
+      if (action.argsHint) args = await ctx.ui.input("Action \u53C2\u6570", `${action.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
+      await insertAction(store2, ctx, action, args);
+      return;
+    }
+    if (choice === "\u67E5\u770B\u8D44\u6E90") {
+      const resources = await readResourcePreviews(action.dir);
+      if (resources.length === 0) {
+        notify2(ctx, "\u8FD9\u4E2A Action \u6CA1\u6709\u989D\u5916\u8D44\u6E90\u6587\u4EF6\u3002", "info");
+        return;
+      }
+      const labels = resources.map((resource2) => `${resource2.name} (${resource2.bytes} B)`);
+      const picked = await ctx.ui.select("\u8D44\u6E90\u6587\u4EF6", [...labels, BACK]);
+      if (picked === void 0 || picked === BACK) return;
+      const resource = resources[labels.indexOf(picked)];
+      if (resource === void 0) return;
+      notify2(ctx, resource.text === void 0 ? `${resource.name}\uFF08\u4E8C\u8FDB\u5236\u6216\u5927\u6587\u4EF6\uFF0C\u8BF7\u5728\u6587\u4EF6\u7CFB\u7EDF\u4E2D\u67E5\u770B\uFF09` : resource.text, "info");
+      return;
+    }
+    if (choice === "\u7F16\u8F91") {
+      await editAction(ctx, store2, action);
+      return;
+    }
+    if (choice === "\u5207\u6362 Command / Skill") {
+      try {
+        await store2.setMode(action.id, action.mode === "skill" ? "command" : "skill");
+        notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1BSkill \u53EF\u89C1\u6027\u53D8\u66F4\u540E\u8BF7 /ah reload\u3002", "info");
+      } catch (error) {
+        notify2(ctx, `\u5207\u6362\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u8BBE\u7F6E\u5206\u7EC4") {
+      const groups = await pickGroups(ctx, store2, `\u4E3A ${action.name} \u9009\u62E9\u5206\u7EC4`, action.groups);
+      if (groups === void 0) return;
+      try {
+        await store2.setActionGroups(action.id, groups);
+        notify2(ctx, "\u5206\u7EC4\u5DF2\u66F4\u65B0", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A") {
+      try {
+        await store2.update(action.id, { pinned: !action.pinned });
+        notify2(ctx, action.pinned ? "\u5DF2\u53D6\u6D88\u56FA\u5B9A" : "\u5DF2\u56FA\u5B9A", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u5220\u9664") {
+      if (!await ctx.ui.confirm("\u5220\u9664 Action", `\u786E\u5B9A\u5220\u9664 ${action.name}\uFF1F\u6B64\u64CD\u4F5C\u4E0D\u53EF\u6062\u590D\u3002`)) return;
+      try {
+        await store2.remove(action.id);
+        notify2(ctx, `\u5DF2\u5220\u9664 ${action.name}`, "info");
+      } catch (error) {
+        notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+  }
+}
+async function manageCategories(ctx, store2) {
+  for (; ; ) {
+    const { actions } = await loadAll(store2);
+    const categories = [...new Set(actions.map((action2) => action2.category).filter(Boolean))].sort();
+    if (categories.length === 0) {
+      notify2(ctx, "\u5F53\u524D\u6CA1\u6709\u5206\u7C7B\u3002\u5206\u7C7B\u53EF\u4EE5\u5728\u7F16\u8F91 Action \u65F6\u8BBE\u7F6E\u3002", "info");
+      return;
+    }
+    const choice = await ctx.ui.select("\u5206\u7C7B\u7BA1\u7406", [...categories, BACK]);
+    if (choice === void 0 || choice === BACK) return;
+    const category = categories[categories.indexOf(choice)];
+    if (category === void 0) continue;
+    const action = await ctx.ui.select(`\u5206\u7C7B\uFF1A${category}`, ["\u91CD\u547D\u540D\u5206\u7C7B", "\u6E05\u7A7A\u5206\u7C7B", BACK]);
+    if (action === void 0 || action === BACK) continue;
+    if (action === "\u91CD\u547D\u540D\u5206\u7C7B") {
+      const value = await askInput(ctx, "\u65B0\u7684\u5206\u7C7B\u540D", category);
+      if (value === void 0 || value === "") continue;
+      try {
+        await store2.renameCategory(category, value);
+        notify2(ctx, "\u5206\u7C7B\u5DF2\u91CD\u547D\u540D", "info");
+      } catch (error) {
+        notify2(ctx, `\u91CD\u547D\u540D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+    } else if (action === "\u6E05\u7A7A\u5206\u7C7B") {
+      if (!await ctx.ui.confirm("\u6E05\u7A7A\u5206\u7C7B", `\u628A ${category} \u4ECE\u6240\u6709 Action \u4E0A\u79FB\u9664\uFF1F`)) continue;
+      try {
+        await store2.deleteCategory(category);
+        notify2(ctx, "\u5206\u7C7B\u5DF2\u6E05\u7A7A", "info");
+      } catch (error) {
+        notify2(ctx, `\u64CD\u4F5C\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+    }
+  }
+}
+async function manageActions(ctx, store2) {
+  for (; ; ) {
+    const choice = await ctx.ui.select("\u7BA1\u7406 Action", ["\u65B0\u5EFA Action", "\u7BA1\u7406\u5DF2\u6709 Action", "\u5206\u7C7B\u7BA1\u7406", BACK]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u65B0\u5EFA Action") {
+      await createAction(ctx, store2);
+      continue;
+    }
+    if (choice === "\u5206\u7C7B\u7BA1\u7406") {
+      await manageCategories(ctx, store2);
+      continue;
+    }
+    const action = await pickAction(ctx, store2);
+    if (action !== null) await manageOneAction(ctx, store2, action);
+  }
+}
+async function manageOneGroup(ctx, store2, group) {
+  for (; ; ) {
+    const choice = await ctx.ui.select(groupLabel(group), [
+      "\u6539\u540D",
+      "\u8BBE\u7F6E\u5168\u5C40\u5206\u7EC4",
+      "\u8BBE\u7F6E\u6210\u5458 Action",
+      "\u8BBE\u7F6E\u5305\u542B\u7684\u5B50\u5206\u7EC4",
+      "\u5220\u9664\u5206\u7EC4",
+      BACK
+    ]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u6539\u540D") {
+      const value = await askInput(ctx, "\u65B0\u5206\u7EC4\u540D", group.name);
+      if (value === void 0 || value === "") continue;
+      try {
+        await store2.renameGroup(group.id, value);
+        notify2(ctx, "\u5206\u7EC4\u5DF2\u6539\u540D", "info");
+      } catch (error) {
+        notify2(ctx, `\u6539\u540D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u8BBE\u7F6E\u5168\u5C40\u5206\u7EC4") {
+      const next = !group.global;
+      if (!await ctx.ui.confirm("\u5168\u5C40\u5206\u7EC4", next ? `\u8BA9 ${group.name} \u5728\u6240\u6709\u9879\u76EE\u53EF\u7528\uFF1F` : `\u53D6\u6D88 ${group.name} \u7684\u5168\u5C40\u72B6\u6001\uFF1F`)) return;
+      try {
+        await store2.setGroupGlobal(group.id, next);
+        notify2(ctx, next ? "\u5DF2\u8BBE\u4E3A\u5168\u5C40\u5206\u7EC4" : "\u5DF2\u53D6\u6D88\u5168\u5C40\u5206\u7EC4", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u8BBE\u7F6E\u6210\u5458 Action") {
+      const data = await store2.read();
+      const members = data.actions.filter((action) => (action.groups ?? []).includes(group.id)).map((action) => action.name);
+      const names = await pickActionNames(ctx, store2, `\u9009\u62E9 ${group.name} \u7684\u6210\u5458`, members);
+      if (names === void 0) return;
+      try {
+        await store2.setGroupActions(group.id, names);
+        notify2(ctx, "\u6210\u5458\u5DF2\u66F4\u65B0", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u8BBE\u7F6E\u5305\u542B\u7684\u5B50\u5206\u7EC4") {
+      const state = await store2.readState();
+      const items = state.groups.filter((entry) => entry.id !== group.id);
+      if (items.length === 0) {
+        notify2(ctx, "\u6CA1\u6709\u5176\u4ED6\u5206\u7EC4\u53EF\u5305\u542B\u3002", "info");
+        return;
+      }
+      const ids = await pickChecklist(ctx, {
+        title: `\u9009\u62E9 ${group.name} \u5305\u542B\u7684\u5B50\u5206\u7EC4`,
+        items: items.map((entry) => ({ key: entry.id, label: groupLabel(entry) })),
+        selected: group.includes ?? []
+      });
+      if (ids === void 0) return;
+      try {
+        await store2.setGroupIncludes(group.id, ids);
+        notify2(ctx, "\u5B50\u5206\u7EC4\u5DF2\u66F4\u65B0", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u5220\u9664\u5206\u7EC4") {
+      if (!await ctx.ui.confirm("\u5220\u9664\u5206\u7EC4", `\u786E\u5B9A\u5220\u9664 ${group.name}\uFF1F\u5176\u4E2D\u7684\u6210\u5458\u4F1A\u5931\u53BB\u8FD9\u4E2A\u5206\u7EC4\u3002`)) return;
+      try {
+        await store2.deleteGroup(group.id);
+        notify2(ctx, "\u5206\u7EC4\u5DF2\u5220\u9664", "info");
+      } catch (error) {
+        notify2(ctx, `\u5220\u9664\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+  }
+}
+async function manageGroups(ctx, store2) {
+  for (; ; ) {
+    const state = await store2.readState();
+    const labels = state.groups.map(groupLabel);
+    const choice = await ctx.ui.select("\u7BA1\u7406\u5206\u7EC4", ["\u65B0\u5EFA\u5206\u7EC4", ...labels, BACK]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u65B0\u5EFA\u5206\u7EC4") {
+      const value = await askInput(ctx, "\u5206\u7EC4\u540D");
+      if (!value) continue;
+      try {
+        await store2.createGroup(value);
+        notify2(ctx, "\u5206\u7EC4\u5DF2\u521B\u5EFA", "info");
+      } catch (error) {
+        notify2(ctx, `\u521B\u5EFA\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      continue;
+    }
+    const index = labels.indexOf(choice);
+    if (index >= 0) await manageOneGroup(ctx, store2, state.groups[index]);
+  }
+}
+async function editProjectScope(ctx, store2, projectPath) {
+  const state = await store2.readState();
+  const existing = state.projects.find((project) => project.path.toLowerCase() === projectPath.toLowerCase());
+  let profile = {
+    label: existing?.label ?? path7.basename(projectPath),
+    groups: existing?.groups ?? [],
+    actions: existing?.actions ?? [],
+    excludeGroups: existing?.excludeGroups ?? [],
+    excludeActions: existing?.excludeActions ?? []
+  };
+  for (; ; ) {
+    const choice = await ctx.ui.select(`\u9879\u76EE\u8303\u56F4\uFF1A${profile.label}`, [
+      "\u542F\u7528\u5206\u7EC4",
+      "\u542F\u7528\u5355\u4E2A Action",
+      "\u5C4F\u853D\u5206\u7EC4",
+      "\u5C4F\u853D Action",
+      "\u4FEE\u6539\u9879\u76EE\u540D\u79F0",
+      "\u4FDD\u5B58",
+      BACK
+    ]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u4FDD\u5B58") {
+      try {
+        await store2.setProjectScope(projectPath, profile);
+        notify2(ctx, "\u9879\u76EE\u8303\u56F4\u5DF2\u4FDD\u5B58", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      return;
+    }
+    if (choice === "\u4FEE\u6539\u9879\u76EE\u540D\u79F0") {
+      const value = await askInput(ctx, "\u9879\u76EE\u663E\u793A\u540D\u79F0", profile.label);
+      if (value === void 0 || value === "") continue;
+      profile = { ...profile, label: value };
+      continue;
+    }
+    if (choice === "\u542F\u7528\u5206\u7EC4") {
+      const groups = await pickGroups(ctx, store2, "\u76F4\u63A5\u542F\u7528\u7684\u5206\u7EC4", profile.groups);
+      if (groups !== void 0) profile = { ...profile, groups };
+      continue;
+    }
+    if (choice === "\u542F\u7528\u5355\u4E2A Action") {
+      const actions = await pickActionNames(ctx, store2, "\u76F4\u63A5\u542F\u7528\u7684 Action", profile.actions);
+      if (actions !== void 0) profile = { ...profile, actions };
+      continue;
+    }
+    if (choice === "\u5C4F\u853D\u5206\u7EC4") {
+      const groups = await pickGroups(ctx, store2, "\u4ECE\u7EE7\u627F\u4E2D\u5C4F\u853D\u7684\u5206\u7EC4", profile.excludeGroups);
+      if (groups !== void 0) profile = { ...profile, excludeGroups: groups };
+      continue;
+    }
+    if (choice === "\u5C4F\u853D Action") {
+      const actions = await pickActionNames(ctx, store2, "\u5C4F\u853D\u7684 Action", profile.excludeActions);
+      if (actions !== void 0) profile = { ...profile, excludeActions: actions };
+      continue;
+    }
+  }
+}
+async function manageProjects(ctx, store2) {
+  for (; ; ) {
+    const state = await store2.readState();
+    const cwd = ctx.cwd ?? process.cwd();
+    const root = await resolveProjectRoot(cwd, state.projects);
+    const target = root ?? path7.resolve(cwd);
+    const labels = state.projects.map((project) => `${project.label}  ${project.path}`);
+    const currentLabel = `\u5F53\u524D\u9879\u76EE\uFF1A${path7.basename(target)}  ${target}`;
+    const choice = await ctx.ui.select("\u9879\u76EE\u8303\u56F4", [currentLabel, ...labels, BACK]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === currentLabel) {
+      await editProjectScope(ctx, store2, target);
+      continue;
+    }
+    const index = labels.indexOf(choice);
+    if (index >= 0) await editProjectScope(ctx, store2, state.projects[index].path);
+  }
+}
+async function manageSettings(ctx, store2, dataDir2) {
+  for (; ; ) {
+    const state = await store2.readState();
+    const defaultGroup = state.groups.find((group) => group.id === (state.defaultGroup ?? ""));
+    const choice = await ctx.ui.select("\u8BBE\u7F6E", [
+      `\u6570\u636E\u76EE\u5F55\uFF1A${dataDir2}`,
+      `\u65B0\u9879\u76EE\u9ED8\u8BA4\u5206\u7EC4\uFF1A${defaultGroup?.name ?? "\u672A\u8BBE\u7F6E"}`,
+      "\u9009\u62E9\u65B0\u9879\u76EE\u9ED8\u8BA4\u5206\u7EC4",
+      "\u91CD\u65B0\u52A0\u8F7D Pi \u8D44\u6E90",
+      BACK
+    ]);
+    if (choice === void 0 || choice === BACK) return;
+    if (choice === "\u9009\u62E9\u65B0\u9879\u76EE\u9ED8\u8BA4\u5206\u7EC4") {
+      const groups = await pickGroups(ctx, store2, "\u9009\u62E9\u65B0\u9879\u76EE\u9ED8\u8BA4\u5206\u7EC4", defaultGroup ? [defaultGroup.id] : []);
+      if (groups === void 0) continue;
+      if (groups.length !== 1) {
+        notify2(ctx, "\u8BF7\u9009\u62E9\u4E00\u4E2A\u5206\u7EC4\u3002", "warning");
+        continue;
+      }
+      try {
+        await store2.setDefaultGroup(groups[0]);
+        notify2(ctx, "\u9ED8\u8BA4\u5206\u7EC4\u5DF2\u66F4\u65B0", "info");
+      } catch (error) {
+        notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+      continue;
+    }
+    if (choice === "\u91CD\u65B0\u52A0\u8F7D Pi \u8D44\u6E90") {
+      await ctx.reload();
+      return;
+    }
+  }
+}
+async function openManager(ctx, store2, dataDir2) {
+  if (ctx.mode !== "tui") {
+    notify2(ctx, "Action Hub \u7BA1\u7406\u754C\u9762\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
+    return;
+  }
+  for (; ; ) {
+    const choice = await ctx.ui.select("Action Hub \u7BA1\u7406", [
+      "Action \u7BA1\u7406",
+      "\u5206\u7EC4\u7BA1\u7406",
+      "\u9879\u76EE\u8303\u56F4",
+      "\u5BFC\u5165 Action",
+      "\u5BFC\u51FA Action",
+      "\u8BBE\u7F6E",
+      "\u5173\u95ED"
+    ]);
+    if (choice === void 0 || choice === "\u5173\u95ED") return;
+    if (choice === "Action \u7BA1\u7406") {
+      await manageActions(ctx, store2);
+    } else if (choice === "\u5206\u7EC4\u7BA1\u7406") {
+      await manageGroups(ctx, store2);
+    } else if (choice === "\u9879\u76EE\u8303\u56F4") {
+      await manageProjects(ctx, store2);
+    } else if (choice === "\u5BFC\u5165 Action") {
+      const source = await ctx.ui.input("\u5BFC\u5165\u8DEF\u5F84", "\u6807\u51C6 Skill \u76EE\u5F55\u6216 ZIP \u7684\u7EDD\u5BF9\u8DEF\u5F84");
+      if (source !== void 0 && source.trim() !== "") await importFromPath(ctx, store2, dataDir2, source.trim());
+    } else if (choice === "\u5BFC\u51FA Action") {
+      await exportActions(ctx, store2, dataDir2);
+    } else if (choice === "\u8BBE\u7F6E") {
+      await manageSettings(ctx, store2, dataDir2);
+    }
+  }
+}
+
+// src/palette.js
+import { Key as Key2, matchesKey as matchesKey2, truncateToWidth as truncateToWidth2, visibleWidth as visibleWidth2 } from "@earendil-works/pi-tui";
+var MAX_ROWS2 = 12;
+function compileMatcher(query, regex) {
+  const text = query.trim();
+  if (text === "") return () => true;
+  if (!regex) {
+    const needle = text.toLowerCase();
+    return (value) => String(value ?? "").toLowerCase().includes(needle);
+  }
+  try {
+    const pattern = new RegExp(text, "i");
+    return (value) => pattern.test(String(value ?? ""));
+  } catch {
+    return () => false;
+  }
+}
+function padRight2(value, width) {
+  return value + " ".repeat(Math.max(0, width - visibleWidth2(value)));
+}
 var ActionPalette = class {
   constructor({ tui, theme, actions, groups = [], done, initialQuery = "" }) {
     this.tui = tui;
@@ -8658,38 +9537,48 @@ var ActionPalette = class {
   }
   get matches() {
     const matches = compileMatcher(this.query, this.regex);
-    return this.actions.filter((action) => `${action.name} ${action.description ?? ""}`.split("\n").some(matches));
+    return this.actions.filter((action) => this.searchText(action).split("\n").some(matches));
+  }
+  searchText(action) {
+    const groups = new Map(this.groups.map((group) => [group.id, group.name]));
+    return [
+      action.name,
+      action.description ?? "",
+      action.category ?? "",
+      ...action.tags ?? [],
+      ...(action.groups ?? []).map((id) => groups.get(id) ?? id)
+    ].join(" ");
   }
   get current() {
     return this.matches[this.selected] ?? null;
   }
   handleInput(data) {
-    if (matchesKey(data, Key.escape)) {
+    if (matchesKey2(data, Key2.escape)) {
       this.done(void 0);
       return;
     }
-    if (matchesKey(data, Key.up)) {
+    if (matchesKey2(data, Key2.up)) {
       this.selected = Math.max(0, this.selected - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.down)) {
+    if (matchesKey2(data, Key2.down)) {
       this.selected = Math.min(this.matches.length - 1, this.selected + 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, "alt+r")) {
+    if (matchesKey2(data, "alt+r")) {
       this.regex = !this.regex;
       this.selected = 0;
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.return)) {
+    if (matchesKey2(data, Key2.return) || matchesKey2(data, "tab")) {
       const action = this.current;
       if (action !== null) this.done(action);
       return;
     }
-    if (matchesKey(data, Key.backspace) || data === "\x7F") {
+    if (matchesKey2(data, Key2.backspace) || data === "\x7F") {
       if (this.cursor > 0) {
         this.query = this.query.slice(0, this.cursor - 1) + this.query.slice(this.cursor);
         this.cursor -= 1;
@@ -8698,12 +9587,12 @@ var ActionPalette = class {
       }
       return;
     }
-    if (matchesKey(data, Key.left)) {
+    if (matchesKey2(data, Key2.left)) {
       this.cursor = Math.max(0, this.cursor - 1);
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.right)) {
+    if (matchesKey2(data, Key2.right)) {
       this.cursor = Math.min(this.query.length, this.cursor + 1);
       this.tui.requestRender();
       return;
@@ -8723,27 +9612,32 @@ var ActionPalette = class {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
     const inner = Math.max(40, Math.min(width, 88) - 2);
-    const row = (value) => paint("border", "\u2502") + padRight(value, inner) + paint("border", "\u2502");
+    const row = (value) => paint("border", "\u2502") + padRight2(value, inner) + paint("border", "\u2502");
     const header = `${paint("accent", " Action Hub ")}${paint("dim", "  /ah  \xB7  Alt+A")}`;
     const lines = [paint("border", `\u256D${"\u2500".repeat(inner)}\u256E`), row(` ${header}`)];
     const cursor = this.cursor < this.query.length ? `${this.query.slice(0, this.cursor)}${paint("accent", "\u258C")}${this.query.slice(this.cursor + 1)}` : `${this.query}${paint("accent", "\u258C")}`;
-    lines.push(row(` ${paint("dim", "Search:")} ${cursor}${this.regex ? paint("warning", "  .*") : ""}`));
+    lines.push(row(` ${paint("dim", "\u641C\u7D22:")} ${cursor}${this.regex ? paint("warning", "  .*") : ""}`));
     lines.push(row(""));
     const matches = this.matches;
     if (matches.length === 0) {
-      lines.push(row(` ${paint("dim", this.query.trim() === "" ? "No Actions yet. Import one with /ah import <path>." : "No matching Actions.")}`));
+      lines.push(row(` ${paint("dim", this.query.trim() === "" ? "\u8FD8\u6CA1\u6709 Action\u3002\u4F7F\u7528 /ah import <\u8DEF\u5F84> \u5BFC\u5165\u3002" : "\u6CA1\u6709\u5339\u914D\u7684 Action\u3002")}`));
     } else {
-      const start = Math.max(0, Math.min(this.selected - Math.floor(MAX_ROWS / 2), matches.length - MAX_ROWS));
-      for (let index = start; index < Math.min(matches.length, start + MAX_ROWS); index += 1) {
+      const groupNames = new Map(this.groups.map((group) => [group.id, group.name]));
+      const start = Math.max(0, Math.min(this.selected - Math.floor(MAX_ROWS2 / 2), matches.length - MAX_ROWS2));
+      for (let index = start; index < Math.min(matches.length, start + MAX_ROWS2); index += 1) {
         const action = matches[index];
         const active = index === this.selected;
         const marker = active ? paint("accent", "\u276F") : " ";
         const mode = action.mode === "skill" ? paint("success", "[Skill]") : paint("dim", "[Cmd]  ");
         const name = active ? paint("accent", action.name) : action.name;
-        const description = truncateToWidth(` ${action.description ?? ""}`, Math.max(10, inner - 20));
-        lines.push(row(` ${marker} ${mode} ${name} ${paint("dim", description)}`));
+        const badges = [
+          action.pinned ? "\u2605" : "",
+          ...(action.groups ?? []).map((id) => groupNames.get(id)).filter(Boolean)
+        ].filter(Boolean).join(" ");
+        const details = truncateToWidth2(` ${action.description ?? ""}`, Math.max(8, inner - 24 - badges.length));
+        lines.push(row(` ${marker} ${mode} ${name} ${badges ? paint("warning", badges) : ""} ${paint("dim", details)}`));
       }
-      if (matches.length > MAX_ROWS) {
+      if (matches.length > MAX_ROWS2) {
         lines.push(row(` ${paint("dim", `${this.selected + 1}/${matches.length}`)}`));
       }
     }
@@ -8751,9 +9645,9 @@ var ActionPalette = class {
     if (current !== null) {
       lines.push(row(""));
       lines.push(row(` ${paint("dim", (current.description ?? "").slice(0, inner - 3))}`));
-      if (current.argsHint) lines.push(row(` ${paint("dim", `Args: ${current.argsHint}`)}`));
+      if (current.argsHint) lines.push(row(` ${paint("dim", `\u53C2\u6570: ${current.argsHint}`)}`));
     }
-    lines.push(row(` ${paint("dim", "\u2191\u2193 select   Enter insert   Esc close   Alt+R regex")}`));
+    lines.push(row(` ${paint("dim", "\u2191\u2193 \u9009\u62E9   Enter/Tab \u63D2\u5165   Esc \u5173\u95ED   Alt+R \u6B63\u5219   /ah manage \u7BA1\u7406")}`));
     lines.push(paint("border", `\u2570${"\u2500".repeat(inner)}\u256F`));
     return lines;
   }
@@ -8762,20 +9656,20 @@ var ActionPalette = class {
 // extensions/action-hub.js
 var dataDir = defaultDataDir();
 var store = createStore({ dataDir });
-function notify(ctx, text, kind = "info") {
+function notify3(ctx, text, kind = "info") {
   try {
     ctx.ui.notify(text, kind);
   } catch {
   }
 }
-async function openPalette(pi, ctx, initialQuery = "") {
+async function openPalette(ctx, initialQuery = "") {
   if (ctx.mode !== "tui") {
-    notify(ctx, "Action Hub palette is only available in Pi interactive TUI mode.", "warning");
+    notify3(ctx, "Action \u9762\u677F\u53EA\u5728 Pi \u4EA4\u4E92 TUI \u6A21\u5F0F\u53EF\u7528\u3002", "warning");
     return;
   }
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd());
   if (catalog.actions.length === 0) {
-    notify(ctx, "Action Hub has no available Actions. Import one with /ah import <path>.", "info");
+    notify3(ctx, "\u5F53\u524D\u6CA1\u6709\u53EF\u7528\u7684 Action\u3002\u4F7F\u7528 /ah import <\u8DEF\u5F84> \u5BFC\u5165\u4E00\u4E2A\u6807\u51C6 Skill \u76EE\u5F55\u3002", "info");
     return;
   }
   const selected = await ctx.ui.custom(
@@ -8794,68 +9688,51 @@ async function openPalette(pi, ctx, initialQuery = "") {
   if (selected.argsHint) {
     args = await ctx.ui.input("Action \u53C2\u6570", `${selected.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
   }
-  const text = renderAction(selected, args);
-  if (text !== "") ctx.ui.pasteToEditor(text);
-}
-function importDecisions(preview) {
-  return preview.items.map((item) => ({
-    key: item.key,
-    mode: item.status === "new" ? "create-command" : "skip"
-  }));
-}
-async function importFromPath(ctx, source) {
-  if (ctx.mode !== "tui") {
-    notify(ctx, "/ah import is only available in Pi interactive TUI mode.", "warning");
-    return;
-  }
-  const target = path6.resolve(ctx.cwd ?? process.cwd(), source);
-  const stat = await fs6.stat(target).catch(() => void 0);
-  if (stat === void 0) {
-    notify(ctx, `Path not found: ${target}`, "error");
-    return;
-  }
-  let preview;
-  let planKind;
-  if (stat.isDirectory()) {
-    preview = await previewFolder(store, dataDir, target);
-    planKind = "folder";
-  } else {
-    const buffer = await fs6.readFile(target);
-    preview = await previewZipBuffer(store, dataDir, buffer);
-    planKind = "zip";
-  }
-  const summary = preview.summary;
-  const confirmed = await ctx.ui.confirm(
-    "Import Actions",
-    `Import ${summary.total} item(s): ${summary.new} new, ${summary.duplicate} duplicate, ${summary.update} update, ${summary.conflict} conflict.
-Existing Actions are skipped.`
-  );
-  if (!confirmed) return;
-  const decisions = importDecisions(preview);
-  const result = planKind === "folder" ? await applyFolderPlan(store, dataDir, target, decisions, []) : await applyZipPlan(store, dataDir, await fs6.readFile(target), decisions, []);
-  notify(ctx, `Imported ${result.imported}, skipped ${result.skipped}, conflicts ${result.conflicts}.`, "info");
-  await ctx.reload();
+  await insertAction(store, ctx, selected, args);
 }
 function actionHub(pi) {
   pi.registerCommand("ah", {
-    description: "Open the Action Hub palette or import skills",
+    description: "\u6253\u5F00 Action Hub \u9762\u677F\u6216\u7BA1\u7406\u754C\u9762",
     handler: async (args, ctx) => {
       const text = typeof args === "string" ? args.trim() : "";
       if (text === "reload") {
         await ctx.reload();
         return;
       }
-      if (text.startsWith("import ")) {
-        await importFromPath(ctx, text.slice("import ".length).trim());
+      if (text === "manage" || text === "\u7BA1\u7406") {
+        await openManager(ctx, store, dataDir);
         return;
       }
-      await openPalette(pi, ctx);
+      if (text === "export" || text === "\u5BFC\u51FA") {
+        await exportActions(ctx, store, dataDir);
+        return;
+      }
+      if (text.startsWith("import ") || text.startsWith("\u5BFC\u5165 ")) {
+        const source = text.replace(/^(import|导入)\s+/u, "").trim();
+        if (source === "") {
+          notify3(ctx, "\u7528\u6CD5\uFF1A/ah import <\u76EE\u5F55\u6216 ZIP \u8DEF\u5F84>", "warning");
+          return;
+        }
+        await importFromPath(ctx, store, dataDir, source);
+        return;
+      }
+      if (text !== "") {
+        await openPalette(ctx, text);
+        return;
+      }
+      await openPalette(ctx);
     }
   });
   pi.registerShortcut("alt+a", {
-    description: "Open Action Hub",
+    description: "\u6253\u5F00 Action Hub \u9762\u677F",
     handler: async (ctx) => {
-      await openPalette(pi, ctx);
+      await openPalette(ctx);
+    }
+  });
+  pi.registerShortcut("ctrl+alt+a", {
+    description: "\u6253\u5F00 Action Hub \u7BA1\u7406\u754C\u9762",
+    handler: async (ctx) => {
+      await openManager(ctx, store, dataDir);
     }
   });
   pi.on("resources_discover", async (event) => {

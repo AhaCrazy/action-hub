@@ -1,13 +1,13 @@
 /**
  * Pi adapter for Action Hub.
  *
- * Native TUI overlay + Pi skill discovery. No server, port, or browser.
+ * Native TUI palette + full library management + Pi skill discovery.
  */
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-
-import { createStore, defaultDataDir, previewFolder, previewZipBuffer, applyFolderPlan, applyZipPlan } from 'action-hub';
-import { loadCatalog, renderAction } from '../src/catalog.js';
+import { createStore, defaultDataDir } from 'action-hub';
+import { loadCatalog } from '../src/catalog.js';
+import { exportActions, importFromPath } from '../src/import-export.js';
+import { insertAction } from '../src/insert.js';
+import { openManager } from '../src/management.js';
 import { ActionPalette } from '../src/palette.js';
 
 const dataDir = defaultDataDir();
@@ -21,14 +21,14 @@ function notify(ctx, text, kind = 'info') {
   }
 }
 
-async function openPalette(pi, ctx, initialQuery = '') {
+async function openPalette(ctx, initialQuery = '') {
   if (ctx.mode !== 'tui') {
-    notify(ctx, 'Action Hub palette is only available in Pi interactive TUI mode.', 'warning');
+    notify(ctx, 'Action 面板只在 Pi 交互 TUI 模式可用。', 'warning');
     return;
   }
   const catalog = await loadCatalog(store, ctx.cwd ?? process.cwd());
   if (catalog.actions.length === 0) {
-    notify(ctx, 'Action Hub has no available Actions. Import one with /ah import <path>.', 'info');
+    notify(ctx, '当前没有可用的 Action。使用 /ah import <路径> 导入一个标准 Skill 目录。', 'info');
     return;
   }
   const selected = await ctx.ui.custom(
@@ -47,73 +47,54 @@ async function openPalette(pi, ctx, initialQuery = '') {
   if (selected.argsHint) {
     args = await ctx.ui.input('Action 参数', `${selected.argsHint}（可留空）`) ?? '';
   }
-  const text = renderAction(selected, args);
-  if (text !== '') ctx.ui.pasteToEditor(text);
-}
-
-function importDecisions(preview) {
-  return preview.items.map((item) => ({
-    key: item.key,
-    mode: item.status === 'new' ? 'create-command' : 'skip',
-  }));
-}
-
-async function importFromPath(ctx, source) {
-  if (ctx.mode !== 'tui') {
-    notify(ctx, '/ah import is only available in Pi interactive TUI mode.', 'warning');
-    return;
-  }
-  const target = path.resolve(ctx.cwd ?? process.cwd(), source);
-  const stat = await fs.stat(target).catch(() => undefined);
-  if (stat === undefined) {
-    notify(ctx, `Path not found: ${target}`, 'error');
-    return;
-  }
-  let preview;
-  let planKind;
-  if (stat.isDirectory()) {
-    preview = await previewFolder(store, dataDir, target);
-    planKind = 'folder';
-  } else {
-    const buffer = await fs.readFile(target);
-    preview = await previewZipBuffer(store, dataDir, buffer);
-    planKind = 'zip';
-  }
-  const summary = preview.summary;
-  const confirmed = await ctx.ui.confirm(
-    'Import Actions',
-    `Import ${summary.total} item(s): ${summary.new} new, ${summary.duplicate} duplicate, ${summary.update} update, ${summary.conflict} conflict.\nExisting Actions are skipped.`,
-  );
-  if (!confirmed) return;
-  const decisions = importDecisions(preview);
-  const result = planKind === 'folder'
-    ? await applyFolderPlan(store, dataDir, target, decisions, [])
-    : await applyZipPlan(store, dataDir, await fs.readFile(target), decisions, []);
-  notify(ctx, `Imported ${result.imported}, skipped ${result.skipped}, conflicts ${result.conflicts}.`, 'info');
-  await ctx.reload();
+  await insertAction(store, ctx, selected, args);
 }
 
 export default function actionHub(pi) {
   pi.registerCommand('ah', {
-    description: 'Open the Action Hub palette or import skills',
+    description: '打开 Action Hub 面板或管理界面',
     handler: async (args, ctx) => {
       const text = typeof args === 'string' ? args.trim() : '';
       if (text === 'reload') {
         await ctx.reload();
         return;
       }
-      if (text.startsWith('import ')) {
-        await importFromPath(ctx, text.slice('import '.length).trim());
+      if (text === 'manage' || text === '管理') {
+        await openManager(ctx, store, dataDir);
         return;
       }
-      await openPalette(pi, ctx);
+      if (text === 'export' || text === '导出') {
+        await exportActions(ctx, store, dataDir);
+        return;
+      }
+      if (text.startsWith('import ') || text.startsWith('导入 ')) {
+        const source = text.replace(/^(import|导入)\s+/u, '').trim();
+        if (source === '') {
+          notify(ctx, '用法：/ah import <目录或 ZIP 路径>', 'warning');
+          return;
+        }
+        await importFromPath(ctx, store, dataDir, source);
+        return;
+      }
+      if (text !== '') {
+        await openPalette(ctx, text);
+        return;
+      }
+      await openPalette(ctx);
     },
   });
 
   pi.registerShortcut('alt+a', {
-    description: 'Open Action Hub',
+    description: '打开 Action Hub 面板',
     handler: async (ctx) => {
-      await openPalette(pi, ctx);
+      await openPalette(ctx);
+    },
+  });
+
+  pi.registerShortcut('ctrl+alt+a', {
+    description: '打开 Action Hub 管理界面',
+    handler: async (ctx) => {
+      await openManager(ctx, store, dataDir);
     },
   });
 

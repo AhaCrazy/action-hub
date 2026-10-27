@@ -114,7 +114,7 @@ npm 包还没有发布。请使用本文档里的 Git 或 release 安装命令�
 ## 支持范围
 
 - DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
-- Pi：原生 TUI 面板、`Alt+A`、编辑器插入、`resources_discover`。
+- Pi：原生 TUI 面板、`Alt+A`、`Ctrl+Alt+A` 管理界面、编辑器插入、Action/分组/项目范围/导入导出管理、`resources_discover`。
 - 其他 harness：可基于同一套核心继续增加适配器。
 
 ## 开发

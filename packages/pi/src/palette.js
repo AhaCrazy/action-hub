@@ -43,7 +43,18 @@ export class ActionPalette {
 
   get matches() {
     const matches = compileMatcher(this.query, this.regex);
-    return this.actions.filter((action) => `${action.name} ${action.description ?? ''}`.split('\n').some(matches));
+    return this.actions.filter((action) => this.searchText(action).split('\n').some(matches));
+  }
+
+  searchText(action) {
+    const groups = new Map(this.groups.map((group) => [group.id, group.name]));
+    return [
+      action.name,
+      action.description ?? '',
+      action.category ?? '',
+      ...(action.tags ?? []),
+      ...(action.groups ?? []).map((id) => groups.get(id) ?? id),
+    ].join(' ');
   }
 
   get current() {
@@ -71,7 +82,7 @@ export class ActionPalette {
       this.tui.requestRender();
       return;
     }
-    if (matchesKey(data, Key.return)) {
+    if (matchesKey(data, Key.return) || matchesKey(data, 'tab')) {
       const action = this.current;
       if (action !== null) this.done(action);
       return;
@@ -118,13 +129,14 @@ export class ActionPalette {
     const cursor = this.cursor < this.query.length
       ? `${this.query.slice(0, this.cursor)}${paint('accent', '▌')}${this.query.slice(this.cursor + 1)}`
       : `${this.query}${paint('accent', '▌')}`;
-    lines.push(row(` ${paint('dim', 'Search:')} ${cursor}${this.regex ? paint('warning', '  .*') : ''}`));
+    lines.push(row(` ${paint('dim', '搜索:')} ${cursor}${this.regex ? paint('warning', '  .*') : ''}`));
     lines.push(row(''));
 
     const matches = this.matches;
     if (matches.length === 0) {
-      lines.push(row(` ${paint('dim', this.query.trim() === '' ? 'No Actions yet. Import one with /ah import <path>.' : 'No matching Actions.')}`));
+      lines.push(row(` ${paint('dim', this.query.trim() === '' ? '还没有 Action。使用 /ah import <路径> 导入。' : '没有匹配的 Action。')}`));
     } else {
+      const groupNames = new Map(this.groups.map((group) => [group.id, group.name]));
       const start = Math.max(0, Math.min(this.selected - Math.floor(MAX_ROWS / 2), matches.length - MAX_ROWS));
       for (let index = start; index < Math.min(matches.length, start + MAX_ROWS); index += 1) {
         const action = matches[index];
@@ -132,8 +144,12 @@ export class ActionPalette {
         const marker = active ? paint('accent', '❯') : ' ';
         const mode = action.mode === 'skill' ? paint('success', '[Skill]') : paint('dim', '[Cmd]  ');
         const name = active ? paint('accent', action.name) : action.name;
-        const description = truncateToWidth(` ${action.description ?? ''}`, Math.max(10, inner - 20));
-        lines.push(row(` ${marker} ${mode} ${name} ${paint('dim', description)}`));
+        const badges = [
+          action.pinned ? '★' : '',
+          ...(action.groups ?? []).map((id) => groupNames.get(id)).filter(Boolean),
+        ].filter(Boolean).join(' ');
+        const details = truncateToWidth(` ${action.description ?? ''}`, Math.max(8, inner - 24 - badges.length));
+        lines.push(row(` ${marker} ${mode} ${name} ${badges ? paint('warning', badges) : ''} ${paint('dim', details)}`));
       }
       if (matches.length > MAX_ROWS) {
         lines.push(row(` ${paint('dim', `${this.selected + 1}/${matches.length}`)}`));
@@ -144,10 +160,10 @@ export class ActionPalette {
     if (current !== null) {
       lines.push(row(''));
       lines.push(row(` ${paint('dim', (current.description ?? '').slice(0, inner - 3))}`));
-      if (current.argsHint) lines.push(row(` ${paint('dim', `Args: ${current.argsHint}`)}`));
+      if (current.argsHint) lines.push(row(` ${paint('dim', `参数: ${current.argsHint}`)}`));
     }
 
-    lines.push(row(` ${paint('dim', '↑↓ select   Enter insert   Esc close   Alt+R regex')}`));
+    lines.push(row(` ${paint('dim', '↑↓ 选择   Enter/Tab 插入   Esc 关闭   Alt+R 正则   /ah manage 管理')}`));
     lines.push(paint('border', `╰${'─'.repeat(inner)}╯`));
     return lines;
   }

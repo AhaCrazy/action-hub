@@ -29,7 +29,7 @@
     "build": "node scripts/build.mjs",
     "pretest": "npm run build",
     "prepack": "npm run build",
-    "test": "node tests/catalog.test.mjs && node --check extensions/action-hub.js && node --check src/palette.js"
+    "test": "node tests/catalog.test.mjs && node tests/management.test.mjs && node --check extensions/action-hub.js && node --check src/palette.js"
   },
   "pi": {
     "extensions": [

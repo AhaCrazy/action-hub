@@ -74,6 +74,6 @@ test('extension registers Pi command, shortcut, and resource discovery', () => {
     on: (event, handler) => events.push({ event, handler }),
   });
   assert.deepEqual(commands.map((entry) => entry.name), ['ah']);
-  assert.deepEqual(shortcuts.map((entry) => entry.shortcut), ['alt+a']);
+  assert.deepEqual(shortcuts.map((entry) => entry.shortcut), ['alt+a', 'ctrl+alt+a']);
   assert.deepEqual(events.map((entry) => entry.event), ['resources_discover']);
 });

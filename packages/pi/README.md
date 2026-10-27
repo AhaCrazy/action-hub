@@ -12,33 +12,56 @@ pi install git:github.com/AhaCrazy/action-hub
 
 安装后重启 Pi。
 
-## 使用
+## 打开面板
 
 ```text
 /ah
 ```
 
-或按 `Alt+A` 打开 Action 面板。
+或按 `Alt+A`。
 
-选中 Command 后，提示词会插入 Pi 编辑器；选中 Skill 后，会插入 Pi 原生的 `/skill:<name>`。
+- 输入关键字搜索；`Alt+R` 切换正则搜索；
+- `↑↓` 选择，`Enter` / `Tab` 插入，`Esc` 关闭；
+- Command 会把展开后的提示词插入编辑器；
+- Skill 会插入 Pi 原生 `/skill:<name>`。
+
+## 管理
+
+```text
+/ah manage
+```
+
+或按 `Ctrl+Alt+A`。
+
+管理界面支持：
+
+- **Action**：新建、编辑、删除；切换 Command/Skill；设置分组、分类、标签、参数提示、固定；查看资源文件；插入到编辑器。
+- **分组**：新建、改名、删除；设为全局分组；设置成员 Action；设置包含的子分组。
+- **项目范围**：直接启用分组或 Action；屏蔽继承来的分组或 Action；修改项目显示名。
+- **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill。
+- **导出**：导出全部 Action 或单个 Action 为 ZIP。
+- **设置**：查看数据目录；设置新项目默认分组；重新加载 Pi 资源。
+
+分组和项目范围与 DSH 版共享同一份 `state.json`。
 
 ## 第一次使用
 
-新库默认是空的。先导入一个标准 Skill 目录：
+新库默认只有一个全局 `Common` 分组。
 
 ```text
 /ah import C:\path\to\skill-folder
 ```
 
-之后 `/ah` 才会出现可选择的 Action。
+导入后 `/ah` 才会出现可选择的 Action。
 
 ## 其他命令
 
 ```text
 /ah reload
+/ah export
 ```
 
-在外部修改了 Action 后，用它重新加载 Pi 资源。
+`/ah reload` 用于在外部修改后重新加载 Pi 资源。
 
 ## 数据
 
@@ -50,8 +73,8 @@ C:\Users\<你>\.action-hub
 
 和 DSH 版共享同一份库。
 
-## 注意
+## 平台差异
 
-- 扩展运行在 Pi 进程内，不启动服务、不打开浏览器、不占用端口。
-- `pi -e` 只是临时加载，重启后失效。
-- 分组和项目范围的完整管理界面仍在完善中；当前可以先通过共享状态或 DSH 端管理。
+- Pi 没有 DSH 的侧边栏和 composer chip；Action 直接插入 Pi 编辑器。
+- Pi 的 Skill 入口使用原生 `/skill:<name>`。
+- Pi 只在启动和 `/ah reload` 时重新发现 Skill；修改 Skill 可见性后需要重新加载。

@@ -19,7 +19,7 @@
 - **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
 - **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
 - **项目范围** → 使用 `ctx.cwd` 或最近的 `.git` 根；全局分组对所有项目生效；项目级屏蔽使用共享状态。
-- **管理** → 后续增加 `/ah manage` TUI 页面，处理分组、范围、导入导出和模式切换。修改 Skill 可见性后，需要调用 `ctx.reload()` 或提示用户。
+- **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。修改 Skill 可见性后需要重新加载 Pi 资源。
 
 ## 包结构
 
@@ -27,7 +27,7 @@
 packages/pi/
   package.json        # pi manifest、pi-package keyword、peerDependencies
   extensions/         # 源码入口
-  src/                # 面板和 catalog 源码
+  src/                # 面板、管理界面、catalog、导入导出
   dist/action-hub.js  # 发布用自包含 bundle（含 core）
 ```
 
