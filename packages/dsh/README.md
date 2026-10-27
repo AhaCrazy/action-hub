@@ -10,40 +10,45 @@ DSH 的标准 Agent Skill 库：同一份 `SKILL.md`，可以当模型可调用�
 
 DSH Desktop 默认 profile 是 `desktop`。
 
-### 通过 DSH 插件页安装
+### 通过 DSH 插件市场安装
 
-1. 打开 DSH Desktop；
-2. 左侧栏进入 **插件**；
-3. 点击 **添加插件** 旁的箭头，选择 **安装第三方插件**；
-4. 粘贴：
-   ```text
-   https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
-   ```
-5. 点击 **安装**，完成后重启 DSH。
+在 DSH Desktop 的 **插件** 页搜索并安装 **Action Hub**。市场来源：
+
+```text
+github:AhaCrazy/action-hub#path:/packages/dsh
+```
 
 ### 通过命令行安装
 
 ```powershell
-dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
 ```
+
+注意 PowerShell 下使用单引号，避免 `#` 被当成注释。
 
 如果 `dsh` 不在 PATH 中：
 
 ```powershell
 & "<DSH 安装目录>\resources\runtime\cli\bin\dsh.cmd" `
   plugin --profile desktop add `
-  https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+  'github:AhaCrazy/action-hub#path:/packages/dsh'
 ```
 
-安装后重启 DSH。
+也可以使用预构建资产：
+
+```powershell
+dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+```
+
+安装后重启 DSH。旧仓库 `AhaCrazy/dsh-action-hub` 已归档，后续版本都在本仓库。
 
 ### 升级与卸载
 
-DSH 插件页通常需要先卸载再安装。命令行方式：
+优先在 DSH 插件市场中点击更新。命令行方式先卸载再安装：
 
 ```powershell
 dsh plugin --profile desktop remove dsh-action-hub
-dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
 ```
 
 只卸载：

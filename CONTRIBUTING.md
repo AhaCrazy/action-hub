@@ -137,7 +137,13 @@ npm publish --workspace pi-action-hub --access public
 
 ### DSH
 
-发布 `dsh-action-hub` 到 npm 或 DSH 插件市场属于可选渠道；用户安装只依赖 GitHub Release 的 `.tgz`。
+DSH 插件市场条目指向本仓库的 `packages/dsh`：
+
+```text
+github:AhaCrazy/action-hub#path:/packages/dsh
+```
+
+GitHub Release 的预构建 `.tgz` 继续保留，作为市场或 Git 安装不可用时的备用渠道。旧仓库 `AhaCrazy/dsh-action-hub` 已归档，不再接收新版本。
 
 ### GitHub Release
 

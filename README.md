@@ -27,20 +27,25 @@
 
 ### DSH
 
-#### 方式一：DSH 插件页（推荐）
+#### 方式一：DSH 插件市场（推荐）
 
-1. 打开 DSH Desktop；
-2. 左侧栏进入 **插件**；
-3. 点击 **添加插件** 旁的箭头，选择 **安装第三方插件**；
-4. 粘贴：
+在 DSH Desktop 的 **插件** 页搜索并安装 **Action Hub**。市场来源：
 
 ```text
-https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+github:AhaCrazy/action-hub#path:/packages/dsh
 ```
 
-5. 点击 **安装**，完成后重启 DSH。
-
 #### 方式二：命令行
+
+```powershell
+dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
+```
+
+注意 PowerShell 下使用单引号，避免 `#` 被当成注释。
+
+#### 方式三：GitHub Release 资产
+
+如果插件市场或 Git 安装暂时不可用，也可以直接安装预构建资产：
 
 ```powershell
 dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
@@ -57,6 +62,8 @@ dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases
 如果你使用的是别的 profile，把 `desktop` 换成对应名称。
 
 安装完成后重启 DSH，打开 Action Hub 页面，或按 `Alt+A`。
+
+旧仓库 `AhaCrazy/dsh-action-hub` 已归档，不再更新；后续版本都在本仓库。
 
 ### Pi
 
@@ -99,11 +106,11 @@ OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，所以 Action Hub 使用 `Alt+
 
 ### DSH
 
-DSH 插件页通常需要先卸载再安装；命令行方式：
+优先在 DSH 插件市场中点击更新；命令行方式先卸载再安装：
 
 ```powershell
 dsh plugin --profile desktop remove dsh-action-hub
-dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases/latest/download/dsh-action-hub.tgz
+dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
 ```
 
 ### Pi
