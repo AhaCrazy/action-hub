@@ -12,21 +12,31 @@
   ],
   "license": "MIT",
   "author": "AhaCrazy",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/action-hub.js",
+  "exports": {
+    ".": "./dist/action-hub.js",
+    "./package.json": "./package.json"
+  },
   "files": [
-    "extensions",
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "pretest": "npm run build",
+    "prepack": "npm run build",
     "test": "node tests/catalog.test.mjs && node --check extensions/action-hub.js && node --check src/palette.js"
   },
   "pi": {
     "extensions": [
-      "./extensions"
+      "./dist/action-hub.js"
     ]
   },
-  "dependencies": {
+  "devDependencies": {
     "action-hub": "file:../core"
   },
   "peerDependencies": {

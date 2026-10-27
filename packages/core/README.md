@@ -56,7 +56,9 @@ npm test
 - DSH：[`../dsh`](../dsh) — Cordis 插件，提供原生 Web UI、Alt+A 面板、composer chip 和 Skill provider。
 - Pi：[`../pi`](../pi) — Pi 包，提供原生 TUI 面板和 `resources_discover`。
 
-在 API 稳定前，两个适配器都通过 `file:../core` 链接本核心。
+开发态两个适配器都通过 `file:../core` 链接本核心；发布构建会把本核心打进各自的
+`dist`，因此对外只有 `pi-action-hub` 和 `dsh-action-hub` 两个安装包，不需要单独发布
+core npm 包。
 
 参见 [../../docs/architecture.md](../../docs/architecture.md) 和
 [../../docs/adapter-contract.md](../../docs/adapter-contract.md)。

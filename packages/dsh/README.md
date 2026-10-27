@@ -2,7 +2,27 @@
 
 **DSH 适配层。** 通用核心位于 [`../core`](../core)；本包只负责 DSH 的原生 UI、快捷键、composer 插入、项目识别和 Skill provider。
 
-在仓库根目录开发：
+## 安装
+
+构建发布包：
+
+```bash
+cd ../..
+npm run build
+npm run pack:dsh
+```
+
+生成 `dsh-action-hub-0.1.0.tgz`。运行时 `dist/` 已包含 core，不需要额外安装 `action-hub`。
+
+本地开发时，在 DSH 插件管理器中安装绝对目录：
+
+```text
+E:\Data\Projs\action-hub\packages\dsh
+```
+
+发布到 DSH 插件市场后，即可在插件管理器中一键安装 `dsh-action-hub`。
+
+## 开发
 
 ```bash
 cd ../..
@@ -10,7 +30,7 @@ npm install
 npm test --workspace dsh-action-hub
 ```
 
-本包通过 `file:../core` 链接共享核心，不复制 core 代码。
+开发态通过 `file:../core` 链接共享核心；发布构建会把 core 打进 `dist/`。
 
 ---
 
@@ -146,14 +166,12 @@ description: 一句话说明何时使用
 
 示例：把 `Common` 设为全局后，在 `P2` 中屏蔽 `Common`，P2 不再显示 Common 的 Action；其他工作区不受影响。若只想在 P2 恢复其中一条 Action，直接在 P2 的 Action 列表里勾选该条即可。
 
-## 开发
+## 构建细节
 
-```bash
-npm install
-npm test
-```
-
-客户端由 `src/client/*.js` 拼接为 `client.js`；Host 入口 `index.js`，标准文档解析在 `skill-doc.js`。
+- `src/client/*.js` 会拼接成 `client.js`；
+- `index.js` 与 `host/*.js` 通过 esbuild 打包成 `dist/index.js`；
+- `builtin-actions` 会复制到 `dist/builtin-actions`；
+- 标准 Skill 解析、分组和范围逻辑来自共享 core，已随 `dist/index.js` 一起打包。
 
 ## 限制
 

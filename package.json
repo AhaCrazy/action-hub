@@ -5,6 +5,12 @@
   "description": "Action Hub monorepo：与 harness 无关的通用核心，以及 DSH、Pi 适配器。",
   "type": "module",
   "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "action-hub",
+    "dsh-plugin"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -16,6 +22,16 @@
     "test:core": "npm run test --workspace action-hub",
     "test:dsh": "npm run test --workspace dsh-action-hub",
     "test:pi": "npm run test --workspace pi-action-hub",
-    "build": "npm run build --workspace dsh-action-hub"
+    "build": "npm run build --workspace dsh-action-hub && npm run build --workspace pi-action-hub",
+    "pack:pi": "npm pack --workspace pi-action-hub",
+    "pack:dsh": "npm pack --workspace dsh-action-hub"
+  },
+  "pi": {
+    "extensions": [
+      "./packages/pi/dist/action-hub.js"
+    ]
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

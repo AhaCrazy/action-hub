@@ -11,17 +11,46 @@
 
 不启动服务、不打开浏览器、不占用端口，也没有额外进程。扩展直接运行在 Pi 进程内。
 
+## 安装
+
+发布后：
+
+```powershell
+pi install npm:pi-action-hub
+```
+
+也可以直接使用本仓库的 Git 根安装：
+
+```powershell
+pi install git:github.com/AhaCrazy/action-hub
+```
+
+或者构建出 tarball 后本地安装：
+
+```powershell
+npm run pack:pi
+pi install ./pi-action-hub-0.1.0.tgz
+```
+
+Pi 包运行时自包含，不需要额外安装 `action-hub` 核心包。
+
 ## 本地开发
 
 ```bash
 cd ../..
 npm install
-npm test --workspace pi-action-hub
-cd packages/pi
-pi -e ./extensions/action-hub.js
+npm run build --workspace pi-action-hub
+pi -e ./packages/pi/dist/action-hub.js
 ```
 
-`pi -e` 只让本次 Pi 启动加载该扩展。如果想持久安装本地包，先在仓库根目录执行 `npm install`，再执行 `pi install ./packages/pi`；Pi 不会替本地包自动安装依赖树。进入会话后：
+`pi -e` 只让本次 Pi 启动加载该扩展。持久安装本地包：
+
+```powershell
+cd E:\Data\Projs\action-hub
+pi install ./packages/pi
+```
+
+进入会话后：
 
 ```text
 /ah

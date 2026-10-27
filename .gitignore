@@ -1,4 +1,6 @@
 node_modules/
 packages/*/node_modules/
 *.log
+*.tgz
+.tmp-*/
 .DS_Store

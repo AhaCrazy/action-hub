@@ -26,11 +26,14 @@
 ```text
 packages/pi/
   package.json        # pi manifest、pi-package keyword、peerDependencies
-  extensions/         # 扩展入口
-  src/                # 面板和 catalog 适配
+  extensions/         # 源码入口
+  src/                # 面板和 catalog 源码
+  dist/action-hub.js  # 发布用自包含 bundle（含 core）
 ```
 
-安装方式：`pi install ./packages/pi`，或发布后 `pi install npm:pi-action-hub`。Pi 在自己的进程内运行扩展；没有服务、端口或浏览器窗口。
+安装方式：发布后使用 `pi install npm:pi-action-hub`，或从仓库根执行
+`pi install git:github.com/AhaCrazy/action-hub`。Pi 在自己的进程内运行扩展；
+没有服务、端口或浏览器窗口。
 
 ## Pi 1.4.0 的限制
 

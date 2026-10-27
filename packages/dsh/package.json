@@ -1,7 +1,6 @@
 {
   "name": "dsh-action-hub",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "DeepSeek Harness 适配器：基于通用 action-hub 核心，提供原生 Alt+A 面板、composer 插入、项目范围和 Skill provider。",
   "keywords": [
@@ -16,30 +15,33 @@
   ],
   "license": "MIT",
   "author": "AhaCrazy",
+  "engines": {
+    "node": ">=20"
+  },
   "icon": "./icon.svg",
+  "main": "./dist/index.js",
   "meta": {
     "title": "Action Hub",
-    "description": "DSH adapter for the shared Action Hub core: standard skills, commands, groups, and project scopes."
+    "description": "DSH 版 Action Hub：标准 Skill、Command、分组和项目范围。"
   },
   "scripts": {
-    "build": "node scripts/build-client.mjs",
+    "build:client": "node scripts/build-client.mjs",
+    "build:host": "node scripts/build-host.mjs",
+    "build": "npm run build:client && npm run build:host",
     "dev": "node scripts/watch-client.mjs",
     "pretest": "npm run build",
     "prepack": "npm run build",
     "test": "node tests/builtins.test.mjs && node tests/provider.test.mjs && node tests/client.test.mjs && node tests/host.test.mjs && node tests/seed.test.mjs"
   },
   "exports": {
-    ".": "./index.js",
+    ".": "./dist/index.js",
     "./client": "./client.js",
     "./package.json": "./package.json",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
   "files": [
-    "index.js",
-    "builtins.js",
-    "builtin-actions/**",
-    "host/**",
+    "dist/**",
     "client.js",
     "cordis.patch.yml",
     "icon.svg",
@@ -64,7 +66,7 @@
       ]
     }
   },
-  "dependencies": {
+  "devDependencies": {
     "action-hub": "file:../core"
   }
 }

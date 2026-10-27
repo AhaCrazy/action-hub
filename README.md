@@ -25,13 +25,61 @@ npm test
 
 `npm test` 会依次运行 core、DSH 适配器和 Pi 适配器的测试。
 
-适配器目前通过 workspace 内的 `file:../core` 链接共享核心，等 API 稳定后仍然可以分别发布为独立 npm 包。
+开发态通过 workspace 内的 `file:../core` 链接共享核心；对外发布时，两个适配器会把 core 打进各自的 `dist`，成为两个自包含的安装包。
+
+## 两个发布包
+
+这个仓库对外提供两个独立的安装产物：
+
+```text
+pi-action-hub     Pi 包
+dsh-action-hub    DSH bundle
+```
+
+两个包都自带 core，运行时不需要额外安装 `action-hub` 包。
+
+### 构建与打包
+
+```bash
+npm run build
+npm run pack:pi
+npm run pack:dsh
+```
+
+生成：
+
+```text
+pi-action-hub-0.1.0.tgz
+dsh-action-hub-0.1.0.tgz
+```
+
+### Pi 安装
+
+```powershell
+pi install npm:pi-action-hub
+```
+
+或者直接从本仓库的 Git 根安装：
+
+```powershell
+pi install git:github.com/AhaCrazy/action-hub
+```
+
+### DSH 安装
+
+在 DSH 插件管理器中安装 `packages/dsh` 目录，或安装发布后的 `dsh-action-hub` bundle。
+
+本地构建后也可以直接安装目录：
+
+```text
+E:\Data\Projs\action-hub\packages\dsh
+```
 
 ## 包说明
 
 - [`packages/core`](packages/core) — 库、`state.json`、分组、范围、搜索、导入导出。
-- [`packages/dsh`](packages/dsh) — DSH 插件（Cordis）。
-- [`packages/pi`](packages/pi) — Pi 包。
+- [`packages/dsh`](packages/dsh) — DSH bundle，构建产物在 `dist/`。
+- [`packages/pi`](packages/pi) — Pi 包，构建产物在 `dist/`。
 
 ## 数据目录
 
