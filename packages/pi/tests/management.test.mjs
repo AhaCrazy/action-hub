@@ -28,6 +28,12 @@ test('dashboard renders three columns with section counts and details', () => {
   assert.match(text, /Action/u);
   assert.match(text, /commit/u);
   assert.match(text, /详情/u);
+  dashboard.handleInput('f');
+  assert.equal(dashboard.search, true);
+  dashboard.handleInput('z');
+  dashboard.handleInput('z');
+  dashboard.handleInput('z');
+  assert.equal(dashboard.query, 'zzz');
 });
 
 test('multi-select filters, toggles, and returns checked keys', () => {

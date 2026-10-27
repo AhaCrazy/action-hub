@@ -9083,7 +9083,7 @@ var ManagerDashboard = class {
       this.tui.requestRender();
       return;
     }
-    if (data === "/") {
+    if (data === "/" || data === "f") {
       this.search = true;
       this.query = "";
       this.tui.requestRender();
@@ -9163,7 +9163,7 @@ var ManagerDashboard = class {
       lines.push(`${paint("border", "\u2502")}${padRight(left[index] ?? "", leftWidth)}${paint("border", "\u2502")}${padRight(middle[index] ?? "", middleWidth)}${paint("border", "\u2502")}${padRight(right[index] ?? "", rightWidth)}${paint("border", "\u2502")}`);
     }
     lines.push(separator);
-    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "Tab \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00/\u6267\u884C \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 i \u63D2\u5165 \xB7 / \u641C\u7D22 \xB7 q \u5173\u95ED";
+    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "Tab \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00 \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 i \u63D2\u5165 \xB7 f \u641C\u7D22 \xB7 q \u5173\u95ED";
     const helpLine = ` ${help}`;
     const fittedHelp = helpLine.length > inner ? `${helpLine.slice(0, Math.max(0, inner - 1))}\u2026` : helpLine;
     lines.push(`${paint("border", "\u2502")}${padRight(paint("dim", fittedHelp), inner)}${paint("border", "\u2502")}`);
@@ -9191,7 +9191,7 @@ var ManagerDashboard = class {
     const theme = this.theme;
     const paint = (color, value) => typeof theme?.fg === "function" ? theme.fg(color, value) : value;
     const out = [` ${paint("dim", this.sectionId === "actions" ? "Actions" : this.sectionId === "groups" ? "\u5206\u7EC4" : this.sectionId === "projects" ? "\u9879\u76EE" : "\u5DE5\u5177")}`];
-    const queryLine = this.search ? `${paint("accent", "\u641C\u7D22:")} ${this.query}${paint("accent", "\u258C")}${this.regex ? paint("warning", " .*") : ""}` : `${paint("dim", "\u641C\u7D22:")} ${this.query}${this.regex ? paint("warning", " .*") : ""}  ${paint("dim", "/ \u8F93\u5165")}`;
+    const queryLine = this.search ? `${paint("accent", "\u641C\u7D22:")} ${this.query}${paint("accent", "\u258C")}${this.regex ? paint("warning", " .*") : ""}` : `${paint("dim", "\u641C\u7D22:")} ${this.query}${this.regex ? paint("warning", " .*") : ""}  ${paint("dim", "f \u8F93\u5165")}`;
     out.push(fit(queryLine, width - 2));
     out.push("");
     const items = this.filteredItems;

@@ -149,7 +149,7 @@ export class ManagerDashboard {
       this.tui.requestRender();
       return;
     }
-    if (data === '/') {
+    if (data === '/' || data === 'f') {
       this.search = true;
       this.query = '';
       this.tui.requestRender();
@@ -233,7 +233,7 @@ export class ManagerDashboard {
     lines.push(separator);
     const help = this.search
       ? '输入搜索 · Enter 结束搜索 · Esc 清空 · Alt+R 正则'
-      : 'Tab 切换栏 · ↑↓ 移动 · Enter 打开/执行 · n 新建 · e 编辑 · d 删除 · m 模式 · p 固定 · g 分组 · i 插入 · / 搜索 · q 关闭';
+      : 'Tab 切换栏 · ↑↓ 移动 · Enter 打开 · n 新建 · e 编辑 · d 删除 · m 模式 · p 固定 · g 分组 · i 插入 · f 搜索 · q 关闭';
     const helpLine = ` ${help}`;
     const fittedHelp = helpLine.length > inner ? `${helpLine.slice(0, Math.max(0, inner - 1))}…` : helpLine;
     lines.push(`${paint('border', '│')}${padRight(paint('dim', fittedHelp), inner)}${paint('border', '│')}`);
@@ -265,7 +265,7 @@ export class ManagerDashboard {
     const out = [` ${paint('dim', this.sectionId === 'actions' ? 'Actions' : this.sectionId === 'groups' ? '分组' : this.sectionId === 'projects' ? '项目' : '工具')}`];
     const queryLine = this.search
       ? `${paint('accent', '搜索:')} ${this.query}${paint('accent', '▌')}${this.regex ? paint('warning', ' .*') : ''}`
-      : `${paint('dim', '搜索:')} ${this.query}${this.regex ? paint('warning', ' .*') : ''}  ${paint('dim', '/ 输入')}`;
+      : `${paint('dim', '搜索:')} ${this.query}${this.regex ? paint('warning', ' .*') : ''}  ${paint('dim', 'f 输入')}`;
     out.push(fit(queryLine, width - 2));
     out.push('');
     const items = this.filteredItems;
