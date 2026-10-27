@@ -1,0 +1,31 @@
+{
+  "name": "action-hub",
+  "version": "0.1.0",
+  "description": "Harness-agnostic library for standard Agent Skills, user Commands, groups, project scopes, and import/export.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./store": "./src/store.js",
+    "./bundle": "./src/bundle.js",
+    "./resources": "./src/resources.js",
+    "./skill-doc": "./src/skill-doc.js",
+    "./availability": "./src/availability.js",
+    "./scope": "./src/scope.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node tests/store.test.mjs && node tests/resources.test.mjs && node tests/bundle.test.mjs && node tests/availability.test.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1"
+  }
+}
