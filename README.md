@@ -60,8 +60,12 @@ npm test
 
 ## Adapters
 
-- DSH: existing `dsh-action-hub` Cordis plugin, to be rebased on this core.
-- Pi: a Pi package providing a native TUI palette and `resources_discover`.
+- DSH: [`../dsh-action-hub`](../dsh-action-hub) — Cordis plugin with the native
+  Web UI, Alt+A palette, composer chips, and skill provider.
+- Pi: [`../pi-action-hub`](../pi-action-hub) — Pi package with a native TUI
+  palette and `resources_discover`.
+
+Both adapters link this core with `file:../action-hub` while the API stabilizes.
 
 See [docs/architecture.md](docs/architecture.md) and
 [docs/adapter-contract.md](docs/adapter-contract.md).
