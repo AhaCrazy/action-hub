@@ -32,6 +32,13 @@ function fit(value, width) {
   return truncateToWidth(String(value ?? ''), width);
 }
 
+function itemLabel(item) {
+  if (typeof item?.name === 'string' && item.name !== '') return item.name;
+  if (typeof item?.label === 'string' && item.label !== '') return item.label;
+  if (typeof item?.path === 'string' && item.path !== '') return item.path;
+  return item?.key ?? '';
+}
+
 export class ManagerDashboard {
   constructor({ tui, theme, data, cwd, sectionId = 'actions', done }) {
     this.tui = tui;
@@ -88,8 +95,9 @@ export class ManagerDashboard {
   get filteredItems() {
     const matches = matcherFor(this.query, this.regex);
     return this.items.filter((item) => matches([
-      item.name,
+      itemLabel(item),
       item.description,
+      item.path,
     ].filter(Boolean).join(' ')));
   }
 
@@ -288,7 +296,7 @@ export class ManagerDashboard {
       const item = items[index];
       const active = index === this.selected;
       const marker = active ? paint('accent', '❯') : ' ';
-      const label = active ? paint('accent', item.name) : item.name;
+      const label = active ? paint('accent', itemLabel(item)) : itemLabel(item);
       const mode = this.sectionId === 'actions'
         ? (item.mode === 'skill' ? paint('success', 'S') : paint('dim', 'C'))
         : this.sectionId === 'groups'

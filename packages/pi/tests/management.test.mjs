@@ -43,6 +43,26 @@ test('dashboard renders three columns with section counts and details', () => {
   assert.equal(dashboard.query, 'zzz');
 });
 
+test('dashboard shows the current project by label', () => {
+  const dashboard = new ManagerDashboard({
+    tui: { requestRender() {} },
+    theme: { fg: (_color, value) => value },
+    data: {
+      actions: [],
+      state: { groups: [], projects: [] },
+      projects: [{ label: 'AgilityDog_Git', path: 'C:\\Work\\AgilityDog_Git', groups: ['dev'] }],
+      dataDir: 'E:\\data',
+      currentProjectRoot: 'C:\\Work\\AgilityDog_Git',
+    },
+    cwd: 'C:\\Work\\AgilityDog_Git',
+    done() {},
+  });
+  dashboard.setSection('projects');
+  const text = dashboard.render(110).join('\n');
+  assert.match(text, /AgilityDog_Git/u);
+  assert.doesNotMatch(text, /undefined/u);
+});
+
 test('multi-select filters, toggles, and returns checked keys', () => {
   let result;
   const component = new MultiSelect({

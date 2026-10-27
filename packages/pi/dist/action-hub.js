@@ -8936,6 +8936,12 @@ function padRight(value, width) {
 function fit(value, width) {
   return truncateToWidth(String(value ?? ""), width);
 }
+function itemLabel(item) {
+  if (typeof item?.name === "string" && item.name !== "") return item.name;
+  if (typeof item?.label === "string" && item.label !== "") return item.label;
+  if (typeof item?.path === "string" && item.path !== "") return item.path;
+  return item?.key ?? "";
+}
 var ManagerDashboard = class {
   constructor({ tui, theme, data, cwd, sectionId = "actions", done }) {
     this.tui = tui;
@@ -8986,8 +8992,9 @@ var ManagerDashboard = class {
   get filteredItems() {
     const matches = matcherFor(this.query, this.regex);
     return this.items.filter((item) => matches([
-      item.name,
-      item.description
+      itemLabel(item),
+      item.description,
+      item.path
     ].filter(Boolean).join(" ")));
   }
   get currentItem() {
@@ -9175,7 +9182,7 @@ var ManagerDashboard = class {
       const item = items[index];
       const active = index === this.selected;
       const marker = active ? paint("accent", "\u276F") : " ";
-      const label = active ? paint("accent", item.name) : item.name;
+      const label = active ? paint("accent", itemLabel(item)) : itemLabel(item);
       const mode = this.sectionId === "actions" ? item.mode === "skill" ? paint("success", "S") : paint("dim", "C") : this.sectionId === "groups" ? item.global ? paint("warning", "G") : " " : " ";
       out.push(fit(` ${marker}${mode} ${label}`, width - 1));
     }
