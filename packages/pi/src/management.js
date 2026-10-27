@@ -248,7 +248,6 @@ async function manageOneAction(ctx, store, action, tui) {
   for (;;) {
     const choice = await ctx.ui.select(actionLabel(action), [
       '插入到编辑器',
-      '编辑',
       '查看资源',
       '切换 Command / Skill',
       '设置分组',
@@ -273,10 +272,6 @@ async function manageOneAction(ctx, store, action, tui) {
       const resource = resources[labels.indexOf(picked)];
       if (resource === undefined) return;
       notify(ctx, resource.text === undefined ? `${resource.name}（二进制或大文件，请在文件系统中查看）` : resource.text, 'info');
-      return;
-    }
-    if (choice === '编辑') {
-      await editAction(ctx, store, action);
       return;
     }
     if (choice === '切换 Command / Skill') {

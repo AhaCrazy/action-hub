@@ -9078,9 +9078,21 @@ var ManagerDashboard = class {
       this.done({ kind: "close" });
       return;
     }
-    if (matchesKey(data, "tab")) {
-      this.focus = this.focus === "middle" ? "left" : "middle";
+    if (matchesKey(data, Key.left)) {
+      this.focus = "left";
       this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, Key.right)) {
+      this.focus = "middle";
+      this.tui.requestRender();
+      return;
+    }
+    if (matchesKey(data, "tab")) {
+      if (this.focus === "middle" && this.sectionId === "actions") {
+        const item2 = this.currentItem;
+        if (item2 !== null) this.done({ kind: "insert-action", action: item2 });
+      }
       return;
     }
     if (data === "/" || data === "f") {
@@ -9163,7 +9175,7 @@ var ManagerDashboard = class {
       lines.push(`${paint("border", "\u2502")}${padRight(left[index] ?? "", leftWidth)}${paint("border", "\u2502")}${padRight(middle[index] ?? "", middleWidth)}${paint("border", "\u2502")}${padRight(right[index] ?? "", rightWidth)}${paint("border", "\u2502")}`);
     }
     lines.push(separator);
-    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "Tab \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00 \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 i \u63D2\u5165 \xB7 f \u641C\u7D22 \xB7 q \u5173\u95ED";
+    const help = this.search ? "\u8F93\u5165\u641C\u7D22 \xB7 Enter \u7ED3\u675F\u641C\u7D22 \xB7 Esc \u6E05\u7A7A \xB7 Alt+R \u6B63\u5219" : "\u2190\u2192 \u5207\u6362\u680F \xB7 \u2191\u2193 \u79FB\u52A8 \xB7 Enter \u6253\u5F00 \xB7 Tab \u63D2\u5165 \xB7 n \u65B0\u5EFA \xB7 e \u7F16\u8F91 \xB7 d \u5220\u9664 \xB7 m \u6A21\u5F0F \xB7 p \u56FA\u5B9A \xB7 g \u5206\u7EC4 \xB7 f \u641C\u7D22 \xB7 q \u5173\u95ED";
     const helpLine = ` ${help}`;
     const fittedHelp = helpLine.length > inner ? `${helpLine.slice(0, Math.max(0, inner - 1))}\u2026` : helpLine;
     lines.push(`${paint("border", "\u2502")}${padRight(paint("dim", fittedHelp), inner)}${paint("border", "\u2502")}`);
@@ -9601,7 +9613,6 @@ async function manageOneAction(ctx, store2, action, tui) {
   for (; ; ) {
     const choice = await ctx.ui.select(actionLabel(action), [
       "\u63D2\u5165\u5230\u7F16\u8F91\u5668",
-      "\u7F16\u8F91",
       "\u67E5\u770B\u8D44\u6E90",
       "\u5207\u6362 Command / Skill",
       "\u8BBE\u7F6E\u5206\u7EC4",
@@ -9626,10 +9637,6 @@ async function manageOneAction(ctx, store2, action, tui) {
       const resource = resources[labels.indexOf(picked)];
       if (resource === void 0) return;
       notify2(ctx, resource.text === void 0 ? `${resource.name}\uFF08\u4E8C\u8FDB\u5236\u6216\u5927\u6587\u4EF6\uFF0C\u8BF7\u5728\u6587\u4EF6\u7CFB\u7EDF\u4E2D\u67E5\u770B\uFF09` : resource.text, "info");
-      return;
-    }
-    if (choice === "\u7F16\u8F91") {
-      await editAction(ctx, store2, action);
       return;
     }
     if (choice === "\u5207\u6362 Command / Skill") {

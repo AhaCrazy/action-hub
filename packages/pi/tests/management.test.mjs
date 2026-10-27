@@ -11,6 +11,7 @@ import { openManager } from '../src/management.js';
 import { insertAction } from '../src/insert.js';
 
 test('dashboard renders three columns with section counts and details', () => {
+  let chosen;
   const dashboard = new ManagerDashboard({
     tui: { requestRender() {} },
     theme: { fg: (_color, value) => value },
@@ -20,7 +21,7 @@ test('dashboard renders three columns with section counts and details', () => {
       dataDir: 'E:\\data',
     },
     cwd: 'E:\\project',
-    done() {},
+    done(value) { chosen = value; },
   });
   const lines = dashboard.render(110);
   assert.ok(lines.length > 15);
@@ -28,6 +29,12 @@ test('dashboard renders three columns with section counts and details', () => {
   assert.match(text, /Action/u);
   assert.match(text, /commit/u);
   assert.match(text, /详情/u);
+  dashboard.handleInput('\t');
+  assert.equal(chosen.kind, 'insert-action');
+  dashboard.handleInput('\u001b[D');
+  assert.equal(dashboard.focus, 'left');
+  dashboard.handleInput('\u001b[C');
+  assert.equal(dashboard.focus, 'middle');
   dashboard.handleInput('f');
   assert.equal(dashboard.search, true);
   dashboard.handleInput('z');
