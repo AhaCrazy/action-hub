@@ -164,6 +164,28 @@ test('manager can save the current Pi workdir scope', async () => {
   await fs.rm(dataDir, { recursive: true, force: true });
 });
 
+test('manager asks the caller to reload after a mode change', async () => {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-reload-'));
+  const store = createStore({ dataDir });
+  await store.create({ name: 'demo', description: 'Demo', prompt: 'Body.', mode: 'command' });
+  const customResults = [
+    { kind: 'toggle-mode', action: { id: 'demo', name: 'demo', mode: 'command' }, selectedKey: 'demo' },
+    { kind: 'close' },
+  ];
+  const ctx = {
+    mode: 'tui',
+    cwd: dataDir,
+    ui: {
+      async custom() { return customResults.shift(); },
+      notify() {},
+    },
+  };
+  const changed = await openManager(ctx, store, dataDir);
+  assert.equal(changed, true);
+  assert.equal((await store.readState()).entries.demo.mode, 'skill');
+  await fs.rm(dataDir, { recursive: true, force: true });
+});
+
 test('insertAction expands commands and uses native skill commands', async () => {
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-insert-'));
   const store = createStore({ dataDir });

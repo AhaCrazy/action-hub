@@ -335,7 +335,7 @@ async function toggleMode(ctx, store, action) {
   }
   try {
     await store.setMode(action.id, action.mode === 'skill' ? 'command' : 'skill');
-    notify(ctx, '模式已切换；Skill 可见性变化后请 /ah reload。', 'info');
+    notify(ctx, '模式已切换；退出管理界面后会自动重新加载 Pi 资源。', 'info');
   } catch (error) {
     notify(ctx, `切换失败：${error instanceof Error ? error.message : String(error)}`, 'error');
   }
@@ -397,6 +397,7 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
   let selectedKey = '';
   let query = '';
   let regex = false;
+  let reloadNeeded = false;
   for (;;) {
     const data = await loadAll(store);
     const cwd = ctx.cwd ?? process.cwd();
@@ -432,30 +433,36 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
       },
       { overlay: true, overlayOptions: { width: '94%', maxHeight: '88%' } },
     );
-    if (result === undefined || result === null || result.kind === 'close') return;
+    if (result === undefined || result === null || result.kind === 'close') return reloadNeeded;
     selectedKey = typeof result.selectedKey === 'string' ? result.selectedKey : '';
     query = typeof result.query === 'string' ? result.query : '';
     regex = result.regex === true;
     if (result.kind === 'new-action') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await createAction(ctx, store);
     } else if (result.kind === 'open-action') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await manageOneAction(ctx, store, result.action, dashboardTui);
     } else if (result.kind === 'edit-action') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await editAction(ctx, store, result.action);
     } else if (result.kind === 'delete-action') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await deleteAction(ctx, store, result.action);
     } else if (result.kind === 'toggle-mode') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await toggleMode(ctx, store, result.action);
     } else if (result.kind === 'pin-action') {
       sectionId = 'actions';
       await togglePin(ctx, store, result.action);
     } else if (result.kind === 'groups-action') {
       sectionId = 'actions';
+      reloadNeeded = true;
       await setActionGroups(ctx, store, result.action);
     } else if (result.kind === 'resources-action') {
       sectionId = 'actions';
@@ -463,18 +470,21 @@ export async function openManager(ctx, store, dataDir, scopeStore) {
     } else if (result.kind === 'insert-action') {
       sectionId = 'actions';
       await insertSelected(ctx, store, result.action, dashboardTui);
-      return;
+      return reloadNeeded;
     } else if (result.kind === 'new-group') {
       sectionId = 'groups';
       await createGroup(ctx, store);
     } else if (result.kind === 'open-group') {
       sectionId = 'groups';
+      reloadNeeded = true;
       await manageOneGroup(ctx, store, result.group);
     } else if (result.kind === 'delete-group') {
       sectionId = 'groups';
+      reloadNeeded = true;
       await deleteGroup(ctx, store, result.group);
     } else if (result.kind === 'edit-project') {
       sectionId = 'projects';
+      reloadNeeded = true;
       await editProjectScope(ctx, store, scopeStore, result.project.path);
     } else if (result.kind === 'tool') {
       sectionId = 'tools';
@@ -616,7 +626,7 @@ async function editProjectScope(ctx, store, scopeStore, projectPath) {
       try {
         if (scopeStore === undefined) throw new Error('项目范围存储不可用');
         await scopeStore.writeForRoot(projectPath, profile);
-        notify(ctx, '项目范围已保存（仅当前 Pi 工作目录）', 'info');
+        notify(ctx, '项目范围已保存（仅当前 Pi 工作目录）；退出管理界面后会自动重新加载。', 'info');
       } catch (error) {
         notify(ctx, `保存失败：${error instanceof Error ? error.message : String(error)}`, 'error');
       }

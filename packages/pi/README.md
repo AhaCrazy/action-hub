@@ -108,4 +108,4 @@ C:\Users\<你>\.pi\agent\sessions\<workdir>\action-hub\scope.json
 
 - Pi 没有 DSH 的侧边栏和 composer chip；Action 直接插入 Pi 编辑器。
 - Pi 的 Skill 入口使用原生 `/skill:<name>`。
-- Pi 只在启动和 `/ah reload` 时重新发现 Skill；修改 Skill 可见性后需要重新加载。
+- 在管理界面修改模式、分组或项目范围后，退出管理界面会自动重新加载 Pi 资源；外部文件修改可用 `/ah reload`。

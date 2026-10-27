@@ -9680,7 +9680,7 @@ async function toggleMode(ctx, store2, action) {
   }
   try {
     await store2.setMode(action.id, action.mode === "skill" ? "command" : "skill");
-    notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1BSkill \u53EF\u89C1\u6027\u53D8\u5316\u540E\u8BF7 /ah reload\u3002", "info");
+    notify2(ctx, "\u6A21\u5F0F\u5DF2\u5207\u6362\uFF1B\u9000\u51FA\u7BA1\u7406\u754C\u9762\u540E\u4F1A\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D Pi \u8D44\u6E90\u3002", "info");
   } catch (error) {
     notify2(ctx, `\u5207\u6362\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
   }
@@ -9736,6 +9736,7 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
   let selectedKey = "";
   let query = "";
   let regex = false;
+  let reloadNeeded = false;
   for (; ; ) {
     const data = await loadAll(store2);
     const cwd = ctx.cwd ?? process.cwd();
@@ -9771,30 +9772,36 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
       },
       { overlay: true, overlayOptions: { width: "94%", maxHeight: "88%" } }
     );
-    if (result === void 0 || result === null || result.kind === "close") return;
+    if (result === void 0 || result === null || result.kind === "close") return reloadNeeded;
     selectedKey = typeof result.selectedKey === "string" ? result.selectedKey : "";
     query = typeof result.query === "string" ? result.query : "";
     regex = result.regex === true;
     if (result.kind === "new-action") {
       sectionId = "actions";
+      reloadNeeded = true;
       await createAction(ctx, store2);
     } else if (result.kind === "open-action") {
       sectionId = "actions";
+      reloadNeeded = true;
       await manageOneAction(ctx, store2, result.action, dashboardTui);
     } else if (result.kind === "edit-action") {
       sectionId = "actions";
+      reloadNeeded = true;
       await editAction(ctx, store2, result.action);
     } else if (result.kind === "delete-action") {
       sectionId = "actions";
+      reloadNeeded = true;
       await deleteAction(ctx, store2, result.action);
     } else if (result.kind === "toggle-mode") {
       sectionId = "actions";
+      reloadNeeded = true;
       await toggleMode(ctx, store2, result.action);
     } else if (result.kind === "pin-action") {
       sectionId = "actions";
       await togglePin(ctx, store2, result.action);
     } else if (result.kind === "groups-action") {
       sectionId = "actions";
+      reloadNeeded = true;
       await setActionGroups(ctx, store2, result.action);
     } else if (result.kind === "resources-action") {
       sectionId = "actions";
@@ -9802,18 +9809,21 @@ async function openManager(ctx, store2, dataDir2, scopeStore2) {
     } else if (result.kind === "insert-action") {
       sectionId = "actions";
       await insertSelected(ctx, store2, result.action, dashboardTui);
-      return;
+      return reloadNeeded;
     } else if (result.kind === "new-group") {
       sectionId = "groups";
       await createGroup(ctx, store2);
     } else if (result.kind === "open-group") {
       sectionId = "groups";
+      reloadNeeded = true;
       await manageOneGroup(ctx, store2, result.group);
     } else if (result.kind === "delete-group") {
       sectionId = "groups";
+      reloadNeeded = true;
       await deleteGroup(ctx, store2, result.group);
     } else if (result.kind === "edit-project") {
       sectionId = "projects";
+      reloadNeeded = true;
       await editProjectScope(ctx, store2, scopeStore2, result.project.path);
     } else if (result.kind === "tool") {
       sectionId = "tools";
@@ -9931,7 +9941,7 @@ async function editProjectScope(ctx, store2, scopeStore2, projectPath) {
       try {
         if (scopeStore2 === void 0) throw new Error("\u9879\u76EE\u8303\u56F4\u5B58\u50A8\u4E0D\u53EF\u7528");
         await scopeStore2.writeForRoot(projectPath, profile);
-        notify2(ctx, "\u9879\u76EE\u8303\u56F4\u5DF2\u4FDD\u5B58\uFF08\u4EC5\u5F53\u524D Pi \u5DE5\u4F5C\u76EE\u5F55\uFF09", "info");
+        notify2(ctx, "\u9879\u76EE\u8303\u56F4\u5DF2\u4FDD\u5B58\uFF08\u4EC5\u5F53\u524D Pi \u5DE5\u4F5C\u76EE\u5F55\uFF09\uFF1B\u9000\u51FA\u7BA1\u7406\u754C\u9762\u540E\u4F1A\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u3002", "info");
       } catch (error) {
         notify2(ctx, `\u4FDD\u5B58\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
       }
@@ -10232,6 +10242,18 @@ async function openPalette(ctx, initialQuery = "") {
   }
   await insertAction(store, ctx, selected, args, paletteTui);
 }
+async function openManagerWithReload(ctx) {
+  await seedDefaultBuiltin(store).catch(() => {
+  });
+  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
+  if (reloadNeeded) {
+    try {
+      await ctx.reload();
+    } catch (error) {
+      notify3(ctx, `\u81EA\u52A8\u91CD\u65B0\u52A0\u8F7D\u5931\u8D25\uFF1A${error instanceof Error ? error.message : String(error)}`, "error");
+    }
+  }
+}
 function actionHub(pi) {
   pi.registerCommand("ah", {
     description: "\u6253\u5F00 Action Hub \u9762\u677F\u6216\u7BA1\u7406\u754C\u9762",
@@ -10242,9 +10264,7 @@ function actionHub(pi) {
         return;
       }
       if (text === "manage" || text === "\u7BA1\u7406") {
-        await seedDefaultBuiltin(store).catch(() => {
-        });
-        await openManager(ctx, store, dataDir, scopeStore);
+        await openManagerWithReload(ctx);
         return;
       }
       if (text === "export" || text === "\u5BFC\u51FA") {
@@ -10278,7 +10298,7 @@ function actionHub(pi) {
     handler: async (ctx) => {
       await seedDefaultBuiltin(store).catch(() => {
       });
-      await openManager(ctx, store, dataDir, scopeStore);
+      await openManagerWithReload(ctx);
     }
   });
   pi.on("resources_discover", async (event) => {

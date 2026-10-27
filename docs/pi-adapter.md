@@ -19,7 +19,7 @@
 - **Command 类型 Action** → 永不作为 Skill 返回；面板把渲染后的提示词插入编辑器。
 - **面板** → 自定义 TUI overlay：搜索（子串 + 正则）、列表、预览、参数、Enter 插入。
 - **项目范围** → 按 Pi workdir 保存：`~/.pi/agent/sessions/<encoded-cwd>/action-hub/scope.json`。它和 DSH 的项目范围默认不共享；删除该 session 工作目录会一起删除范围。
-- **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。修改 Skill 可见性后需要重新加载 Pi 资源。
+- **管理** → `/ah manage` 与 `Ctrl+Alt+A` 打开 TUI 管理界面，覆盖 Action、分组、项目范围、导入导出和设置。修改 Skill 可见性后，退出管理界面会自动重新加载 Pi 资源。
 
 ## 包结构
 
@@ -39,6 +39,6 @@ packages/pi/
 
 - `ctx.ui.custom` 只在 TUI 模式可用；print/JSON 模式没有 UI。
 - 命令和快捷键只在交互模式可用。
-- Skill 在启动和 `/reload` 时发现；范围变化需要重新加载。
+- Skill 在启动、`/ah reload` 或管理界面退出后的自动加载时发现。
 - 使用 Pi 的主题和 `KeybindingsManager`，不要硬编码颜色或终端按键处理。
 - 扩展工厂里不要启动 watcher/timer；应在 `session_start` 启动，在 `session_shutdown` 清理。

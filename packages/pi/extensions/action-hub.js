@@ -58,6 +58,18 @@ async function openPalette(ctx, initialQuery = '') {
   await insertAction(store, ctx, selected, args, paletteTui);
 }
 
+async function openManagerWithReload(ctx) {
+  await seedDefaultBuiltin(store).catch(() => {});
+  const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore);
+  if (reloadNeeded) {
+    try {
+      await ctx.reload();
+    } catch (error) {
+      notify(ctx, `自动重新加载失败：${error instanceof Error ? error.message : String(error)}`, 'error');
+    }
+  }
+}
+
 export default function actionHub(pi) {
   pi.registerCommand('ah', {
     description: '打开 Action Hub 面板或管理界面',
@@ -68,8 +80,7 @@ export default function actionHub(pi) {
         return;
       }
       if (text === 'manage' || text === '管理') {
-        await seedDefaultBuiltin(store).catch(() => {});
-        await openManager(ctx, store, dataDir, scopeStore);
+        await openManagerWithReload(ctx);
         return;
       }
       if (text === 'export' || text === '导出') {
@@ -104,7 +115,7 @@ export default function actionHub(pi) {
     description: '打开 Action Hub 管理界面',
     handler: async (ctx) => {
       await seedDefaultBuiltin(store).catch(() => {});
-      await openManager(ctx, store, dataDir, scopeStore);
+      await openManagerWithReload(ctx);
     },
   });
 
