@@ -1,0 +1,71 @@
+{
+  "name": "dsh-action-hub",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DeepSeek Harness adapter for the harness-agnostic action-hub core: native Alt+A palette, composer insertion, project scopes, and skill provider.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "action-hub",
+    "adapter",
+    "skill",
+    "palette",
+    "cordis"
+  ],
+  "license": "MIT",
+  "author": "AhaCrazy",
+  "icon": "./icon.svg",
+  "meta": {
+    "title": "Action Hub",
+    "description": "DSH adapter for the shared Action Hub core: standard skills, commands, groups, and project scopes."
+  },
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "dev": "node scripts/watch-client.mjs",
+    "pretest": "npm run build",
+    "prepack": "npm run build",
+    "test": "node tests/builtins.test.mjs && node tests/provider.test.mjs && node tests/client.test.mjs && node tests/host.test.mjs && node tests/seed.test.mjs"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "builtins.js",
+    "builtin-actions/**",
+    "host/**",
+    "client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json",
+    "assets/**",
+    "screenshots.json",
+    "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "dependencies": {
+    "action-hub": "file:../core"
+  }
+}

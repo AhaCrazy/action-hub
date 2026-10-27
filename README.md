@@ -1,55 +1,25 @@
-# action-hub
+# Action Hub
 
-Harness-agnostic core for a portable **Action** library:
+One portable Action library, native in every harness.
 
-- **Skill**: a standard `SKILL.md` directory that a harness may expose to the model.
-- **Command**: the same standard directory, used as a user-invoked prompt template.
-- Groups, global groups, project scopes, explicit per-project blocks.
-- Search, import/export, usage metadata, and a versioned local state file.
+An **Action** is a standard Agent Skill directory: `SKILL.md` plus optional
+resources. The same directory can be exposed to the model as a **Skill**, or
+kept user-invoked as a **Command**. Groups, global groups, project scopes, and
+per-project blocks live in local state, never in the portable skill document.
 
-This repository is the shared core. Harness integrations (DSH, Pi, and others)
-are separate adapter packages that bundle this core and provide their own native
-UI, shortcuts, and insertion behavior.
-
-## Status
-
-Early extraction of the proven `dsh-action-hub` core. The storage format and
-public API are still stabilizing; do not treat this package as published yet.
-
-## Layout
+This repository is a monorepo:
 
 ```text
-src/
-  store.js          # library + state, groups, scopes, modes, search data
-  availability.js   # project/global/blocked resolution
-  scope.js          # project-root and path matching
-  skill-doc.js      # SKILL.md parsing and writing
-  resources.js      # resource files inside a skill
-  bundle.js         # folder/ZIP import and export
-  zip.js            # deterministic ZIP codec
-  index.js          # public exports
-tests/              # Node test runner suites
-docs/               # architecture and adapter contract
+packages/
+  core/   action-hub       harness-agnostic library and state model
+  dsh/    dsh-action-hub   DSH Cordis adapter (native Web UI, Alt+A)
+  pi/     pi-action-hub    Pi package (native TUI palette, Alt+A)
+docs/     architecture and adapter contract
 ```
 
-## Data
-
-```text
-$ACTION_HUB_HOME/            # defaults to ~/.action-hub
-  library/<skill-name>/
-    SKILL.md
-    ...resources
-  state.json                 # mode / groups / scopes / usage / excludes
-```
-
-`SKILL.md` is the only portable artifact. `state.json` is local metadata and is
-never included in exported bundles.
-
-On a fresh data directory, the core creates a global **Common** group. Built-in
-Actions are supplied by the adapter, not hard-coded into the core.
-
-Writes use a cross-process lock and atomic `state.json` replacement, so DSH and
-Pi can use the same `ACTION_HUB_HOME` without one overwriting the other.
+The core is intentionally free of Cordis, DSH, Pi, React, and terminal UI
+dependencies. Each adapter supplies only harness-native UI, shortcuts,
+insertion, project discovery, and skill registration.
 
 ## Development
 
@@ -58,14 +28,42 @@ npm install
 npm test
 ```
 
-## Adapters
+`npm test` runs the core, DSH adapter, and Pi adapter test suites.
 
-- DSH: [`../dsh-action-hub`](../dsh-action-hub) — Cordis plugin with the native
-  Web UI, Alt+A palette, composer chips, and skill provider.
-- Pi: [`../pi-action-hub`](../pi-action-hub) — Pi package with a native TUI
-  palette and `resources_discover`.
+The adapters use workspace-local `file:../core` links while the core API is
+stabilizing. They remain separately publishable packages.
 
-Both adapters link this core with `file:../action-hub` while the API stabilizes.
+## Packages
 
-See [docs/architecture.md](docs/architecture.md) and
-[docs/adapter-contract.md](docs/adapter-contract.md).
+- [`packages/core`](packages/core) — library, `state.json`, groups, scopes,
+  search, import/export.
+- [`packages/dsh`](packages/dsh) — DSH plugin (Cordis).
+- [`packages/pi`](packages/pi) — Pi package.
+
+## Data
+
+All adapters use the same default:
+
+```text
+$ACTION_HUB_HOME/            # defaults to ~/.action-hub
+  library/<skill-name>/
+    SKILL.md
+  state.json
+```
+
+`SKILL.md` is portable. `state.json` is local metadata and is never written into
+exported bundles.
+
+Core writes use a cross-process lock and atomic `state.json` replacement, so a
+DSH process and a Pi process can share the same library.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Adapter contract](docs/adapter-contract.md)
+- [Pi adapter design](docs/pi-adapter.md)
+
+## Status
+
+Early consolidation. The package boundaries and storage schema are stable
+enough for validation, but not yet a frozen public API.

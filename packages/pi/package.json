@@ -1,0 +1,35 @@
+{
+  "name": "pi-action-hub",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Pi adapter for Action Hub: native TUI palette, editor insertion, and resource discovery for standard Agent Skills.",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "action-hub",
+    "skills",
+    "tui"
+  ],
+  "license": "MIT",
+  "author": "AhaCrazy",
+  "files": [
+    "extensions",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node tests/catalog.test.mjs && node --check extensions/action-hub.js && node --check src/palette.js"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "dependencies": {
+    "action-hub": "file:../core"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-tui": "*"
+  }
+}

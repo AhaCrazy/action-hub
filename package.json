@@ -1,31 +1,21 @@
 {
-  "name": "action-hub",
+  "name": "action-hub-workspace",
   "version": "0.1.0",
-  "description": "Harness-agnostic library for standard Agent Skills, user Commands, groups, project scopes, and import/export.",
+  "private": true,
+  "description": "Monorepo for the harness-agnostic Action Hub core and its DSH/Pi adapters.",
   "type": "module",
   "license": "MIT",
   "engines": {
     "node": ">=20"
   },
-  "exports": {
-    ".": "./src/index.js",
-    "./store": "./src/store.js",
-    "./bundle": "./src/bundle.js",
-    "./resources": "./src/resources.js",
-    "./skill-doc": "./src/skill-doc.js",
-    "./availability": "./src/availability.js",
-    "./scope": "./src/scope.js"
-  },
-  "files": [
-    "src",
-    "README.md",
-    "LICENSE",
-    "docs"
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "test": "node tests/store.test.mjs && node tests/resources.test.mjs && node tests/bundle.test.mjs && node tests/availability.test.mjs"
-  },
-  "dependencies": {
-    "yaml": "^2.9.1"
+    "test": "npm run test --workspaces --if-present",
+    "test:core": "npm run test --workspace action-hub",
+    "test:dsh": "npm run test --workspace dsh-action-hub",
+    "test:pi": "npm run test --workspace pi-action-hub",
+    "build": "npm run build --workspace dsh-action-hub"
   }
 }
