@@ -2,13 +2,14 @@
   "name": "action-hub-workspace",
   "version": "0.1.0",
   "private": true,
-  "description": "Action Hub monorepo：与 harness 无关的通用核心，以及 DSH、Pi、OMP 适配器。",
+  "description": "Action Hub monorepo：与 harness 无关的通用核心，以及 DSH、Pi、OMP、Claude Code 适配器。",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "pi",
     "omp",
+    "claude-code",
     "action-hub",
     "dsh-plugin"
   ],
@@ -23,9 +24,11 @@
     "test:core": "npm run test --workspace action-hub",
     "test:dsh": "npm run test --workspace dsh-action-hub",
     "test:pi": "npm run test --workspace pi-action-hub",
-    "build": "npm run build --workspace dsh-action-hub && npm run build --workspace pi-action-hub",
+    "test:claude": "npm run test --workspace claude-action-hub",
+    "build": "npm run build --workspace dsh-action-hub && npm run build --workspace pi-action-hub && npm run build --workspace claude-action-hub",
     "pack:pi": "npm pack --workspace pi-action-hub",
-    "pack:dsh": "npm pack --workspace dsh-action-hub"
+    "pack:dsh": "npm pack --workspace dsh-action-hub",
+    "pack:claude": "npm pack --workspace claude-action-hub"
   },
   "pi": {
     "extensions": [

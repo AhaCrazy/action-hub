@@ -1,6 +1,6 @@
 # Action Hub
 
-一套可移植的 Action 库，在 DSH、Pi 和 OMP 中提供原生使用体验。
+一套可移植的 Action 库，在 DSH、Pi、OMP 和 Claude Code 中提供原生使用体验。
 
 **Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组和全局分组保存在共享状态中；项目范围跟随各自 harness 的工作区，不写进 Skill 文件。
 
@@ -11,6 +11,7 @@
 | [docs/dsh.md](docs/dsh.md) | DSH 安装与功能 |
 | [docs/pi.md](docs/pi.md) | Pi 安装与功能 |
 | [docs/omp.md](docs/omp.md) | OMP 安装与功能 |
+| [docs/claude.md](docs/claude.md) | Claude Code 安装与功能 |
 | [docs/README.md](docs/README.md) | 文档索引、环境要求与公共 FAQ |
 | [docs/architecture.md](docs/architecture.md) | 架构与存储归属 |
 | [docs/adapter-contract.md](docs/adapter-contract.md) | 适配器契约 |
@@ -22,6 +23,7 @@
 | DSH | DSH Desktop 当前版本，默认 `desktop` profile |
 | Pi | `@earendil-works/pi-coding-agent@1.4.0` |
 | OMP | `omp@18.1.16` |
+| Claude Code | 原生 `skills/` 与 `commands/`，通过 `action-hub-claude` 同步 |
 
 ## 安装
 
@@ -86,12 +88,27 @@ OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，所以 Action Hub 使用 `Alt+
 
 更完整的安装与排查见 [docs/omp.md](docs/omp.md)。
 
+### Claude Code
+
+Claude Code 使用原生 `skills/` 和 `commands/`，通过同步 CLI 接入：
+
+```powershell
+npm install -g https://github.com/AhaCrazy/action-hub/releases/latest/download/claude-action-hub.tgz
+action-hub-claude sync
+claude
+```
+
+修改 Action、分组或项目范围后，重新执行 `action-hub-claude sync` 再启动 Claude Code。
+
+更完整的说明见 [docs/claude.md](docs/claude.md)。
+
 ## 第一次使用
 
 新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill。
 
 - DSH：在 Action Hub 页面里导入一个标准 Skill 目录；
-- Pi / OMP：使用 `/ah import <目录路径>` 导入。
+- Pi / OMP：使用 `/ah import <目录路径>` 导入；
+- Claude Code：在共享库已有 Action 后执行 `action-hub-claude sync`。
 
 导入后即可在面板里搜索、选择和插入 Action。
 
@@ -125,6 +142,15 @@ pi install git:github.com/AhaCrazy/action-hub
 omp plugin install git:github.com/AhaCrazy/action-hub --force
 ```
 
+### Claude Code
+
+重新安装 release 资产，然后重新同步：
+
+```powershell
+npm install -g https://github.com/AhaCrazy/action-hub/releases/latest/download/claude-action-hub.tgz
+action-hub-claude sync
+```
+
 ## 卸载
 
 ```powershell
@@ -136,11 +162,15 @@ pi remove git:github.com/AhaCrazy/action-hub
 
 # OMP
 omp plugin uninstall action-hub-workspace
+
+# Claude Code
+action-hub-claude clean
+npm uninstall -g claude-action-hub
 ```
 
 ## 数据
 
-DSH、Pi 和 OMP 默认共用 Action 库、分组和全局分组：
+DSH、Pi、OMP 和 Claude Code 默认共用 Action 库、分组和全局分组：
 
 ```text
 C:\Users\<你>\.action-hub
@@ -164,9 +194,12 @@ C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 OMP:
 C:\Users\<你>\.omp\agent\sessions\<encoded-project-root>\action-hub\scope.json
 （使用 --profile 时位于 .omp\profiles\<profile>\agent\sessions）
+
+Claude Code:
+<项目根>\.claude\action-hub\scope.json
 ```
 
-项目范围保存在当前 harness 的 session 存储目录下，子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）。因此 Pi、OMP 各自跟随自己的工作区；同一个项目在 DSH、Pi、OMP 中可以有不同范围。删除对应 session 子目录时，范围文件也会一起清理。
+项目范围保存在当前 harness 的本地配置中：DSH 用 workspace ID，Pi / OMP 使用 session 存储根 + 项目根编码，Claude Code 直接放在项目 `.claude/action-hub/scope.json`。同一个项目在四个 harness 中可以有不同范围。
 
 旧版 DSH 插件的数据在：
 
@@ -184,6 +217,7 @@ C:\Users\<你>\.dsh\dsh-action-hub
 - 重启对应的 harness；
 - Pi：`/ah`、`Alt+A`、`Ctrl+Alt+A`；
 - OMP：`/ah` 或 `Alt+Shift+A`；`Alt+A` 是 OMP 内置的 Agent Hub；
+- Claude Code：没有 `/ah` 面板，使用 `action-hub-claude sync` 后重启会话；
 - DSH：检查是否还有旧版 Action Hub 同时启用。新旧适配器使用相同的插件标识，只应保留一个。
 
 ### OMP 按 `Alt+A` 打开的是 Agent Hub
@@ -205,10 +239,21 @@ C:\Users\<你>\.dsh\dsh-action-hub
 
 npm 包还没有发布。请使用本文档里的 Git 安装命令。
 
+### Claude Code 没有 Action
+
+Claude Code 不会在运行时自动发现 Action。先执行：
+
+```powershell
+action-hub-claude sync
+```
+
+再启动 Claude Code。修改 Action、分组或范围后需要重新 sync。
+
 ### 升级后行为没有变化
 
 - Pi：先 `pi update --extensions`，仍不生效则 remove + install；
 - OMP：`omp plugin install ... --force` 后重启；
+- Claude Code：重新安装后执行 `action-hub-claude sync`；
 - DSH：先卸载再安装，然后重启。
 
 ## 支持范围
@@ -216,6 +261,7 @@ npm 包还没有发布。请使用本文档里的 Git 安装命令。
 - DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
 - Pi：原生 TUI 面板、`Alt+A`、`Ctrl+Alt+A` 管理界面、编辑器插入、Action / 分组 / 项目范围 / 导入导出管理、`resources_discover`。
 - OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入、项目范围和 `resources_discover`；项目范围使用 OMP session 存储根 + 项目根编码。
+- Claude Code：通过 `action-hub-claude sync` 同步为原生 `skills/` 和 `/ah:<name>` commands；没有自定义 TUI，项目范围放在 `.claude/action-hub/scope.json`。
 - 其他 harness：可基于同一套核心继续增加适配器。
 
 ## 开发

@@ -173,7 +173,7 @@ C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\act
 使用 `--session-dir` 时跟随自定义目录。
 
 - 每个项目根独立；
-- 同一个项目在 Pi、OMP、DSH 中的范围互相独立；
+- 同一个项目在 Pi、OMP、DSH、Claude Code 中的范围互相独立；
 - 删除对应 session 子目录时，范围文件一起删除。
 
 ### Skill 自动发现与重载

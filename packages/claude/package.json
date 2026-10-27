@@ -1,0 +1,41 @@
+{
+  "name": "claude-action-hub",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Action Hub 的 Claude Code 适配器：把共享 Action 同步为原生 Skills 和 Slash Commands。",
+  "keywords": [
+    "claude-code",
+    "claude",
+    "action-hub",
+    "skills",
+    "slash-commands"
+  ],
+  "license": "MIT",
+  "author": "AhaCrazy",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "action-hub-claude": "./bin/action-hub-claude.js"
+  },
+  "main": "./dist/action-hub-claude.js",
+  "exports": {
+    ".": "./dist/action-hub-claude.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "pretest": "npm run build",
+    "prepack": "npm run build",
+    "test": "node tests/sync.test.mjs && node --check src/sync.js && node --check src/cli.js && node --check bin/action-hub-claude.js"
+  },
+  "devDependencies": {
+    "action-hub": "file:../core"
+  }
+}

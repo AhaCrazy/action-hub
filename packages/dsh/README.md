@@ -131,7 +131,7 @@ C:\Users\<你>\.dsh\dsh-action-hub
 - 分组可以标记为**全局分组**，所有工作区自动可用；
 - 项目可以只启用指定分组/Action；
 - 项目可以屏蔽继承来的分组/Action，而不影响其他工作区；
-- 项目范围只对当前 DSH 工作区生效，不会同步到 Pi / OMP 或其他 harness。
+- 项目范围只对当前 DSH 工作区生效，不会同步到 Pi / OMP / Claude Code 或其他 harness。
 
 ## 常见问题
 

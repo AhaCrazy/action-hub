@@ -125,7 +125,7 @@ C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 - 每个项目根独立；
 - 同一项目根的多个 Pi 会话共享范围；
 - 删除对应 session 子目录时，范围文件一起删除；
-- 同一个项目在 DSH、Pi、OMP 中的范围互相独立。
+- 同一个项目在 DSH、Pi、OMP、Claude Code 中的范围互相独立。
 
 ### Skill 自动发现与重载
 
