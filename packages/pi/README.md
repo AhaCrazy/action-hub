@@ -136,6 +136,7 @@ C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\act
 
 - Pi / OMP 没有 DSH 的侧边栏和 composer chip；Action 直接插入编辑器。
 - Pi / OMP 的 Skill 入口使用原生 `/skill:<name>`。
-- 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。外部文件修改也可用 `/ah reload`。
+- Pi 使用 `resources_discover` 把 Skill 交给 Pi；OMP 18.1.x 主会话不触发该事件，OMP 适配器会把 Skill 模式复制到 `<项目>/.omp/skills` 供 OMP 原生发现。生成物由 `.omp/action-hub/generated.json` 跟踪，不覆盖用户自己的同名 Skill。
+- 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。OMP 当前会话未刷新到新 Skill 时，重启 OMP 一次。
 - OMP 的 `Alt+A` 属于内置 Agent Hub；Action 面板使用 `/ah` 或 `Alt+Shift+A`。
 - 管理界面的当前焦点栏标题前显示 `▶`，非焦点栏内容变暗。

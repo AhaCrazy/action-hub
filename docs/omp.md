@@ -87,7 +87,7 @@ OMP 通过自己的 legacy Pi 兼容层加载 Action Hub 的 Pi 适配器：
 
 ### Action 的两种模式
 
-- **Skill**：通过 `resources_discover` 交给 OMP，模型在系统提示词中看到名称和描述，可按需读取 `SKILL.md`；
+- **Skill**：OMP 18.1.x 的主会话不消费 Pi 兼容的 `resources_discover` 事件，适配器会在启动扫描前把 Skill 模式的 Action 投影到 `<项目>/.omp/skills`，由 OMP 原生 Skill 发现读取；
 - **Command**：不进入模型目录，只能由用户从面板插入展开后的提示词。
 
 Skill 也可以由用户主动调用：
@@ -178,11 +178,17 @@ C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\act
 
 ### Skill 自动发现与重载
 
-- OMP 在启动、切换会话或 reload 时调用 `resources_discover`；
-- 只有 Skill 模式的 Action 会进入模型可见列表；
+- OMP 18.1.x 没有把 `resources_discover` 接入主会话的 Skill 目录构建；
+- 适配器在扩展加载时，把当前范围内 Skill 模式的 Action 复制到：
+  ```text
+  <项目>/.omp/skills/<name>/
+  <项目>/.omp/action-hub/generated.json
+  ```
+- OMP 启动时按原生 `.omp/skills` 规则发现这些 Skill，模型会在系统提示词中看到名称和描述；
 - Command 永远不进入模型目录；
-- 修改模式、分组或项目范围后，退出管理界面会尝试自动重新加载；
-- 如果编辑器里已有草稿或当前上下文无法自动重载，会提示执行 `/ah reload`。
+- 修改模式、分组或项目范围后，退出管理界面会尝试重新加载，并刷新 `.omp/skills` 投影；
+- 如果当前会话仍未出现新 Skill，重启 OMP 一次即可；
+- `generated.json` 只记录 Action Hub 生成物，不会删除用户自己的 `.omp/skills` 条目。
 
 ### 与 OMP / Claude / Codex 原生 Skill 重名
 
@@ -197,7 +203,7 @@ OMP 还会发现自己的 Skill 目录，例如：
 .agents/skills
 ```
 
-同名 Skill 按 OMP 的加载顺序去重，先发现者胜出；Action Hub 的同名 Skill 通常会被丢弃。建议 Action Hub 中的 Skill 使用唯一名称。
+同名 Skill 按 OMP 的加载顺序去重，先发现者胜出；Action Hub 生成到 `.omp/skills` 的同名 Skill 不会覆盖用户已有的原生 Skill，遇到冲突会跳过。建议 Action Hub 中的 Skill 使用唯一名称。
 
 ### 数据
 

@@ -45,7 +45,7 @@ interface HarnessAdapter {
 
 ## Skill 投影
 
-对于每次 `resources_discover`（Pi / OMP）或 provider list（DSH）：
+对于每次 `resources_discover`（Pi）或 provider list（DSH）：
 
 1. 从 `cwd` 解析项目根；
 2. 从 core 加载 Action；
@@ -92,4 +92,4 @@ OMP 不新增独立适配器包，而是复用 Pi 适配器：
 
 ## 重新加载行为
 
-DSH 的 Skill provider 可以在进程内刷新。Pi / OMP 只在启动或 reload 时发现 Skill；如果管理操作改变了 Skill 可见性，适配器应在退出管理界面时调用 `ctx.reload()`，或在无法自动 reload 的上下文提示用户执行 `/ah reload`。
+DSH 的 Skill provider 可以在进程内刷新。Pi 只在启动或 reload 时发现 Skill；如果管理操作改变了 Skill 可见性，适配器应在退出管理界面时调用 `ctx.reload()`，或在无法自动 reload 的上下文提示用户执行 `/ah reload`。OMP 18.1.x 的主会话不触发 `resources_discover`，适配器在扩展加载时把 Skill 模式投影到 `<项目>/.omp/skills`，并在 session_start / 管理界面退出时刷新投影；当前会话未刷新时重启 OMP。

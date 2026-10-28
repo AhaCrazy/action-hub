@@ -11,10 +11,16 @@ import { insertAction } from '../src/insert.js';
 import { openManager } from '../src/management.js';
 import { ActionPalette } from '../src/palette.js';
 import { createPiProjectScopeStore } from '../src/project-scopes.js';
+import {
+  createOmpScopeStore,
+  isOmpRuntime,
+  syncOmpNativeSkills,
+} from '../src/omp-native-skills.js';
 
 const dataDir = defaultDataDir();
 const store = createStore({ dataDir });
-const scopeStore = createPiProjectScopeStore();
+const ompRuntime = isOmpRuntime();
+const scopeStore = ompRuntime ? createOmpScopeStore() : createPiProjectScopeStore();
 
 function notify(ctx, text, kind = 'info') {
   try {
@@ -82,6 +88,9 @@ async function openManagerWithReload(ctx) {
   const reloadNeeded = await openManager(ctx, store, dataDir, scopeStore, {
     onTui(value) { tui = value; },
   });
+  if (ompRuntime) {
+    await syncOmpNativeSkills(store, scopeStore, ctx.cwd ?? process.cwd()).catch(() => {});
+  }
   if (!reloadNeeded) return;
   // Pi 1.4.0 only exposes reload() on command contexts. Shortcut handlers get
   // the smaller ExtensionContext, so fall back to submitting the reload command
@@ -101,6 +110,20 @@ async function openManagerWithReload(ctx) {
     return;
   }
   notify(ctx, '修改已保存。当前上下文不能自动重载，请执行 /ah reload。', 'warning');
+}
+
+// OMP 18.1.x does not emit the Pi-compatible resources_discover event, and its
+// native skill catalog is built before session_start. Project the current
+// Skill-mode Actions before OMP scans `<project>/.omp/skills`, so the first
+// session already sees them. The projection is refreshed on session_start and
+// after manager changes for the next launch.
+if (ompRuntime) {
+  try {
+    await seedDefaultBuiltin(store);
+    await syncOmpNativeSkills(store, scopeStore, process.cwd());
+  } catch {
+    /* OMP startup must not fail because a generated skill could not be written */
+  }
 }
 
 export default function actionHub(pi) {
@@ -167,6 +190,11 @@ export default function actionHub(pi) {
 
   pi.on('session_start', (_event, ctx) => {
     scopeStore.configure(ctx);
+    if (ompRuntime) {
+      // OMP's native catalog is already built for this session; refresh the
+      // on-disk projection so the next launch sees the exact project scope.
+      void syncOmpNativeSkills(store, scopeStore, ctx.cwd ?? process.cwd()).catch(() => {});
+    }
   });
 
   pi.on('resources_discover', async (event) => {

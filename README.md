@@ -222,7 +222,7 @@ npm 包还没有发布。请使用本文档里的 Git 安装命令。
 
 - DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
 - Pi：原生 TUI 面板、`Alt+A`、`Ctrl+Alt+A` 管理界面、编辑器插入、Action / 分组 / 项目范围 / 导入导出管理、`resources_discover`。
-- OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入、项目范围和 `resources_discover`；项目范围使用 OMP session 存储根 + 项目根编码。
+- OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入和项目范围；OMP 18.1.x 不触发 `resources_discover`，Skill 模式会投影到 `<项目>/.omp/skills` 供原生发现。
 - 其他 harness：可基于同一套核心继续增加适配器。
 
 ## 开发

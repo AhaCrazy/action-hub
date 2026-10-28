@@ -8,7 +8,7 @@
 
 - DSH：Cordis 插件、Alt+A 面板、composer 插入、Skill provider。
 - Pi：Pi 包、TUI 面板、`resources_discover`、编辑器插入。
-- OMP：复用 Pi 适配器，通过 OMP 的 legacy Pi 兼容层加载；项目范围跟随 OMP session 目录。
+- OMP：复用 Pi 适配器，通过 OMP 的 legacy Pi 兼容层加载；OMP 18.1.x 主会话不触发 `resources_discover`，适配器把 Skill 模式投影到 `<项目>/.omp/skills`，项目范围跟随 OMP session 目录。
 - 其他 harness：使用各自的扩展点。
 
 ## 分层
