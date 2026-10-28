@@ -1,6 +1,6 @@
-﻿# Action Hub
+# Action Hub
 
-一套可移植的 Action 库，在 DSH、Pi 和 OMP 中提供原生使用体验。
+一套可移植的 Action 库，在 DSH、Pi、OMP 和 Codex 中提供原生使用体验。
 
 **Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组和全局分组保存在共享状态中；项目范围跟随各自 harness 的工作区，不写进 Skill 文件。
 
@@ -11,6 +11,7 @@
 | [docs/dsh.md](docs/dsh.md) | DSH 安装与功能 |
 | [docs/pi.md](docs/pi.md) | Pi 安装与功能 |
 | [docs/omp.md](docs/omp.md) | OMP 安装与功能 |
+| [docs/codex.md](docs/codex.md) | Codex 安装与功能 |
 | [docs/README.md](docs/README.md) | 文档索引、环境要求与公共 FAQ |
 | [docs/architecture.md](docs/architecture.md) | 架构与存储归属 |
 | [docs/adapter-contract.md](docs/adapter-contract.md) | 适配器契约 |
@@ -22,6 +23,7 @@
 | DSH | DSH Desktop 当前版本，默认 `desktop` profile |
 | Pi | `@earendil-works/pi-coding-agent@1.4.0` |
 | OMP | `omp@18.1.16` |
+| Codex | Agent Skills，`.agents/skills` 目录约定 |
 
 ## 安装
 
@@ -93,12 +95,27 @@ OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，所以 Action Hub 使用 `Alt+
 
 更完整的安装与排查见 [docs/omp.md](docs/omp.md)。
 
+### Codex
+
+Codex 使用原生 Agent Skills，通过同步 CLI 接入：
+
+```powershell
+npm install -g https://github.com/AhaCrazy/action-hub/releases/latest/download/codex-action-hub.tgz
+action-hub-codex sync
+codex
+```
+
+修改 Action、分组或项目范围后，重新执行 `action-hub-codex sync` 再启动 Codex。
+
+更完整的说明见 [docs/codex.md](docs/codex.md)。
+
 ## 第一次使用
 
 新库默认只有一个全局 `Common` 分组，并自带只读的 `action-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill。
 
 - DSH：在 Action Hub 页面里导入一个标准 Skill 目录；
-- Pi / OMP：使用 `/ah import <目录路径>` 导入。
+- Pi / OMP：使用 `/ah import <目录路径>` 导入；
+- Codex：在共享库已有 Action 后执行 `action-hub-codex sync`。
 
 导入后即可在面板里搜索、选择和插入 Action。
 
@@ -132,6 +149,15 @@ pi install git:github.com/AhaCrazy/action-hub
 omp plugin install git:github.com/AhaCrazy/action-hub --force
 ```
 
+### Codex
+
+重新安装 release 资产，然后重新同步：
+
+```powershell
+npm install -g https://github.com/AhaCrazy/action-hub/releases/latest/download/codex-action-hub.tgz
+action-hub-codex sync
+```
+
 ## 卸载
 
 ```powershell
@@ -143,11 +169,15 @@ pi remove git:github.com/AhaCrazy/action-hub
 
 # OMP
 omp plugin uninstall action-hub-workspace
+
+# Codex
+action-hub-codex clean
+npm uninstall -g codex-action-hub
 ```
 
 ## 数据
 
-DSH、Pi 和 OMP 默认共用 Action 库、分组和全局分组：
+DSH、Pi、OMP 和 Codex 默认共用 Action 库、分组和全局分组：
 
 ```text
 C:\Users\<你>\.action-hub
@@ -171,9 +201,12 @@ C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 OMP:
 C:\Users\<你>\.omp\agent\sessions\<encoded-project-root>\action-hub\scope.json
 （使用 --profile 时位于 .omp\profiles\<profile>\agent\sessions）
+
+Codex:
+<项目根>\.codex\action-hub\scope.json
 ```
 
-项目范围保存在当前 harness 的 session 存储目录下，子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）。因此 Pi、OMP 各自跟随自己的工作区；同一个项目在 DSH、Pi、OMP 中可以有不同范围。删除对应 session 子目录时，范围文件也会一起清理。
+项目范围保存在当前 harness 的 session 存储目录下，子目录名由项目根编码（最近的已登记工作区或 `.git` 祖先；没有则使用 cwd）。Codex 直接使用项目根下的 `.codex/action-hub/scope.json`。同一个项目在 DSH、Pi、OMP、Codex 中可以有不同范围。
 
 旧版 DSH 插件的数据在：
 
@@ -191,6 +224,7 @@ C:\Users\<你>\.dsh\dsh-action-hub
 - 重启对应的 harness；
 - Pi：`/ah`、`Alt+A`、`Ctrl+Alt+A`；
 - OMP：`/ah` 或 `Alt+Shift+A`；`Alt+A` 是 OMP 内置的 Agent Hub；
+- Codex：没有 `/ah` 面板，执行 `action-hub-codex sync` 后启动 Codex；
 - DSH：检查是否还有旧版 Action Hub 同时启用。新旧适配器使用相同的插件标识，只应保留一个。
 
 ### OMP 按 `Alt+A` 打开的是 Agent Hub
@@ -212,10 +246,21 @@ C:\Users\<你>\.dsh\dsh-action-hub
 
 npm 包还没有发布。请使用本文档里的 Git 安装命令。
 
+### Codex 没有 Action
+
+Codex 不会在运行时读取 Action Hub 的共享范围。先执行：
+
+```powershell
+action-hub-codex sync
+```
+
+再启动 Codex；修改 Action、分组或范围后重新同步。
+
 ### 升级后行为没有变化
 
 - Pi：先 `pi update --extensions`，仍不生效则 remove + install；
 - OMP：`omp plugin install ... --force` 后重启；
+- Codex：重新安装后执行 `action-hub-codex sync`；
 - DSH：先卸载再安装，然后重启。
 
 ## 支持范围
@@ -223,6 +268,7 @@ npm 包还没有发布。请使用本文档里的 Git 安装命令。
 - DSH：原生 Web UI、`Alt+A`、composer 插入、项目范围、Skill provider。
 - Pi：原生 TUI 面板、`Alt+A`、`Ctrl+Alt+A` 管理界面、编辑器插入、Action / 分组 / 项目范围 / 导入导出管理、`resources_discover`。
 - OMP：通过 Pi 兼容层加载同一扩展，提供 `/ah`、`Alt+Shift+A`、`Ctrl+Alt+A`、编辑器插入和项目范围；OMP 18.1.x 不触发 `resources_discover`，Skill 模式会投影到 `<项目>/.omp/skills` 供原生发现。
+- Codex：通过 `action-hub-codex sync` 同步为原生 `.agents/skills`；Skill 可隐式调用，Command 通过 `allow_implicit_invocation: false` 仅允许显式调用；项目范围放在 `.codex/action-hub/scope.json`。
 - 其他 harness：可基于同一套核心继续增加适配器。
 
 ## 开发
