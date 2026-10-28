@@ -1,4 +1,4 @@
-﻿# OMP 版 Action Hub
+# OMP 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。
 
@@ -173,7 +173,7 @@ C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\act
 使用 `--session-dir` 时跟随自定义目录。
 
 - 每个项目根独立；
-- 同一个项目在 Pi、OMP、DSH 中的范围互相独立；
+- 同一个项目在 Pi、OMP、DSH、Codex 中的范围互相独立；
 - 删除对应 session 子目录时，范围文件一起删除。
 
 ### Skill 自动发现与重载

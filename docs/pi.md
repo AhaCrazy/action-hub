@@ -1,4 +1,4 @@
-﻿# Pi 版 Action Hub
+# Pi 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 Pi 中的安装与功能。当前验证环境：`@earendil-works/pi-coding-agent@1.4.0`。
 
@@ -125,7 +125,7 @@ C:\Users\<你>\.pi\agent\sessions\<encoded-project-root>\action-hub\scope.json
 - 每个项目根独立；
 - 同一项目根的多个 Pi 会话共享范围；
 - 删除对应 session 子目录时，范围文件一起删除；
-- 同一个项目在 DSH、Pi、OMP 中的范围互相独立。
+- 同一个项目在 DSH、Pi、OMP、Codex 中的范围互相独立。
 
 ### Skill 自动发现与重载
 

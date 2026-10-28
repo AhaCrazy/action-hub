@@ -1,4 +1,4 @@
-﻿# DSH 版 Action Hub
+# DSH 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 DSH 中的安装与功能。
 
@@ -143,7 +143,7 @@ C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json
 
 - 工作区改名不影响范围；
 - 删除工作区后，对应范围文件会在后续刷新时清理；
-- 同一个项目在 DSH、Pi、OMP 中的范围互相独立。
+- 同一个项目在 DSH、Pi、OMP、Codex 中的范围互相独立。
 
 ### 数据
 
