@@ -7,7 +7,7 @@
 - 分组、全局分组、项目范围 schema 与项目级显式屏蔽。
 - 搜索、导入导出、使用记录和带版本号的本地状态文件。
 
-本包是共享核心。DSH、Pi、OMP、Codex 以及其他 harness 的集成都作为适配器存在，各自提供原生 UI、快捷键和插入方式。OMP 复用 Pi 适配器，不单独发布包。
+本包是共享核心。DSH、Pi、OMP 以及其他 harness 的集成都作为适配器存在，各自提供原生 UI、快捷键和插入方式。OMP 复用 Pi 适配器，不单独发布包。
 
 ## 状态
 
@@ -43,7 +43,7 @@ $ACTION_HUB_HOME/            # 默认 ~/.action-hub
 
 新数据目录会默认创建一个全局 **Common** 分组。内置 Action 由适配器提供，不硬编码进 core。
 
-写入使用跨进程锁和原子替换 `state.json`，因此 DSH、Pi、OMP 和 Codex 可以共用同一个 `ACTION_HUB_HOME`，不会互相覆盖。
+写入使用跨进程锁和原子替换 `state.json`，因此 DSH、Pi 和 OMP 可以共用同一个 `ACTION_HUB_HOME`，不会互相覆盖。
 
 ## 开发
 
