@@ -113,17 +113,17 @@ var require_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    function visit_(key, node, visitor, path8) {
-      const ctrl = callVisitor(key, node, visitor, path8);
+    function visit_(key, node, visitor, path7) {
+      const ctrl = callVisitor(key, node, visitor, path7);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visit_(key, ctrl, visitor, path8);
+        replaceNode(key, path7, ctrl);
+        return visit_(key, ctrl, visitor, path7);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path7 = Object.freeze(path7.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = visit_(i, node.items[i], visitor, path8);
+            const ci = visit_(i, node.items[i], visitor, path7);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -134,13 +134,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = visit_("key", node.key, visitor, path8);
+          path7 = Object.freeze(path7.concat(node));
+          const ck = visit_("key", node.key, visitor, path7);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = visit_("value", node.value, visitor, path8);
+          const cv = visit_("value", node.value, visitor, path7);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -161,17 +161,17 @@ var require_visit = __commonJS({
     visitAsync.BREAK = BREAK;
     visitAsync.SKIP = SKIP;
     visitAsync.REMOVE = REMOVE;
-    async function visitAsync_(key, node, visitor, path8) {
-      const ctrl = await callVisitor(key, node, visitor, path8);
+    async function visitAsync_(key, node, visitor, path7) {
+      const ctrl = await callVisitor(key, node, visitor, path7);
       if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
-        replaceNode(key, path8, ctrl);
-        return visitAsync_(key, ctrl, visitor, path8);
+        replaceNode(key, path7, ctrl);
+        return visitAsync_(key, ctrl, visitor, path7);
       }
       if (typeof ctrl !== "symbol") {
         if (identity.isCollection(node)) {
-          path8 = Object.freeze(path8.concat(node));
+          path7 = Object.freeze(path7.concat(node));
           for (let i = 0; i < node.items.length; ++i) {
-            const ci = await visitAsync_(i, node.items[i], visitor, path8);
+            const ci = await visitAsync_(i, node.items[i], visitor, path7);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -182,13 +182,13 @@ var require_visit = __commonJS({
             }
           }
         } else if (identity.isPair(node)) {
-          path8 = Object.freeze(path8.concat(node));
-          const ck = await visitAsync_("key", node.key, visitor, path8);
+          path7 = Object.freeze(path7.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path7);
           if (ck === BREAK)
             return BREAK;
           else if (ck === REMOVE)
             node.key = null;
-          const cv = await visitAsync_("value", node.value, visitor, path8);
+          const cv = await visitAsync_("value", node.value, visitor, path7);
           if (cv === BREAK)
             return BREAK;
           else if (cv === REMOVE)
@@ -215,23 +215,23 @@ var require_visit = __commonJS({
       }
       return visitor;
     }
-    function callVisitor(key, node, visitor, path8) {
+    function callVisitor(key, node, visitor, path7) {
       if (typeof visitor === "function")
-        return visitor(key, node, path8);
+        return visitor(key, node, path7);
       if (identity.isMap(node))
-        return visitor.Map?.(key, node, path8);
+        return visitor.Map?.(key, node, path7);
       if (identity.isSeq(node))
-        return visitor.Seq?.(key, node, path8);
+        return visitor.Seq?.(key, node, path7);
       if (identity.isPair(node))
-        return visitor.Pair?.(key, node, path8);
+        return visitor.Pair?.(key, node, path7);
       if (identity.isScalar(node))
-        return visitor.Scalar?.(key, node, path8);
+        return visitor.Scalar?.(key, node, path7);
       if (identity.isAlias(node))
-        return visitor.Alias?.(key, node, path8);
+        return visitor.Alias?.(key, node, path7);
       return void 0;
     }
-    function replaceNode(key, path8, node) {
-      const parent = path8[path8.length - 1];
+    function replaceNode(key, path7, node) {
+      const parent = path7[path7.length - 1];
       if (identity.isCollection(parent)) {
         parent.items[key] = node;
       } else if (identity.isPair(parent)) {
@@ -843,10 +843,10 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node = require_Node();
-    function collectionFromPath(schema, path8, value) {
+    function collectionFromPath(schema, path7, value) {
       let v = value;
-      for (let i = path8.length - 1; i >= 0; --i) {
-        const k = path8[i];
+      for (let i = path7.length - 1; i >= 0; --i) {
+        const k = path7[i];
         if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
           const a = [];
           a[k] = v;
@@ -865,7 +865,7 @@ var require_Collection = __commonJS({
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
-    var isEmptyPath = (path8) => path8 == null || typeof path8 === "object" && !!path8[Symbol.iterator]().next().done;
+    var isEmptyPath = (path7) => path7 == null || typeof path7 === "object" && !!path7[Symbol.iterator]().next().done;
     var Collection = class extends Node.NodeBase {
       constructor(type, schema) {
         super(type);
@@ -895,11 +895,11 @@ var require_Collection = __commonJS({
        * be a Pair instance or a `{ key, value }` object, which may not have a key
        * that already exists in the map.
        */
-      addIn(path8, value) {
-        if (isEmptyPath(path8))
+      addIn(path7, value) {
+        if (isEmptyPath(path7))
           this.add(value);
         else {
-          const [key, ...rest] = path8;
+          const [key, ...rest] = path7;
           const node = this.get(key, true);
           if (identity.isCollection(node))
             node.addIn(rest, value);
@@ -913,8 +913,8 @@ var require_Collection = __commonJS({
        * Removes a value from the collection.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        const [key, ...rest] = path8;
+      deleteIn(path7) {
+        const [key, ...rest] = path7;
         if (rest.length === 0)
           return this.delete(key);
         const node = this.get(key, true);
@@ -928,8 +928,8 @@ var require_Collection = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        const [key, ...rest] = path8;
+      getIn(path7, keepScalar) {
+        const [key, ...rest] = path7;
         const node = this.get(key, true);
         if (rest.length === 0)
           return !keepScalar && identity.isScalar(node) ? node.value : node;
@@ -947,8 +947,8 @@ var require_Collection = __commonJS({
       /**
        * Checks if the collection includes a value with the key `key`.
        */
-      hasIn(path8) {
-        const [key, ...rest] = path8;
+      hasIn(path7) {
+        const [key, ...rest] = path7;
         if (rest.length === 0)
           return this.has(key);
         const node = this.get(key, true);
@@ -958,8 +958,8 @@ var require_Collection = __commonJS({
        * Sets a value in this collection. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        const [key, ...rest] = path8;
+      setIn(path7, value) {
+        const [key, ...rest] = path7;
         if (rest.length === 0) {
           this.set(key, value);
         } else {
@@ -3474,9 +3474,9 @@ var require_Document = __commonJS({
           this.contents.add(value);
       }
       /** Adds a value to the document. */
-      addIn(path8, value) {
+      addIn(path7, value) {
         if (assertCollection(this.contents))
-          this.contents.addIn(path8, value);
+          this.contents.addIn(path7, value);
       }
       /**
        * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
@@ -3551,14 +3551,14 @@ var require_Document = __commonJS({
        * Removes a value from the document.
        * @returns `true` if the item was found and removed.
        */
-      deleteIn(path8) {
-        if (Collection.isEmptyPath(path8)) {
+      deleteIn(path7) {
+        if (Collection.isEmptyPath(path7)) {
           if (this.contents == null)
             return false;
           this.contents = null;
           return true;
         }
-        return assertCollection(this.contents) ? this.contents.deleteIn(path8) : false;
+        return assertCollection(this.contents) ? this.contents.deleteIn(path7) : false;
       }
       /**
        * Returns item at `key`, or `undefined` if not found. By default unwraps
@@ -3573,10 +3573,10 @@ var require_Document = __commonJS({
        * scalar values from their surrounding node; to disable set `keepScalar` to
        * `true` (collections are always returned intact).
        */
-      getIn(path8, keepScalar) {
-        if (Collection.isEmptyPath(path8))
+      getIn(path7, keepScalar) {
+        if (Collection.isEmptyPath(path7))
           return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
-        return identity.isCollection(this.contents) ? this.contents.getIn(path8, keepScalar) : void 0;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path7, keepScalar) : void 0;
       }
       /**
        * Checks if the document includes a value with the key `key`.
@@ -3587,10 +3587,10 @@ var require_Document = __commonJS({
       /**
        * Checks if the document includes a value at `path`.
        */
-      hasIn(path8) {
-        if (Collection.isEmptyPath(path8))
+      hasIn(path7) {
+        if (Collection.isEmptyPath(path7))
           return this.contents !== void 0;
-        return identity.isCollection(this.contents) ? this.contents.hasIn(path8) : false;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path7) : false;
       }
       /**
        * Sets a value in this document. For `!!set`, `value` needs to be a
@@ -3607,13 +3607,13 @@ var require_Document = __commonJS({
        * Sets a value in this document. For `!!set`, `value` needs to be a
        * boolean to add/remove the item from the set.
        */
-      setIn(path8, value) {
-        if (Collection.isEmptyPath(path8)) {
+      setIn(path7, value) {
+        if (Collection.isEmptyPath(path7)) {
           this.contents = value;
         } else if (this.contents == null) {
-          this.contents = Collection.collectionFromPath(this.schema, Array.from(path8), value);
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path7), value);
         } else if (assertCollection(this.contents)) {
-          this.contents.setIn(path8, value);
+          this.contents.setIn(path7, value);
         }
       }
       /**
@@ -5574,9 +5574,9 @@ var require_cst_visit = __commonJS({
     visit.BREAK = BREAK;
     visit.SKIP = SKIP;
     visit.REMOVE = REMOVE;
-    visit.itemAtPath = (cst, path8) => {
+    visit.itemAtPath = (cst, path7) => {
       let item = cst;
-      for (const [field, index] of path8) {
+      for (const [field, index] of path7) {
         const tok = item?.[field];
         if (tok && "items" in tok) {
           item = tok.items[index];
@@ -5585,23 +5585,23 @@ var require_cst_visit = __commonJS({
       }
       return item;
     };
-    visit.parentCollection = (cst, path8) => {
-      const parent = visit.itemAtPath(cst, path8.slice(0, -1));
-      const field = path8[path8.length - 1][0];
+    visit.parentCollection = (cst, path7) => {
+      const parent = visit.itemAtPath(cst, path7.slice(0, -1));
+      const field = path7[path7.length - 1][0];
       const coll = parent?.[field];
       if (coll && "items" in coll)
         return coll;
       throw new Error("Parent collection not found");
     };
-    function _visit(path8, item, visitor) {
-      let ctrl = visitor(item, path8);
+    function _visit(path7, item, visitor) {
+      let ctrl = visitor(item, path7);
       if (typeof ctrl === "symbol")
         return ctrl;
       for (const field of ["key", "value"]) {
         const token = item[field];
         if (token && "items" in token) {
           for (let i = 0; i < token.items.length; ++i) {
-            const ci = _visit(Object.freeze(path8.concat([[field, i]])), token.items[i], visitor);
+            const ci = _visit(Object.freeze(path7.concat([[field, i]])), token.items[i], visitor);
             if (typeof ci === "number")
               i = ci - 1;
             else if (ci === BREAK)
@@ -5612,10 +5612,10 @@ var require_cst_visit = __commonJS({
             }
           }
           if (typeof ctrl === "function" && field === "key")
-            ctrl = ctrl(item, path8);
+            ctrl = ctrl(item, path7);
         }
       }
-      return typeof ctrl === "function" ? ctrl(item, path8) : ctrl;
+      return typeof ctrl === "function" ? ctrl(item, path7) : ctrl;
     }
     exports.visit = visit;
   }
@@ -6917,14 +6917,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs7 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs8, sep: [] });
+                map.items.push({ start, key: fs7, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs8);
+                this.stack.push(fs7);
               } else {
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs7, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -7052,13 +7052,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs7 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs8, sep: [] });
+                fc.items.push({ start: [], key: fs7, sep: [] });
               else if (it.sep)
-                this.stack.push(fs8);
+                this.stack.push(fs7);
               else
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs7, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -7621,9 +7621,9 @@ function normalizeGroups(raw) {
   }
   return out;
 }
-function defaultProjectProfile(path8 = "", label = "", groupId = "") {
+function defaultProjectProfile(path7 = "", label = "", groupId = "") {
   return {
-    path: path8,
+    path: path7,
     label,
     groups: groupId === "" ? [] : [groupId],
     actions: [],
@@ -8382,74 +8382,26 @@ async function writeProjectScope(file, profile = {}) {
 }
 
 // src/sync.js
-import { promises as fs7 } from "node:fs";
-import os2 from "node:os";
-import path7 from "node:path";
-
-// src/builtins.js
 import { promises as fs6 } from "node:fs";
+import os2 from "node:os";
 import path6 from "node:path";
-import { fileURLToPath } from "node:url";
-var DEFAULT_ROOT = fileURLToPath(new URL("../builtin-actions/", import.meta.url));
-var cache = /* @__PURE__ */ new Map();
-async function loadBuiltinActions(root = DEFAULT_ROOT) {
-  if (cache.has(root)) return cache.get(root);
-  const actions = [];
-  let entries = [];
-  try {
-    entries = await fs6.readdir(root, { withFileTypes: true });
-  } catch {
-    cache.set(root, actions);
-    return actions;
-  }
-  const seen = /* @__PURE__ */ new Set();
-  for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
-    const dir = path6.join(root, entry.name);
-    const skill = await readSkillDir(dir);
-    if (skill.error !== "" || seen.has(skill.name)) continue;
-    seen.add(skill.name);
-    actions.push({
-      id: skill.name,
-      name: skill.name,
-      skillName: skill.name,
-      description: skill.description,
-      prompt: skill.body,
-      argsHint: "",
-      pinned: false,
-      usage: { count: 0, lastAt: 0 },
-      mode: "command",
-      groups: [],
-      resources: skill.files.map((name) => ({ name, bytes: 0 })),
-      frontmatter: skill.frontmatter,
-      builtin: true,
-      dir,
-      fingerprint: skill.fingerprint
-    });
-  }
-  actions.sort((left, right) => left.name.localeCompare(right.name));
-  cache.set(root, actions);
-  return actions;
-}
-
-// src/sync.js
 var MANIFEST_FORMAT = "action-hub/codex-generated@1";
 function agentsHome(env = process.env) {
   const configured = env.AGENTS_HOME?.trim();
-  return configured !== void 0 && configured !== "" ? configured : path7.join(os2.homedir(), ".agents");
+  return configured !== void 0 && configured !== "" ? configured : path6.join(os2.homedir(), ".agents");
 }
 function projectScopePath(projectRoot) {
-  return path7.join(projectRoot, ".codex", "action-hub", "scope.json");
+  return path6.join(projectRoot, ".codex", "action-hub", "scope.json");
 }
 function manifestPath(agentsRoot) {
-  return path7.join(agentsRoot, "action-hub", "generated.json");
+  return path6.join(agentsRoot, "action-hub", "generated.json");
 }
 function skillTarget(agentsRoot, name) {
-  return path7.join(agentsRoot, "skills", name);
+  return path6.join(agentsRoot, "skills", name);
 }
 async function exists(target) {
   try {
-    await fs7.lstat(target);
+    await fs6.lstat(target);
     return true;
   } catch {
     return false;
@@ -8457,7 +8409,7 @@ async function exists(target) {
 }
 async function readManifest(agentsRoot) {
   try {
-    const raw = JSON.parse(await fs7.readFile(manifestPath(agentsRoot), "utf8"));
+    const raw = JSON.parse(await fs6.readFile(manifestPath(agentsRoot), "utf8"));
     if (raw?.format !== MANIFEST_FORMAT || !Array.isArray(raw.items)) return [];
     return raw.items.filter((item) => typeof item?.name === "string" && item.name !== "");
   } catch {
@@ -8466,37 +8418,37 @@ async function readManifest(agentsRoot) {
 }
 async function writeManifest(agentsRoot, items) {
   const target = manifestPath(agentsRoot);
-  await fs7.mkdir(path7.dirname(target), { recursive: true });
+  await fs6.mkdir(path6.dirname(target), { recursive: true });
   const temporary = `${target}.${process.pid}.${Date.now()}.tmp`;
-  await fs7.writeFile(temporary, `${JSON.stringify({ format: MANIFEST_FORMAT, items }, null, 2)}
+  await fs6.writeFile(temporary, `${JSON.stringify({ format: MANIFEST_FORMAT, items }, null, 2)}
 `, "utf8");
-  await fs7.rename(temporary, target);
+  await fs6.rename(temporary, target);
 }
 async function copyTree(source, target, options = {}) {
-  const stat = await fs7.lstat(source);
+  const stat = await fs6.lstat(source);
   if (stat.isSymbolicLink()) {
-    const resolved = await fs7.realpath(source);
-    const resolvedStat = await fs7.lstat(resolved);
+    const resolved = await fs6.realpath(source);
+    const resolvedStat = await fs6.lstat(resolved);
     if (resolvedStat.isDirectory()) {
-      await fs7.mkdir(target, { recursive: true });
-      for (const name of await fs7.readdir(resolved)) await copyTree(path7.join(resolved, name), path7.join(target, name), options);
+      await fs6.mkdir(target, { recursive: true });
+      for (const name of await fs6.readdir(resolved)) await copyTree(path6.join(resolved, name), path6.join(target, name), options);
     } else {
-      await fs7.mkdir(path7.dirname(target), { recursive: true });
-      await fs7.copyFile(resolved, target);
+      await fs6.mkdir(path6.dirname(target), { recursive: true });
+      await fs6.copyFile(resolved, target);
     }
     return;
   }
   if (stat.isDirectory()) {
-    await fs7.mkdir(target, { recursive: true });
-    for (const name of await fs7.readdir(source)) {
+    await fs6.mkdir(target, { recursive: true });
+    for (const name of await fs6.readdir(source)) {
       if (options.skipSkillFile === true && name === "SKILL.md") continue;
       if (options.skipOpenAiFile === true && name === "openai.yaml") continue;
-      await copyTree(path7.join(source, name), path7.join(target, name), options);
+      await copyTree(path6.join(source, name), path6.join(target, name), options);
     }
     return;
   }
-  await fs7.mkdir(path7.dirname(target), { recursive: true });
-  await fs7.copyFile(source, target);
+  await fs6.mkdir(path6.dirname(target), { recursive: true });
+  await fs6.copyFile(source, target);
 }
 function oneLine(value, fallback = "") {
   return String(value ?? fallback).replace(/\r?\n/gu, " ").replace(/---/gu, "- - -").trim();
@@ -8523,26 +8475,23 @@ policy:
 `;
 }
 async function writeGeneratedCommand(action, target) {
-  await fs7.mkdir(target, { recursive: true });
+  await fs6.mkdir(target, { recursive: true });
   if (action.dir !== void 0) {
     await copyTree(action.dir, target, { skipSkillFile: true, skipOpenAiFile: true });
   }
-  await fs7.mkdir(path7.join(target, "agents"), { recursive: true });
-  await fs7.writeFile(path7.join(target, "agents", "openai.yaml"), commandMetadata(action), "utf8");
-  await fs7.writeFile(path7.join(target, "SKILL.md"), commandSkillDocument(action), "utf8");
+  await fs6.mkdir(path6.join(target, "agents"), { recursive: true });
+  await fs6.writeFile(path6.join(target, "agents", "openai.yaml"), commandMetadata(action), "utf8");
+  await fs6.writeFile(path6.join(target, "SKILL.md"), commandSkillDocument(action), "utf8");
 }
 async function loadCodexActions(store, cwd, options = {}) {
   const global = options.global === true;
   const root = await resolveProjectRoot(cwd, []);
   if (root === null) throw new Error(`\u65E0\u6CD5\u89E3\u6790\u9879\u76EE\u6839\uFF1A${cwd}`);
   const { state, actions, invalid } = await store.read();
-  const builtins = await loadBuiltinActions();
-  const builtinNames = new Set(builtins.map((action) => action.name));
-  const allActions = [...builtins, ...actions.filter((action) => !builtinNames.has(action.name))];
   const scope = global ? null : await readProjectScope(projectScopePath(root));
-  const profile = global ? defaultProjectProfile("", "global", state.defaultGroup ?? "") : scope ?? defaultProjectProfile(root, path7.basename(root), state.defaultGroup ?? "");
-  const available = allActions.filter((action) => actionAvailable(action, profile, state.groups));
-  const agentsRoot = global ? agentsHome() : path7.join(root, ".agents");
+  const profile = global ? defaultProjectProfile("", "global", state.defaultGroup ?? "") : scope ?? defaultProjectProfile(root, path6.basename(root), state.defaultGroup ?? "");
+  const available = actions.filter((action) => actionAvailable(action, profile, state.groups));
+  const agentsRoot = global ? agentsHome() : path6.join(root, ".agents");
   return { root, scope, profile, actions: available, invalid, agentsRoot };
 }
 async function syncProject(store, cwd, options = {}) {
@@ -8552,7 +8501,7 @@ async function syncProject(store, cwd, options = {}) {
   const previousNames = new Set(previous.map((item) => item.name));
   const warnings = [];
   const next = [];
-  if (options.dryRun !== true) await fs7.mkdir(path7.join(agentsRoot, "skills"), { recursive: true });
+  if (options.dryRun !== true) await fs6.mkdir(path6.join(agentsRoot, "skills"), { recursive: true });
   for (const action of actions) {
     const kind = action.mode === "skill" ? "skill" : "command";
     const target = skillTarget(agentsRoot, action.name);
@@ -8561,7 +8510,7 @@ async function syncProject(store, cwd, options = {}) {
         warnings.push(`\u8DF3\u8FC7 ${action.name}\uFF1A${target} \u5DF2\u5B58\u5728\u4E14\u4E0D\u662F Action Hub \u751F\u6210\u7269`);
         continue;
       }
-      if (options.dryRun !== true) await fs7.rm(target, { recursive: true, force: true });
+      if (options.dryRun !== true) await fs6.rm(target, { recursive: true, force: true });
     }
     if (options.dryRun === true) {
       next.push({ name: action.name, kind });
@@ -8580,7 +8529,7 @@ async function syncProject(store, cwd, options = {}) {
   if (options.dryRun !== true) {
     for (const item of previous) {
       if (nextNames.has(item.name)) continue;
-      await fs7.rm(skillTarget(agentsRoot, item.name), { recursive: true, force: true }).then(() => {
+      await fs6.rm(skillTarget(agentsRoot, item.name), { recursive: true, force: true }).then(() => {
         removed += 1;
       }).catch(() => {
       });
@@ -8600,16 +8549,16 @@ async function cleanProject(cwd, options = {}) {
   const global = options.global === true;
   const root = await resolveProjectRoot(cwd, []);
   if (root === null) throw new Error(`\u65E0\u6CD5\u89E3\u6790\u9879\u76EE\u6839\uFF1A${cwd}`);
-  const agentsRoot = global ? agentsHome() : path7.join(root, ".agents");
+  const agentsRoot = global ? agentsHome() : path6.join(root, ".agents");
   const previous = await readManifest(agentsRoot);
   let removed = 0;
   for (const item of previous) {
-    await fs7.rm(skillTarget(agentsRoot, item.name), { recursive: true, force: true }).then(() => {
+    await fs6.rm(skillTarget(agentsRoot, item.name), { recursive: true, force: true }).then(() => {
       removed += 1;
     }).catch(() => {
     });
   }
-  await fs7.rm(manifestPath(agentsRoot), { force: true });
+  await fs6.rm(manifestPath(agentsRoot), { force: true });
   return { agentsRoot, removed };
 }
 async function status(cwd, options = {}) {
@@ -8639,7 +8588,7 @@ async function writeScopeFromNames(store, cwd, options = {}) {
   };
   const list = (value) => Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
   const profile = normalizeProjectScope({
-    label: options.label ?? path7.basename(root),
+    label: options.label ?? path6.basename(root),
     groups: list(options.groups).map(resolveGroup),
     actions: list(options.actions).map(resolveAction),
     excludeGroups: list(options.excludeGroups).map(resolveGroup),

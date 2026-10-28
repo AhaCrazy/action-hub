@@ -24,7 +24,6 @@ import {
   resolveProjectRoot,
   writeProjectScope,
 } from 'action-hub';
-import { loadBuiltinActions } from './builtins.js';
 
 export const MANIFEST_FORMAT = 'action-hub/codex-generated@1';
 
@@ -133,14 +132,11 @@ export async function loadCodexActions(store, cwd, options = {}) {
   const root = await resolveProjectRoot(cwd, []);
   if (root === null) throw new Error(`无法解析项目根：${cwd}`);
   const { state, actions, invalid } = await store.read();
-  const builtins = await loadBuiltinActions();
-  const builtinNames = new Set(builtins.map((action) => action.name));
-  const allActions = [...builtins, ...actions.filter((action) => !builtinNames.has(action.name))];
   const scope = global ? null : await readProjectScope(projectScopePath(root));
   const profile = global
     ? defaultProjectProfile('', 'global', state.defaultGroup ?? '')
     : scope ?? defaultProjectProfile(root, path.basename(root), state.defaultGroup ?? '');
-  const available = allActions.filter((action) => actionAvailable(action, profile, state.groups));
+  const available = actions.filter((action) => actionAvailable(action, profile, state.groups));
   const agentsRoot = global ? agentsHome() : path.join(root, '.agents');
   return { root, scope, profile, actions: available, invalid, agentsRoot };
 }
