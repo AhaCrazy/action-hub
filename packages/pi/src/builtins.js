@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { DEFAULT_GROUP_ID, readSkillDir } from 'action-hub';
 
 const DEFAULT_ROOT = fileURLToPath(new URL('../builtin-actions/', import.meta.url));
-const DEFAULT_BUILTIN = 'skill-import-assistant';
+const DEFAULT_BUILTIN = 'action-import-assistant';
+const LEGACY_BUILTIN = 'skill-import-assistant';
 const cache = new Map();
 
 export function defaultBuiltinRoot() {
@@ -67,6 +68,9 @@ export function clearBuiltinCache() {
  * the DSH adapter. Existing libraries are never rewritten automatically.
  */
 export async function seedDefaultBuiltin(store) {
+  // The built-in was named skill-import-assistant before the Action vocabulary
+  // settled. Rename its state entry so groups, pin, and usage survive.
+  await store.renameStateEntry(LEGACY_BUILTIN, DEFAULT_BUILTIN).catch(() => false);
   const state = await store.readState();
   const names = Object.keys(state.entries ?? {});
   if (names.length !== 0) return false;

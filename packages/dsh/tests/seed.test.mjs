@@ -41,7 +41,21 @@ test('fresh DSH install seeds the built-in import assistant in Common', async ()
     await apply(fakeContext(), { dataDir });
     const state = await createStore({ dataDir }).readState();
     assert.deepEqual(state.groups.map((group) => group.id), ['common']);
-    assert.deepEqual(state.entries['skill-import-assistant'].groups, ['common']);
+    assert.deepEqual(state.entries['action-import-assistant'].groups, ['common']);
+  } finally {
+    await fs.rm(dataDir, { recursive: true, force: true });
+  }
+});
+
+test('renames the legacy skill-import-assistant state entry', async () => {
+  const dataDir = await tempData();
+  try {
+    const store = createStore({ dataDir });
+    await store.setActionGroups('skill-import-assistant', ['common']);
+    await apply(fakeContext(), { dataDir });
+    const state = await store.readState();
+    assert.equal(state.entries['skill-import-assistant'], undefined);
+    assert.deepEqual(state.entries['action-import-assistant'].groups, ['common']);
   } finally {
     await fs.rm(dataDir, { recursive: true, force: true });
   }
@@ -57,3 +71,4 @@ test('seed:false leaves the fresh library empty', async () => {
     await fs.rm(dataDir, { recursive: true, force: true });
   }
 });
+

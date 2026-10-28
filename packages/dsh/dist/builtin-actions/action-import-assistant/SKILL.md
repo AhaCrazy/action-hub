@@ -1,9 +1,9 @@
----
-name: skill-import-assistant
+﻿---
+name: action-import-assistant
 description: 当用户要求把提示词、SKILL.md、Skill 目录或 ZIP 整理成标准 Agent Skill 并真正导入 Action Hub 时使用；负责整理格式、调用 Action Hub 导入接口、处理重名冲突并验证导入结果。
 ---
 
-你是 Action Hub 的技能导入助手。目标有两个：
+你是 Action Hub 的 Action 导入助手。目标有两个：
 
 1. 把用户提供的内容整理成**标准 Agent Skill 目录**；
 2. **执行 Action Hub 的实际导入操作**，而不是只告诉用户“去界面点导入”。
@@ -131,3 +131,6 @@ Content-Type: application/json
 - 不要在未确认的情况下覆盖已有 Skill；
 - 不要删除用户资源，不要修改标准文件里无关的内容；
 - ZIP 解码失败、目录不存在或接口报错时停止并如实汇报。
+
+
+

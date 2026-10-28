@@ -8072,6 +8072,30 @@ function createStore(options = {}) {
         await writeStateFile(dataDir2, state);
       });
     },
+    async renameStateEntry(from, to) {
+      return serialize(async () => {
+        const source = assertSkillName(from);
+        const target = assertSkillName(to);
+        if (source === target) return false;
+        const state = await readState();
+        const entry = state.entries[source];
+        if (entry === void 0) return false;
+        if (state.entries[target] === void 0) {
+          state.entries[target] = entry;
+        } else {
+          const current = state.entries[target];
+          state.entries[target] = {
+            ...current,
+            groups: [.../* @__PURE__ */ new Set([...current.groups ?? [], ...entry.groups ?? []])],
+            usage: (entry.usage?.count ?? 0) > (current.usage?.count ?? 0) ? entry.usage : current.usage,
+            updatedAt: Math.max(current.updatedAt ?? 0, entry.updatedAt ?? 0, Date.now())
+          };
+        }
+        delete state.entries[source];
+        await writeStateFile(dataDir2, state);
+        return true;
+      });
+    },
     async touch(id) {
       return serialize(async () => {
         const name = assertSkillName(id);
@@ -8841,6 +8865,7 @@ async function loadBuiltinActions(root = DEFAULT_ROOT) {
   return actions;
 }
 async function seedDefaultBuiltin(store2) {
+  await store2.renameStateEntry(LEGACY_BUILTIN, DEFAULT_BUILTIN).catch(() => false);
   const state = await store2.readState();
   const names = Object.keys(state.entries ?? {});
   if (names.length !== 0) return false;
@@ -8848,12 +8873,13 @@ async function seedDefaultBuiltin(store2) {
   await store2.setGroupActions(DEFAULT_GROUP_ID, [DEFAULT_BUILTIN], [DEFAULT_BUILTIN]);
   return true;
 }
-var DEFAULT_ROOT, DEFAULT_BUILTIN, cache;
+var DEFAULT_ROOT, DEFAULT_BUILTIN, LEGACY_BUILTIN, cache;
 var init_builtins = __esm({
   "src/builtins.js"() {
     init_src();
     DEFAULT_ROOT = fileURLToPath(new URL("../builtin-actions/", import.meta.url));
-    DEFAULT_BUILTIN = "skill-import-assistant";
+    DEFAULT_BUILTIN = "action-import-assistant";
+    LEGACY_BUILTIN = "skill-import-assistant";
     cache = /* @__PURE__ */ new Map();
   }
 });

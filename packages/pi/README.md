@@ -1,4 +1,4 @@
-# Pi / OMP 版 Action Hub
+﻿# Pi / OMP 版 Action Hub
 
 在 Pi 或 OMP 中使用共享 Action 库：同一个标准 Skill 可以当模型可调用的 Skill，也可以只作为用户主动调用的 Command。
 
@@ -87,7 +87,7 @@ Action 库、分组和全局分组与 DSH 版共享；**项目范围不共享**�
 
 ## 第一次使用
 
-新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill 后交给 `/ah import` 导入。
+新库默认只有一个全局 `Common` 分组，并自带只读的 `action-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill 后交给 `/ah import` 导入。
 
 ```text
 /ah import C:\path\to\skill-folder
@@ -140,3 +140,4 @@ C:\Users\<你>\.omp\profiles\<profile>\agent\sessions\<encoded-project-root>\act
 - 修改模式、分组或项目范围后，退出管理界面会自动重新加载资源；如果编辑器里已有草稿或当前上下文无法提交 reload 命令，会提示执行 `/ah reload`。OMP 当前会话未刷新到新 Skill 时，重启 OMP 一次。
 - OMP 的 `Alt+A` 属于内置 Agent Hub；Action 面板使用 `/ah` 或 `Alt+Shift+A`。
 - 管理界面的当前焦点栏标题前显示 `▶`，非焦点栏内容变暗。
+

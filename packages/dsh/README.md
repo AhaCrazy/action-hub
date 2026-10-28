@@ -1,4 +1,4 @@
-# DSH 版 Action Hub
+﻿# DSH 版 Action Hub
 
 DSH 的标准 Agent Skill 库：同一份 `SKILL.md`，可以当模型可调用的 Skill，也可以只当你能调用的 Command。
 
@@ -81,7 +81,7 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 ## 第一次使用
 
-新库默认只有一个全局 `Common` 分组，并自带 `skill-import-assistant`。
+新库默认只有一个全局 `Common` 分组，并自带 `action-import-assistant`。
 
 导入一个标准 Skill 目录：
 
@@ -153,3 +153,4 @@ C:\Users\<你>\.dsh\dsh-action-hub
 
 - 只支持标准 `SKILL.md` 目录，不执行 Skill 里的脚本；
 - 导入的资源会随 Skill 目录一起保存。
+

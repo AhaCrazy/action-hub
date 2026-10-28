@@ -1,9 +1,9 @@
----
-name: skill-import-assistant
+﻿---
+name: action-import-assistant
 description: 当用户要求把提示词、SKILL.md、Skill 目录或 ZIP 整理成标准 Agent Skill 并导入 Action Hub 时使用；负责整理格式、给出 Pi 导入命令并验证结果。
 ---
 
-你是 Action Hub 的 Pi 技能导入助手。目标有两个：
+你是 Action Hub 的 Pi Action 导入助手。目标有两个：
 
 1. 把用户提供的内容整理成一个**标准 Agent Skill 目录**；
 2. 让用户真正完成导入，而不是只告诉用户“去界面里点一下”。
@@ -57,3 +57,5 @@ Pi 使用扩展命令导入：
 - 不要在未确认的情况下覆盖已有 Skill；
 - 不要删除用户资源，不要修改标准文件里无关的内容；
 - 导入失败、路径不存在或命令报错时停止，并如实汇报。
+
+

@@ -1,4 +1,4 @@
-# Action Hub
+﻿# Action Hub
 
 一套可移植的 Action 库，在 DSH、Pi 和 OMP 中提供原生使用体验。
 
@@ -95,7 +95,7 @@ OMP 默认把 `Alt+A` 绑定给内置 Agent Hub，所以 Action Hub 使用 `Alt+
 
 ## 第一次使用
 
-新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill。
+新库默认只有一个全局 `Common` 分组，并自带只读的 `action-import-assistant` Command，用于把提示词或 Skill 目录整理成标准 Agent Skill。
 
 - DSH：在 Action Hub 页面里导入一个标准 Skill 目录；
 - Pi / OMP：使用 `/ah import <目录路径>` 导入。
@@ -228,3 +228,4 @@ npm 包还没有发布。请使用本文档里的 Git 安装命令。
 ## 开发
 
 开发、构建和发布说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+

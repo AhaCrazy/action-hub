@@ -41,10 +41,10 @@ test('loads only available actions and renders command/skill payloads', async ()
 
   const catalog = await loadCatalog(store, dataDir, scopeStore);
   assert.deepEqual(
-    catalog.actions.map((action) => action.name).filter((name) => name !== 'skill-import-assistant').sort(),
+    catalog.actions.map((action) => action.name).filter((name) => name !== 'action-import-assistant').sort(),
     ['commit', 'review'],
   );
-  assert.ok(catalog.actions.some((action) => action.name === 'skill-import-assistant' && action.builtin === true));
+  assert.ok(catalog.actions.some((action) => action.name === 'action-import-assistant' && action.builtin === true));
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'commit'), 'fix bug'), 'Commit the staged changes with fix bug.');
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'review')), '/skill:review');
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'review'), 'src/a.ts'), '/skill:review src/a.ts');
@@ -55,7 +55,7 @@ test('empty data directory still exposes the built-in import assistant', async (
   const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-empty-'));
   const store = createStore({ dataDir });
   const catalog = await loadCatalog(store, dataDir);
-  assert.deepEqual(catalog.actions.map((action) => action.name), ['skill-import-assistant']);
+  assert.deepEqual(catalog.actions.map((action) => action.name), ['action-import-assistant']);
   assert.equal(catalog.actions[0].builtin, true);
   assert.equal(catalog.actions[0].mode, 'command');
 });
@@ -66,8 +66,18 @@ test('fresh Pi library seeds the built-in into Common', async () => {
   assert.equal(await seedDefaultBuiltin(store), true);
   const state = await store.readState();
   assert.deepEqual(state.groups.map((group) => group.id), ['common']);
-  assert.deepEqual(state.entries['skill-import-assistant'].groups, ['common']);
+  assert.deepEqual(state.entries['action-import-assistant'].groups, ['common']);
   assert.equal(await seedDefaultBuiltin(store), false);
+});
+
+test('migrates the legacy skill-import-assistant state entry', async () => {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pi-action-hub-rename-'));
+  const store = createStore({ dataDir });
+  await store.setActionGroups('skill-import-assistant', ['common']);
+  assert.equal(await seedDefaultBuiltin(store), false);
+  const state = await store.readState();
+  assert.equal(state.entries['skill-import-assistant'], undefined);
+  assert.deepEqual(state.entries['action-import-assistant'].groups, ['common']);
 });
 
 test('palette renders a native TUI overlay', () => {
@@ -120,3 +130,4 @@ test('extension registers Pi command, shortcut, and resource discovery', () => {
   assert.deepEqual(shortcuts.map((entry) => entry.shortcut), ['alt+a', 'alt+shift+a', 'ctrl+alt+a']);
   assert.deepEqual(events.map((entry) => entry.event), ['session_start', 'resources_discover']);
 });
+

@@ -8091,6 +8091,30 @@ function createStore(options = {}) {
         await writeStateFile(dataDir, state);
       });
     },
+    async renameStateEntry(from, to) {
+      return serialize(async () => {
+        const source = assertSkillName(from);
+        const target = assertSkillName(to);
+        if (source === target) return false;
+        const state = await readState();
+        const entry = state.entries[source];
+        if (entry === void 0) return false;
+        if (state.entries[target] === void 0) {
+          state.entries[target] = entry;
+        } else {
+          const current = state.entries[target];
+          state.entries[target] = {
+            ...current,
+            groups: [.../* @__PURE__ */ new Set([...current.groups ?? [], ...entry.groups ?? []])],
+            usage: (entry.usage?.count ?? 0) > (current.usage?.count ?? 0) ? entry.usage : current.usage,
+            updatedAt: Math.max(current.updatedAt ?? 0, entry.updatedAt ?? 0, Date.now())
+          };
+        }
+        delete state.entries[source];
+        await writeStateFile(dataDir, state);
+        return true;
+      });
+    },
     async touch(id) {
       return serialize(async () => {
         const name2 = assertSkillName(id);
@@ -9276,7 +9300,8 @@ var name = "action-hub";
 var inject = ["webServer"];
 var ROUTE = "/api/dsh-action-hub";
 var MAX_BODY2 = 40 * 1024 * 1024;
-var DEFAULT_BUILTIN = "skill-import-assistant";
+var DEFAULT_BUILTIN = "action-import-assistant";
+var LEGACY_BUILTIN = "skill-import-assistant";
 async function ensureScopeMaintenance(ctx, store, scopeStore) {
   try {
     await migrateLegacyProjects(ctx, store, scopeStore);
@@ -9288,6 +9313,7 @@ async function ensureScopeMaintenance(ctx, store, scopeStore) {
   }
 }
 async function seedDefaultBuiltin(store) {
+  await store.renameStateEntry(LEGACY_BUILTIN, DEFAULT_BUILTIN).catch(() => false);
   const state = await store.readState();
   const names = Object.keys(state.entries ?? {});
   if (names.length !== 0) return;

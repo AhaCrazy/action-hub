@@ -619,6 +619,30 @@ export function createStore(options = {}) {
         await writeStateFile(dataDir, state);
       });
     },
+    async renameStateEntry(from, to) {
+      return serialize(async () => {
+        const source = assertSkillName(from);
+        const target = assertSkillName(to);
+        if (source === target) return false;
+        const state = await readState();
+        const entry = state.entries[source];
+        if (entry === undefined) return false;
+        if (state.entries[target] === undefined) {
+          state.entries[target] = entry;
+        } else {
+          const current = state.entries[target];
+          state.entries[target] = {
+            ...current,
+            groups: [...new Set([...(current.groups ?? []), ...(entry.groups ?? [])])],
+            usage: (entry.usage?.count ?? 0) > (current.usage?.count ?? 0) ? entry.usage : current.usage,
+            updatedAt: Math.max(current.updatedAt ?? 0, entry.updatedAt ?? 0, Date.now()),
+          };
+        }
+        delete state.entries[source];
+        await writeStateFile(dataDir, state);
+        return true;
+      });
+    },
     async touch(id) {
       return serialize(async () => {
         const name = assertSkillName(id);

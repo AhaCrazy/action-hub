@@ -12,7 +12,8 @@
   API、搜索和旧 state 字段都已清理。
 - 从原单体插件中拆出 DSH 适配器。适配器现在依赖与 harness 无关的
   `action-hub` 核心，只保留 DSH 专属的 UI、项目发现、Skill provider 和 API 接线。
-- 全新安装会把内置 `skill-import-assistant` 放入核心提供的全局 `Common` 分组。
+- 全新安装会把内置 `action-import-assistant` 放入核心提供的全局 `Common` 分组。
+- 内置 `skill-import-assistant` 更名为 `action-import-assistant`；旧 state 条目会自动迁移，保留分组、固定和使用记录。
 
 ## 8.8.0 — 2026-10-27
 
@@ -98,7 +99,7 @@
 
 ## 8.3.0 — 2026-10-23
 
-- Removed the obsolete built-in Action `action-import-assistant`.
+- Removed the obsolete built-in Action `skill-import-assistant`.
 - Added built-in **skill-import-assistant**: it turns prompts, SKILL.md files,
   directories, and ZIPs into standard Agent Skills, then imports them through
   Action Hub's preview/import APIs, handles duplicate/conflict decisions, and
@@ -771,3 +772,4 @@ Product rebuild and first public release.
 
 - Initial prototype: sidebar management page, composer-dock popover, categories,
   search, Skill import, import/export, and the `/action` command.
+

@@ -1,4 +1,4 @@
-# OMP 版 Action Hub
+﻿# OMP 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。
 
@@ -219,7 +219,7 @@ C:\Users\<你>\.action-hub
 
 ### 内置内容
 
-新库默认只有一个全局 `Common` 分组，并自带只读的 `skill-import-assistant` Command：
+新库默认只有一个全局 `Common` 分组，并自带只读的 `action-import-assistant` Command：
 
 ```text
 /ah import C:\path\to\skill-folder
@@ -273,3 +273,4 @@ omp plugin list
 - 面板和管理界面依赖 OMP 的 TUI 模式；
 - 只支持标准 `SKILL.md` 目录，不执行 Skill 内的脚本；
 - OMP 版本差异可能影响快捷键和 TUI 细节，命令入口 `/ah` 始终可用。
+

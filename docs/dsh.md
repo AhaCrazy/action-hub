@@ -1,4 +1,4 @@
-# DSH 版 Action Hub
+﻿# DSH 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 DSH 中的安装与功能。
 
@@ -84,7 +84,7 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 ### 验证
 
-重启后打开 Action Hub 页面，或按 `Alt+A`。应能看到一个 `Common` 全局分组和内置的 `skill-import-assistant`。
+重启后打开 Action Hub 页面，或按 `Alt+A`。应能看到一个 `Common` 全局分组和内置的 `action-import-assistant`。
 
 ## 二、功能说明
 
@@ -172,3 +172,4 @@ C:\Users\<你>\.dsh\dsh-action-hub
 - 只支持标准 `SKILL.md` 目录，不执行 Skill 内的脚本；
 - 导入资源会随 Skill 目录一起保存；
 - 新旧适配器使用同一个插件标识，只应保留一个。
+

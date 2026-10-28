@@ -41,7 +41,8 @@ export const inject = ['webServer'];
 
 const ROUTE = '/api/dsh-action-hub';
 const MAX_BODY = 40 * 1024 * 1024;
-const DEFAULT_BUILTIN = 'skill-import-assistant';
+const DEFAULT_BUILTIN = 'action-import-assistant';
+const LEGACY_BUILTIN = 'skill-import-assistant';
 
 async function ensureScopeMaintenance(ctx, store, scopeStore) {
   try {
@@ -57,6 +58,7 @@ async function ensureScopeMaintenance(ctx, store, scopeStore) {
 }
 
 async function seedDefaultBuiltin(store) {
+  await store.renameStateEntry(LEGACY_BUILTIN, DEFAULT_BUILTIN).catch(() => false);
   const state = await store.readState();
   const names = Object.keys(state.entries ?? {});
   if (names.length !== 0) return;
