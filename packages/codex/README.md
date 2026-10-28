@@ -98,3 +98,14 @@ codex
 - 需要显式执行 `sync`，Codex 不会读取 Action Hub 的运行时范围；
 - Skill 使用目录复制，不依赖 Windows symlink 权限；
 - 生成目录会出现在项目的 `.agents/` 下，是否提交由团队决定。
+
+## 内置 Action
+
+Codex 适配器自带只读的 `action-import-assistant`，它是显式调用 Skill：
+
+```text
+$action-import-assistant
+```
+
+它不会自动触发，也不会写入共享库；卸载适配器后即消失。
+

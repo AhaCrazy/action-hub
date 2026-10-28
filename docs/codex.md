@@ -155,3 +155,13 @@ codex
 - 没有 Pi / OMP 的三栏 TUI 管理界面；
 - 没有运行时自动发现，需要显式 `sync`；
 - 生成目录会出现在项目的 `.agents/` 下，是否提交由团队决定。
+
+### 内置内容
+
+Codex 适配器自带只读的 `action-import-assistant`，作为显式调用的 Skill：
+
+```text
+$action-import-assistant
+```
+
+它用于把提示词或 Skill 目录整理成标准 Agent Skill，写入共享库后提醒执行 `action-hub-codex sync`。内置 Skill 不写入共享库，卸载适配器后消失。

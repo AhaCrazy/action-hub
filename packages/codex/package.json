@@ -26,6 +26,7 @@
   "files": [
     "bin",
     "dist",
+    "builtin-actions",
     "README.md",
     "LICENSE"
   ],
@@ -33,7 +34,7 @@
     "build": "node scripts/build.mjs",
     "pretest": "npm run build",
     "prepack": "npm run build",
-    "test": "node tests/sync.test.mjs && node --check src/sync.js && node --check src/cli.js && node --check bin/action-hub-codex.js"
+    "test": "node tests/sync.test.mjs && node --check src/sync.js && node --check src/cli.js && node --check src/builtins.js && node --check bin/action-hub-codex.js"
   },
   "devDependencies": {
     "action-hub": "file:../core"

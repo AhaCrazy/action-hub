@@ -33,15 +33,17 @@ test('projects Skill and explicit-only Command into Codex skills', async () => {
   const { dataDir, project, store } = await fixture();
   try {
     const result = await syncProject(store, project);
-    assert.equal(result.added, 2);
+    assert.equal(result.added, 3);
     const skillFile = path.join(project, '.agents', 'skills', 'skill-alpha', 'SKILL.md');
     assert.match(await fs.readFile(skillFile, 'utf8'), /Do skill work\./u);
     const commandFile = path.join(project, '.agents', 'skills', 'command-beta', 'SKILL.md');
     assert.match(await fs.readFile(commandFile, 'utf8'), /Use this command prompt\./u);
     const metadata = await fs.readFile(path.join(project, '.agents', 'skills', 'command-beta', 'agents', 'openai.yaml'), 'utf8');
     assert.match(metadata, /allow_implicit_invocation: false/u);
+    const builtinMetadata = await fs.readFile(path.join(project, '.agents', 'skills', 'action-import-assistant', 'agents', 'openai.yaml'), 'utf8');
+    assert.match(builtinMetadata, /allow_implicit_invocation: false/u);
     const manifest = JSON.parse(await fs.readFile(manifestPath(path.join(project, '.agents')), 'utf8'));
-    assert.equal(manifest.items.length, 2);
+    assert.equal(manifest.items.length, 3);
   } finally {
     await fs.rm(dataDir, { recursive: true, force: true });
     await fs.rm(project, { recursive: true, force: true });
@@ -87,8 +89,9 @@ test('respects the Codex project scope before projecting skills', async () => {
     await fs.mkdir(scopeDir, { recursive: true });
     await fs.writeFile(path.join(scopeDir, 'scope.json'), JSON.stringify(normalizeProjectScope({ excludeActions: ['skill-alpha', 'command-beta'] })), 'utf8');
     const result = await syncProject(store, project);
-    assert.equal(result.added, 0);
+    assert.equal(result.added, 1);
     assert.equal(await fs.access(path.join(project, '.agents', 'skills', 'skill-alpha')).then(() => true).catch(() => false), false);
+    assert.equal(await fs.access(path.join(project, '.agents', 'skills', 'action-import-assistant', 'SKILL.md')).then(() => true).catch(() => false), true);
   } finally {
     await fs.rm(dataDir, { recursive: true, force: true });
     await fs.rm(project, { recursive: true, force: true });
