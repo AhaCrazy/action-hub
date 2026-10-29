@@ -8925,13 +8925,10 @@ async function loadCatalog(store2, cwd = process.cwd(), scopeStore2) {
     actions: sortActions(actions.filter((action) => actionAvailable(action, profile, data.state.groups)))
   };
 }
-function renderAction(action, args = "") {
+function renderAction(action) {
   if (action === null || typeof action !== "object") return "";
-  const trimmed = typeof args === "string" ? args.trim() : "";
-  if (action.mode === "skill") {
-    return trimmed === "" ? `/skill:${action.name}` : `/skill:${action.name} ${trimmed}`;
-  }
-  return expandPrompt(action.prompt ?? "", { args: trimmed });
+  if (action.mode === "skill") return `/skill:${action.name}`;
+  return expandPrompt(action.prompt ?? "");
 }
 function groupLabels(action, groups = []) {
   const byId = new Map(groups.map((group) => [group.id, group.name]));
@@ -9029,8 +9026,8 @@ async function exportActions(ctx, store2, dataDir2) {
 
 // src/insert.js
 init_src();
-async function insertAction(store2, ctx, action, args = "", tui) {
-  const text = action.mode === "skill" ? String(args).trim() === "" ? `/skill:${action.name}` : `/skill:${action.name} ${String(args).trim()}` : expandPrompt(action.prompt ?? "", { args });
+async function insertAction(store2, ctx, action, tui) {
+  const text = action.mode === "skill" ? `/skill:${action.name}` : expandPrompt(action.prompt ?? "");
   if (text === "") return;
   await store2.touch(action.name).catch(() => {
   });
@@ -9357,7 +9354,6 @@ var ManagerDashboard = class {
       push("\u540D\u79F0", item.name);
       push("\u6A21\u5F0F", item.mode === "skill" ? "Skill" : "Command");
       push("\u63CF\u8FF0", item.description);
-      push("\u53C2\u6570", item.argsHint || "\u2014");
       push("\u56FA\u5B9A", item.pinned ? "\u662F" : "\u5426");
       push("\u4F7F\u7528", String(item.usage?.count ?? 0));
       push("\u5206\u7EC4", (item.groups ?? []).join(", ") || "\u2014");
@@ -9632,7 +9628,6 @@ async function editAction(ctx, store2, action) {
       "\u6B63\u6587",
       "\u6A21\u5F0F",
       "\u5206\u7EC4",
-      "\u53C2\u6570\u63D0\u793A",
       "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A",
       "\u4FDD\u5B58\u5E76\u8FD4\u56DE",
       "\u8FD4\u56DE\u4E0D\u4FDD\u5B58"
@@ -9674,11 +9669,6 @@ async function editAction(ctx, store2, action) {
       if (groups === void 0) continue;
       patch.groups = groups;
       current = { ...current, groups };
-    } else if (choice === "\u53C2\u6570\u63D0\u793A") {
-      const value = await askInput(ctx, "\u53C2\u6570\u63D0\u793A\uFF08\u53EF\u7559\u7A7A\uFF09", current.argsHint ?? "");
-      if (value === void 0) continue;
-      patch.argsHint = value;
-      current = { ...current, argsHint: value };
     } else if (choice === "\u56FA\u5B9A/\u53D6\u6D88\u56FA\u5B9A") {
       patch.pinned = !current.pinned;
       current = { ...current, pinned: patch.pinned };
@@ -9842,9 +9832,7 @@ async function setActionGroups(ctx, store2, action) {
   }
 }
 async function insertSelected(ctx, store2, action, tui) {
-  let args = "";
-  if (action.argsHint) args = await ctx.ui.input("Action \u53C2\u6570", `${action.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
-  await insertAction(store2, ctx, action, args, tui);
+  await insertAction(store2, ctx, action, tui);
 }
 async function createGroup(ctx, store2) {
   const value = await askInput(ctx, "\u5206\u7EC4\u540D");
@@ -10289,7 +10277,6 @@ var ActionPalette = class {
     if (current !== null) {
       lines.push(row(""));
       lines.push(row(` ${paint("dim", (current.description ?? "").slice(0, inner - 3))}`));
-      if (current.argsHint) lines.push(row(` ${paint("dim", `\u53C2\u6570: ${current.argsHint}`)}`));
     }
     lines.push(row(` ${paint("dim", "\u2191\u2193 \u9009\u62E9   Enter/Tab \u63D2\u5165   Esc \u5173\u95ED   Alt+R \u6B63\u5219   /ah manage \u7BA1\u7406")}`));
     lines.push(paint("border", `\u2570${"\u2500".repeat(inner)}\u256F`));
@@ -10491,11 +10478,7 @@ async function openPalette(ctx, initialQuery = "") {
     { overlay: true }
   );
   if (selected === void 0 || selected === null) return;
-  let args = "";
-  if (selected.argsHint) {
-    args = await ctx.ui.input("Action \u53C2\u6570", `${selected.argsHint}\uFF08\u53EF\u7559\u7A7A\uFF09`) ?? "";
-  }
-  await insertAction(store, ctx, selected, args, paletteTui);
+  await insertAction(store, ctx, selected, paletteTui);
 }
 async function submitReloadThroughEditor(ctx, tui) {
   if (typeof tui?.getFocusedComponent !== "function") return false;

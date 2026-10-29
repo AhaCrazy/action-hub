@@ -150,7 +150,6 @@ async function editAction(ctx, store, action) {
       '正文',
       '模式',
       '分组',
-      '参数提示',
       '固定/取消固定',
       '保存并返回',
       '返回不保存',
@@ -192,11 +191,6 @@ async function editAction(ctx, store, action) {
       if (groups === undefined) continue;
       patch.groups = groups;
       current = { ...current, groups };
-    } else if (choice === '参数提示') {
-      const value = await askInput(ctx, '参数提示（可留空）', current.argsHint ?? '');
-      if (value === undefined) continue;
-      patch.argsHint = value;
-      current = { ...current, argsHint: value };
     } else if (choice === '固定/取消固定') {
       patch.pinned = !current.pinned;
       current = { ...current, pinned: patch.pinned };
@@ -367,9 +361,7 @@ async function setActionGroups(ctx, store, action) {
 }
 
 async function insertSelected(ctx, store, action, tui) {
-  let args = '';
-  if (action.argsHint) args = await ctx.ui.input('Action 参数', `${action.argsHint}（可留空）`) ?? '';
-  await insertAction(store, ctx, action, args, tui);
+  await insertAction(store, ctx, action, tui);
 }
 
 async function createGroup(ctx, store) {

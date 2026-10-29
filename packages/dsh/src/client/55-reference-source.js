@@ -116,7 +116,6 @@
         mode: 'browse',
         query: '',
         selectedId: null,
-        args: '',
         toast: '',
         toastKind: 'ok',
         bridge: null,
@@ -144,7 +143,7 @@
           emit();
         },
         open() {
-          state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
+          state = { ...state, open: true, mode: 'browse', query: '', toast: '', toastKind: 'ok' };
           emit();
         },
         close() {
@@ -156,7 +155,7 @@
             state = { ...state, open: false };
             emit();
           } else {
-            state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
+            state = { ...state, open: true, mode: 'browse', query: '', toast: '', toastKind: 'ok' };
             emit();
           }
         },

@@ -7,10 +7,10 @@ import { expandPrompt } from 'action-hub';
  * normally comes from the next terminal keypress), so callers that own the TUI
  * pass it here to request a render immediately.
  */
-export async function insertAction(store, ctx, action, args = '', tui) {
+export async function insertAction(store, ctx, action, tui) {
   const text = action.mode === 'skill'
-    ? (String(args).trim() === '' ? `/skill:${action.name}` : `/skill:${action.name} ${String(args).trim()}`)
-    : expandPrompt(action.prompt ?? '', { args });
+    ? `/skill:${action.name}`
+    : expandPrompt(action.prompt ?? '');
   if (text === '') return;
   await store.touch(action.name).catch(() => {});
   ctx.ui.pasteToEditor(text);

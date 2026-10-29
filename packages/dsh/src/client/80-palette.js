@@ -28,7 +28,6 @@
         const listRef = React.useRef(null);
         const insertRef = React.useRef(null);
         const [selectedId, setSelectedId] = React.useState(null);
-        const [args, setArgs] = React.useState('');
         const [sortBy, setSortBy] = React.useState('recent');
         const [regex, setRegex] = React.useState(false);
         const [toast, setToast] = React.useState({ text: '', kind: 'ok' });
@@ -57,7 +56,6 @@
           const composer = document.querySelector('[data-composer-card="true"] [contenteditable="true"]')
             ?? document.querySelector('[contenteditable="true"]');
           setSelectedId(null);
-          setArgs('');
           setToast({ text: '', kind: 'ok' });
           const activeSessionId = mainSessionId || storedSessionId() || state.bridge?.sessionId || '';
           if (activeSessionId !== '') hub.setSession(activeSessionId);
@@ -160,11 +158,9 @@
           const commandDraft = /^\/(?!ah-[0-9a-f]{10}(?![0-9a-f]))/u.test(draft.trimStart());
           const hasCommand = bridge.input?.claim !== undefined || commandDraft;
           const handle = snapshot.meta?.handles?.[action.id];
-          const isSkill = action.mode === 'skill';
-          const referenceMode = !isSkill && args.trim() === '' && typeof handle === 'string' && handle !== '';
+          const referenceMode = typeof handle === 'string' && handle !== '';
           const referenceText = referenceMode ? `/${handle}` : '';
-          const skillText = isSkill ? expandPrompt(action.prompt, { args }) : '';
-          const text = referenceMode ? referenceText : isSkill ? skillText : expandPrompt(action.prompt, { args });
+          const text = expandPrompt(action.prompt);
           let placed = false;
           let atCaret = false;
           let referenced = false;
@@ -179,7 +175,7 @@
               }
             }
             if (!placed && span && typeof inputActions.insertText === 'function') {
-              const result = inputActions.insertText(isSkill ? skillText : referenceMode ? `${referenceText} ` : text, span);
+              const result = inputActions.insertText(referenceMode ? `${referenceText} ` : text, span);
               placed = result !== false;
               atCaret = placed;
               referenced = placed && referenceMode;
@@ -189,7 +185,7 @@
           }
           if (!placed) {
             try {
-              inputActions.setDraft(composeDraft(draft, isSkill ? skillText : referenceMode ? `${referenceText} ` : text));
+              inputActions.setDraft(composeDraft(draft, referenceMode ? `${referenceText} ` : text));
               placed = true;
               referenced = referenceMode;
             } catch {
@@ -216,7 +212,7 @@
           if (referenced) showToast(t('palette.refInserted'));
           else showToast(atCaret ? t('palette.insertedAtCaret') : t('palette.inserted'));
           if (prefs.closeAfterInsert) {
-            insertRef.current = isSkill ? { cursor: 'keep' } : referenced ? { label: action.name } : null;
+            insertRef.current = referenced ? { label: action.name } : null;
             setTimeout(() => palette.close(), 220);
           }
         };
@@ -291,7 +287,7 @@
                 action.pinned ? h('span', { className: 'ah-result-star' }, h(Icons.star, { size: 11, filled: true })) : null,
                 h('span', { className: 'ah-result-name' }, action.name),
                 action.available === false ? h('span', { className: 'ah-badge' }, t('palette.scopeUnavailable')) : null),
-              h('span', { className: 'ah-result-desc' }, action.description || (action.argsHint ? `${action.argsHint}` : action.prompt.slice(0, 80)))))));
+              h('span', { className: 'ah-result-desc' }, action.description || action.prompt.slice(0, 80))))));
 
         const preview = selected === null
           ? h('div', { className: 'ah-preview' },
@@ -320,29 +316,15 @@
             selected.description ? h('p', { className: 'ah-preview-desc' }, selected.description) : null,
             selected.available === false ? h('p', { className: 'ah-hint ah-hint-warn' }, t('palette.unavailableHint')) : null,
             h('p', { className: 'ah-hint' }, `${t('editor.groups')}: ${groupNames.length === 0 ? t('palette.noGroups') : groupNames.join('、')}`),
-            selected.argsHint ? h('p', { className: 'ah-hint' }, `${t('editor.args')}: ${selected.argsHint}`) : null,
-            selected !== null && selected.mode === 'skill'
-              ? h('p', { className: 'ah-hint' }, t('palette.skillHint', { name: selected.name }))
-              : null,
-            selected !== null && selected.mode !== 'skill' && snapshot.meta?.referencing && typeof snapshot.meta?.handles?.[selected.id] === 'string'
-              ? h('p', { className: 'ah-hint' }, args.trim() === ''
-                ? t('palette.refHint', { name: selected.name })
-                : t('palette.refArgsHint'))
+            selected !== null && snapshot.meta?.referencing && typeof snapshot.meta?.handles?.[selected.id] === 'string'
+              ? h('p', { className: 'ah-hint' }, t('palette.refHint', { name: selected.name }))
               : null,
             h('pre', { className: 'ah-code ah-preview-body' }, selected.prompt));
 
         const footer = h('div', { className: 'ah-palette-foot' },
           h('div', { className: 'ah-foot-row' },
-            h('div', { className: 'ah-args' },
-              h('input', {
-                className: 'ah-input',
-                value: args,
-                placeholder: t('palette.args'),
-                'aria-label': t('palette.args'),
-                onChange: (event) => setArgs(event.target.value),
-              })),
             h('div', { className: 'ah-actions' },
-              h(Button, { ghost: true, small: true, onClick: () => { palette.close(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('action.scopes')),
+              h(Button, { ghost: true, small: true, onClick: () => { palette.close(); requestProjectScope(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('action.scopes')),
               h(Button, { ghost: true, small: true, onClick: () => { palette.close(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('palette.manage')),
               h(Button, { small: true, primary: true, onClick: () => { if (selected) doInsert(selected, 'insert'); }, disabled: !canWrite || selected === null || selected.available === false }, h(Icons.arrow, { size: 13 }), t('palette.insert')),
               h(Button, { small: true, onClick: () => { if (selected) doInsert(selected, 'send'); }, disabled: !canWrite || selected === null || selected.available === false }, h(Icons.send, { size: 13 }), t('palette.send')))),

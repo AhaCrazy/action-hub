@@ -158,7 +158,6 @@ export class ActionPalette {
     if (current !== null) {
       lines.push(row(''));
       lines.push(row(` ${paint('dim', (current.description ?? '').slice(0, inner - 3))}`));
-      if (current.argsHint) lines.push(row(` ${paint('dim', `参数: ${current.argsHint}`)}`));
     }
 
     lines.push(row(` ${paint('dim', '↑↓ 选择   Enter/Tab 插入   Esc 关闭   Alt+R 正则   /ah manage 管理')}`));

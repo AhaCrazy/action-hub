@@ -1,6 +1,6 @@
 {
   "name": "dsh-action-hub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "DeepSeek Harness 适配器：基于通用 action-hub 核心，提供原生 Alt+A 面板、composer 插入、项目范围和 Skill provider。",
   "keywords": [

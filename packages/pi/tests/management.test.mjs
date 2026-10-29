@@ -261,14 +261,14 @@ test('insertAction expands commands and uses native skill commands', async () =>
   await insertAction(store, ctx, {
     name: 'demo',
     mode: 'command',
-    prompt: 'Do {{args}}.',
-  }, 'work', tui);
+    prompt: 'Do the work.',
+  }, tui);
   await insertAction(store, ctx, {
     name: 'review',
     mode: 'skill',
     prompt: 'Review.',
-  }, 'src/a.ts');
-  assert.deepEqual(pasted, ['Do work.', '/skill:review src/a.ts']);
+  });
+  assert.deepEqual(pasted, ['Do the work.', '/skill:review']);
   assert.ok(renders >= 1);
   await fs.rm(dataDir, { recursive: true, force: true });
 });

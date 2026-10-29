@@ -103,7 +103,7 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 ![DSH 输入框工具行的 Action Hub 入口](assets/dsh-composer-entry.png)
 
-点击列表图标会打开 Action 面板。面板左侧是搜索和 Action 列表，右侧显示选中 Action 的模式、分组、描述和正文预览；底部可以填写参数、插入到输入框或直接发送。
+点击列表图标会打开 Action 面板。面板左侧是搜索和 Action 列表，右侧显示选中 Action 的模式、分组、描述和正文预览；底部可以插入到输入框或直接发送。需要补充信息时，直接在插入的 chip 后面继续输入即可。
 
 ![Action Hub 面板](assets/dsh-palette.png)
 
@@ -113,12 +113,14 @@ dsh plugin --profile desktop remove dsh-action-hub
 - `Enter` / `Tab` 插入；
 - `Ctrl/⌘ + Enter` 直接发送。
 
-Command 插入行为：
+插入行为：
 
-- 无参数：插入引用 chip；
-- 有参数：插入展开后的正文。
+- Command 和 Skill 都以引用 chip 插入；
+- 不再有参数输入框或占位符替换；
+- 需要补充信息时，直接在 chip 后面继续输入；
+- 发送时由 Host 展开正文：Command 注入提示词，Skill 注入技能正文，同时仍通过 Skill provider 自动发现。
 
-Skill：插入展开后的技能正文，由用户显式调用；模型侧仍通过 Skill provider 自动发现。
+Skill 仍然可以由模型自动发现；面板插入是用户显式调用的一种方式。
 
 ### 管理页面
 

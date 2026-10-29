@@ -228,9 +228,7 @@
       .ah-preview-body { flex: 1 1 auto; min-height: 90px; }
       .ah-preview-empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--dsw-alias-label-secondary); font-size: 12.5px; text-align: center; padding: 24px; }
       .ah-palette-foot { border-top: 1px solid var(--dsw-alias-border-l1); padding: 10px 14px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-      .ah-foot-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
-      .ah-args { flex: 1 1 auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
-      .ah-args .ah-input { height: 32px; font-size: 12px; padding: 0 10px; }
+      .ah-foot-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
       .ah-actions { display: flex; align-items: center; gap: 6px; flex: none; flex-wrap: nowrap; }
       .ah-hints { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--dsw-alias-label-secondary); flex-wrap: wrap; }
       .ah-toast { margin: 0 14px; padding: 7px 11px; border-radius: 8px; font-size: 12px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary); }

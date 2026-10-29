@@ -47,6 +47,23 @@ npm run test:pi
 
 文档改动不需要构建，但发布前仍应跑一次完整测试。
 
+## 版本号规则
+
+版本号格式为：
+
+```text
+<大版本改动>.<通用功能改动>.<对应平台改动>
+```
+
+- **第一位：大版本改动 / 整体重构级别**  
+  只有整体架构、数据模型或兼容性发生重构级变化时才增加。
+- **第二位：通用功能改动**  
+  core、跨 harness 行为、共享数据模型或所有平台都会受影响的功能变化。
+- **第三位：对应平台的改动**  
+  只影响某个平台适配器的修复或小功能，例如只改 DSH 面板、只改 Pi TUI。
+- OMP 复用 `pi-action-hub`，因此跟随 Pi 的版本号。
+- 不按单次小改动提升版本；由维护者确认阶段性目标达成后再统一提升。
+
 ## 构建
 
 ```bash
@@ -77,8 +94,8 @@ pi-action-hub.tgz
 版本化文件同时保留：
 
 ```text
-dsh-action-hub-0.1.0.tgz
-pi-action-hub-0.1.0.tgz
+dsh-action-hub-0.2.0.tgz
+pi-action-hub-0.2.0.tgz
 ```
 
 用户文档中的 DSH 一条命令依赖 `dsh-action-hub.tgz` 这个固定名称，不能用带版本号的文件替代。
@@ -162,8 +179,8 @@ GitHub Release 的预构建 `.tgz` 继续保留，作为市场或 Git 安装不�
 稳定别名由版本化文件复制生成：
 
 ```powershell
-Copy-Item pi-action-hub-0.1.0.tgz pi-action-hub.tgz
-Copy-Item dsh-action-hub-0.1.0.tgz dsh-action-hub.tgz
+Copy-Item pi-action-hub-0.2.0.tgz pi-action-hub.tgz
+Copy-Item dsh-action-hub-0.2.0.tgz dsh-action-hub.tgz
 ```
 
 发布后校验：

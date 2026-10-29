@@ -20,6 +20,8 @@
         const [menu, setMenu] = React.useState(null);
         const [notice, setNotice] = React.useState({ text: '', kind: '' });
 
+        React.useEffect(() => registerProjectScopeOpener(() => setScopeOpen(true)), []);
+
         React.useEffect(() => {
           if (menu === null) return undefined;
           const close = () => setMenu(null);

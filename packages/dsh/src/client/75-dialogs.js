@@ -1,7 +1,6 @@
     function EditorDialog(props) {
       const { t, initial } = props;      const [form, setForm] = React.useState(() => ({
         name: initial?.name ?? '',
-        argsHint: initial?.argsHint ?? '',
         description: initial?.description ?? '',
         prompt: initial?.prompt ?? '',
         pinned: initial?.pinned === true,
@@ -39,7 +38,6 @@
         try {
           await props.onSave({
             name: form.name.trim(),
-            argsHint: form.argsHint.trim(),
             description: form.description.trim(),
             prompt: form.prompt,
             pinned: form.pinned,
@@ -73,15 +71,10 @@
         h('label', { className: 'ah-label' }, t('editor.name')),
         h('input', { className: 'ah-input', value: form.name, maxLength: 80, placeholder: t('editor.namePlaceholder'), onChange: patch('name') }),
         h('span', { className: 'ah-hint' }, t('editor.nameHint'))),
-      h('div', { className: 'ah-field-row' },
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.description')),
-          h('input', { className: 'ah-input', value: form.description, maxLength: 600, placeholder: t('editor.descriptionPlaceholder'), onChange: patch('description') }),
-          h('span', { className: 'ah-hint' }, t('editor.descriptionHint'))),
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.args')),
-          h('input', { className: 'ah-input', value: form.argsHint, maxLength: 120, placeholder: t('editor.argsPlaceholder'), onChange: patch('argsHint') }),
-          h('span', { className: 'ah-hint' }, t('editor.argsHint')))),
+      h('div', { className: 'ah-field' },
+        h('label', { className: 'ah-label' }, t('editor.description')),
+        h('input', { className: 'ah-input', value: form.description, maxLength: 600, placeholder: t('editor.descriptionPlaceholder'), onChange: patch('description') }),
+        h('span', { className: 'ah-hint' }, t('editor.descriptionHint'))),
       h('div', { className: 'ah-field' },
         h('label', { className: 'ah-label' }, t('editor.prompt')),
         h('textarea', { className: 'ah-textarea', value: form.prompt, rows: 12, spellCheck: false, placeholder: t('editor.promptPlaceholder'), onChange: patch('prompt') }),

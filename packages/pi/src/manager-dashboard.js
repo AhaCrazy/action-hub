@@ -344,7 +344,6 @@ export class ManagerDashboard {
       push('名称', item.name);
       push('模式', item.mode === 'skill' ? 'Skill' : 'Command');
       push('描述', item.description);
-      push('参数', item.argsHint || '—');
       push('固定', item.pinned ? '是' : '否');
       push('使用', String(item.usage?.count ?? 0));
       push('分组', (item.groups ?? []).join(', ') || '—');

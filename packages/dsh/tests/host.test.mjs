@@ -62,6 +62,7 @@ test('actionInvocationMessage wraps the body with the Action name', () => {
   assert.equal(message.role, 'user');
   assert.equal(message.source.kind, 'action');
   assert.match(message.content[0].text, /^<action_content name="代码审查">/u);
+  assert.match(message.content[0].text, /explicitly selected the Action/u);
   assert.match(message.content[0].text, /body/u);
   assert.match(message.content[0].text, /<\/action_content>$/u);
 });

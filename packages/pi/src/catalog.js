@@ -57,13 +57,10 @@ export async function loadCatalog(store, cwd = process.cwd(), scopeStore) {
 }
 
 /** Render the text Pi should receive for the selected Action. */
-export function renderAction(action, args = '') {
+export function renderAction(action) {
   if (action === null || typeof action !== 'object') return '';
-  const trimmed = typeof args === 'string' ? args.trim() : '';
-  if (action.mode === 'skill') {
-    return trimmed === '' ? `/skill:${action.name}` : `/skill:${action.name} ${trimmed}`;
-  }
-  return expandPrompt(action.prompt ?? '', { args: trimmed });
+  if (action.mode === 'skill') return `/skill:${action.name}`;
+  return expandPrompt(action.prompt ?? '');
 }
 
 /** Human-readable group labels for a palette row. */

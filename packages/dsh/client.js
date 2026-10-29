@@ -258,9 +258,7 @@ window.__ModuleLoader__.load({
       .ah-preview-body { flex: 1 1 auto; min-height: 90px; }
       .ah-preview-empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--dsw-alias-label-secondary); font-size: 12.5px; text-align: center; padding: 24px; }
       .ah-palette-foot { border-top: 1px solid var(--dsw-alias-border-l1); padding: 10px 14px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-      .ah-foot-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
-      .ah-args { flex: 1 1 auto; display: flex; align-items: center; gap: 8px; min-width: 0; }
-      .ah-args .ah-input { height: 32px; font-size: 12px; padding: 0 10px; }
+      .ah-foot-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
       .ah-actions { display: flex; align-items: center; gap: 6px; flex: none; flex-wrap: nowrap; }
       .ah-hints { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--dsw-alias-label-secondary); flex-wrap: wrap; }
       .ah-toast { margin: 0 14px; padding: 7px 11px; border-radius: 8px; font-size: 12px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-secondary); }
@@ -363,9 +361,6 @@ window.__ModuleLoader__.load({
         'editor.description': '描述',
         'editor.descriptionPlaceholder': '一句话说明它做什么',
         'editor.descriptionHint': '显示在列表里，也参与搜索。',
-        'editor.args': '参数提示',
-        'editor.argsPlaceholder': '例如：分支名',
-        'editor.argsHint': '调用时会提示填写；正文里的 {{args}} 会被替换。',
         'editor.resources': '资源文件',
         'editor.resourcesHint': '只读展示该 Action 的 files/ 目录。增删文件请直接在文件浏览器里操作，然后刷新管理库。',
         'editor.resourceSaved': '新建 Action 为纯文本；保存后如需附件，请在文件浏览器里把文件放进该 Action 的 files/ 目录。',
@@ -373,7 +368,7 @@ window.__ModuleLoader__.load({
         'editor.resourceEmptyText': '（无法预览的文件）',
         'editor.prompt': '提示词正文',
         'editor.promptPlaceholder': '把要发给 Agent 的提示词写在这里…',
-        'editor.promptHint': '支持多段 Markdown；{{args}} 是参数，{{date}} 是当天日期。',
+        'editor.promptHint': '支持多段 Markdown；{{date}} 是当天日期。',
         'editor.pinned': '置顶',
         'editor.mode': '调用方式',
         'editor.modeCommand': 'Command（只有你能调用，不占上下文）',
@@ -425,7 +420,6 @@ window.__ModuleLoader__.load({
         'palette.emptyCopy': '新建一条，或从管理页导入，之后在这里一搜即用。',
         'palette.noMatch': '没有匹配的 Action',
         'palette.noAvailable': '当前项目没有可用的 Action',
-        'palette.args': '参数（可选，替换 {{args}}）',
         'palette.insert': '插入',
         'palette.send': '发送',
         'palette.manage': '管理',
@@ -438,7 +432,7 @@ window.__ModuleLoader__.load({
         'palette.hintInsert': '插入',
         'palette.hintSend': '发送',
         'palette.refHint': '将以引用方式插入：对话中只显示「{name}」',
-        'palette.skillHint': '将插入技能正文；Agent 仍可自行调用，但不进入 / 菜单',
+        'palette.skillHint': '将以引用方式插入；Agent 仍可通过 Skill provider 自行调用',
         'palette.scope': '可用范围',
         'palette.scopeAll': '所有项目',
         'palette.scopeCustom': '多个项目',
@@ -499,7 +493,6 @@ window.__ModuleLoader__.load({
         'scope.extraHint': '蓝勾为单独选中，灰勾为分组继承可用，灰叉为已屏蔽。点击灰勾可屏蔽，点击灰叉可恢复或改为单独选中。',
         'scope.groupCount': '{count} 个分组',
         'scope.noProjects': '没有可配置的项目',
-        'palette.refArgsHint': '已填参数，将以完整文本插入',
         'palette.refInserted': '已插入引用',
         'palette.resourceCount': '{count} 个资源',
         'palette.usage': '用过 {count} 次',
@@ -607,9 +600,6 @@ window.__ModuleLoader__.load({
         'editor.description': 'Description',
         'editor.descriptionPlaceholder': 'One line on what it does',
         'editor.descriptionHint': 'Shown in the list and searched.',
-        'editor.args': 'Argument hint',
-        'editor.argsPlaceholder': 'e.g. branch name',
-        'editor.argsHint': 'Prompted for at call time; {{args}} in the body is replaced.',
         'editor.resources': 'Resource files',
         'editor.resourcesHint': 'Read-only view of this Action’s files/ directory. Add or remove files in your file browser, then refresh the library.',
         'editor.resourceSaved': 'New Actions are plain text; after saving, put attachments into this Action’s files/ directory from your file browser.',
@@ -617,7 +607,7 @@ window.__ModuleLoader__.load({
         'editor.resourceEmptyText': '(not previewable)',
         'editor.prompt': 'Prompt body',
         'editor.promptPlaceholder': 'Write the prompt you send to the agent…',
-        'editor.promptHint': 'Markdown is fine; {{args}} is the argument slot, {{date}} is today.',
+        'editor.promptHint': 'Markdown is fine; {{date}} is today.',
         'editor.pinned': 'Pin to top',
         'editor.mode': 'Invocation',
         'editor.modeCommand': 'Command (you only; zero context)',
@@ -669,7 +659,6 @@ window.__ModuleLoader__.load({
         'palette.emptyCopy': 'Create one, or import from the library, and it is one search away from now on.',
         'palette.noMatch': 'No matching Action',
         'palette.noAvailable': 'No Actions are available for this project',
-        'palette.args': 'Arguments (optional; replaces {{args}})',
         'palette.insert': 'Insert',
         'palette.send': 'Send',
         'palette.manage': 'Manage',
@@ -682,7 +671,7 @@ window.__ModuleLoader__.load({
         'palette.hintInsert': 'insert',
         'palette.hintSend': 'send',
         'palette.refHint': 'Inserts a reference: the transcript shows “{name}” only',
-        'palette.skillHint': 'Inserts the skill body; the agent can still invoke it, but it is hidden from /',
+        'palette.skillHint': 'Inserts as a reference chip; the agent can still invoke it through the Skill provider',
         'palette.scope': 'Availability',
         'palette.scopeAll': 'All projects',
         'palette.scopeCustom': 'Multiple projects',
@@ -743,7 +732,6 @@ window.__ModuleLoader__.load({
         'scope.extraHint': 'Blue means individually selected, grey check means inherited from a group, grey cross means blocked. Click a grey check to block or a grey cross to restore or select directly.',
         'scope.groupCount': '{count} groups',
         'scope.noProjects': 'No projects to configure',
-        'palette.refArgsHint': 'Arguments are filled, so the full text is inserted',
         'palette.refInserted': 'Reference inserted',
         'palette.resourceCount': '{count} resource(s)',
         'palette.usage': 'Used {count}×',
@@ -1617,7 +1605,6 @@ window.__ModuleLoader__.load({
         mode: 'browse',
         query: '',
         selectedId: null,
-        args: '',
         toast: '',
         toastKind: 'ok',
         bridge: null,
@@ -1645,7 +1632,7 @@ window.__ModuleLoader__.load({
           emit();
         },
         open() {
-          state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
+          state = { ...state, open: true, mode: 'browse', query: '', toast: '', toastKind: 'ok' };
           emit();
         },
         close() {
@@ -1657,7 +1644,7 @@ window.__ModuleLoader__.load({
             state = { ...state, open: false };
             emit();
           } else {
-            state = { ...state, open: true, mode: 'browse', query: '', args: '', toast: '', toastKind: 'ok' };
+            state = { ...state, open: true, mode: 'browse', query: '', toast: '', toastKind: 'ok' };
             emit();
           }
         },
@@ -1980,7 +1967,6 @@ window.__ModuleLoader__.load({
     function EditorDialog(props) {
       const { t, initial } = props;      const [form, setForm] = React.useState(() => ({
         name: initial?.name ?? '',
-        argsHint: initial?.argsHint ?? '',
         description: initial?.description ?? '',
         prompt: initial?.prompt ?? '',
         pinned: initial?.pinned === true,
@@ -2018,7 +2004,6 @@ window.__ModuleLoader__.load({
         try {
           await props.onSave({
             name: form.name.trim(),
-            argsHint: form.argsHint.trim(),
             description: form.description.trim(),
             prompt: form.prompt,
             pinned: form.pinned,
@@ -2052,15 +2037,10 @@ window.__ModuleLoader__.load({
         h('label', { className: 'ah-label' }, t('editor.name')),
         h('input', { className: 'ah-input', value: form.name, maxLength: 80, placeholder: t('editor.namePlaceholder'), onChange: patch('name') }),
         h('span', { className: 'ah-hint' }, t('editor.nameHint'))),
-      h('div', { className: 'ah-field-row' },
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.description')),
-          h('input', { className: 'ah-input', value: form.description, maxLength: 600, placeholder: t('editor.descriptionPlaceholder'), onChange: patch('description') }),
-          h('span', { className: 'ah-hint' }, t('editor.descriptionHint'))),
-        h('div', { className: 'ah-field' },
-          h('label', { className: 'ah-label' }, t('editor.args')),
-          h('input', { className: 'ah-input', value: form.argsHint, maxLength: 120, placeholder: t('editor.argsPlaceholder'), onChange: patch('argsHint') }),
-          h('span', { className: 'ah-hint' }, t('editor.argsHint')))),
+      h('div', { className: 'ah-field' },
+        h('label', { className: 'ah-label' }, t('editor.description')),
+        h('input', { className: 'ah-input', value: form.description, maxLength: 600, placeholder: t('editor.descriptionPlaceholder'), onChange: patch('description') }),
+        h('span', { className: 'ah-hint' }, t('editor.descriptionHint'))),
       h('div', { className: 'ah-field' },
         h('label', { className: 'ah-label' }, t('editor.prompt')),
         h('textarea', { className: 'ah-textarea', value: form.prompt, rows: 12, spellCheck: false, placeholder: t('editor.promptPlaceholder'), onChange: patch('prompt') }),
@@ -2304,6 +2284,8 @@ window.__ModuleLoader__.load({
         const [scopeOpen, setScopeOpen] = React.useState(false);
         const [menu, setMenu] = React.useState(null);
         const [notice, setNotice] = React.useState({ text: '', kind: '' });
+
+        React.useEffect(() => registerProjectScopeOpener(() => setScopeOpen(true)), []);
 
         React.useEffect(() => {
           if (menu === null) return undefined;
@@ -2637,6 +2619,28 @@ window.__ModuleLoader__.load({
     }
 
     // -------------------------------------------------------- groups & scopes
+
+    let pendingScopeRequest = false;
+    let scopeDialogOpener = null;
+
+    function requestProjectScope() {
+      if (scopeDialogOpener !== null) {
+        scopeDialogOpener();
+        return;
+      }
+      pendingScopeRequest = true;
+    }
+
+    function registerProjectScopeOpener(opener) {
+      scopeDialogOpener = opener;
+      if (pendingScopeRequest) {
+        pendingScopeRequest = false;
+        opener();
+      }
+      return () => {
+        if (scopeDialogOpener === opener) scopeDialogOpener = null;
+      };
+    }
 
     function ActionCheck(props) {
       return h(React.Fragment, null,
@@ -3395,7 +3399,6 @@ window.__ModuleLoader__.load({
         const listRef = React.useRef(null);
         const insertRef = React.useRef(null);
         const [selectedId, setSelectedId] = React.useState(null);
-        const [args, setArgs] = React.useState('');
         const [sortBy, setSortBy] = React.useState('recent');
         const [regex, setRegex] = React.useState(false);
         const [toast, setToast] = React.useState({ text: '', kind: 'ok' });
@@ -3424,7 +3427,6 @@ window.__ModuleLoader__.load({
           const composer = document.querySelector('[data-composer-card="true"] [contenteditable="true"]')
             ?? document.querySelector('[contenteditable="true"]');
           setSelectedId(null);
-          setArgs('');
           setToast({ text: '', kind: 'ok' });
           const activeSessionId = mainSessionId || storedSessionId() || state.bridge?.sessionId || '';
           if (activeSessionId !== '') hub.setSession(activeSessionId);
@@ -3527,11 +3529,9 @@ window.__ModuleLoader__.load({
           const commandDraft = /^\/(?!ah-[0-9a-f]{10}(?![0-9a-f]))/u.test(draft.trimStart());
           const hasCommand = bridge.input?.claim !== undefined || commandDraft;
           const handle = snapshot.meta?.handles?.[action.id];
-          const isSkill = action.mode === 'skill';
-          const referenceMode = !isSkill && args.trim() === '' && typeof handle === 'string' && handle !== '';
+          const referenceMode = typeof handle === 'string' && handle !== '';
           const referenceText = referenceMode ? `/${handle}` : '';
-          const skillText = isSkill ? expandPrompt(action.prompt, { args }) : '';
-          const text = referenceMode ? referenceText : isSkill ? skillText : expandPrompt(action.prompt, { args });
+          const text = expandPrompt(action.prompt);
           let placed = false;
           let atCaret = false;
           let referenced = false;
@@ -3546,7 +3546,7 @@ window.__ModuleLoader__.load({
               }
             }
             if (!placed && span && typeof inputActions.insertText === 'function') {
-              const result = inputActions.insertText(isSkill ? skillText : referenceMode ? `${referenceText} ` : text, span);
+              const result = inputActions.insertText(referenceMode ? `${referenceText} ` : text, span);
               placed = result !== false;
               atCaret = placed;
               referenced = placed && referenceMode;
@@ -3556,7 +3556,7 @@ window.__ModuleLoader__.load({
           }
           if (!placed) {
             try {
-              inputActions.setDraft(composeDraft(draft, isSkill ? skillText : referenceMode ? `${referenceText} ` : text));
+              inputActions.setDraft(composeDraft(draft, referenceMode ? `${referenceText} ` : text));
               placed = true;
               referenced = referenceMode;
             } catch {
@@ -3583,7 +3583,7 @@ window.__ModuleLoader__.load({
           if (referenced) showToast(t('palette.refInserted'));
           else showToast(atCaret ? t('palette.insertedAtCaret') : t('palette.inserted'));
           if (prefs.closeAfterInsert) {
-            insertRef.current = isSkill ? { cursor: 'keep' } : referenced ? { label: action.name } : null;
+            insertRef.current = referenced ? { label: action.name } : null;
             setTimeout(() => palette.close(), 220);
           }
         };
@@ -3658,7 +3658,7 @@ window.__ModuleLoader__.load({
                 action.pinned ? h('span', { className: 'ah-result-star' }, h(Icons.star, { size: 11, filled: true })) : null,
                 h('span', { className: 'ah-result-name' }, action.name),
                 action.available === false ? h('span', { className: 'ah-badge' }, t('palette.scopeUnavailable')) : null),
-              h('span', { className: 'ah-result-desc' }, action.description || (action.argsHint ? `${action.argsHint}` : action.prompt.slice(0, 80)))))));
+              h('span', { className: 'ah-result-desc' }, action.description || action.prompt.slice(0, 80))))));
 
         const preview = selected === null
           ? h('div', { className: 'ah-preview' },
@@ -3687,29 +3687,15 @@ window.__ModuleLoader__.load({
             selected.description ? h('p', { className: 'ah-preview-desc' }, selected.description) : null,
             selected.available === false ? h('p', { className: 'ah-hint ah-hint-warn' }, t('palette.unavailableHint')) : null,
             h('p', { className: 'ah-hint' }, `${t('editor.groups')}: ${groupNames.length === 0 ? t('palette.noGroups') : groupNames.join('、')}`),
-            selected.argsHint ? h('p', { className: 'ah-hint' }, `${t('editor.args')}: ${selected.argsHint}`) : null,
-            selected !== null && selected.mode === 'skill'
-              ? h('p', { className: 'ah-hint' }, t('palette.skillHint', { name: selected.name }))
-              : null,
-            selected !== null && selected.mode !== 'skill' && snapshot.meta?.referencing && typeof snapshot.meta?.handles?.[selected.id] === 'string'
-              ? h('p', { className: 'ah-hint' }, args.trim() === ''
-                ? t('palette.refHint', { name: selected.name })
-                : t('palette.refArgsHint'))
+            selected !== null && snapshot.meta?.referencing && typeof snapshot.meta?.handles?.[selected.id] === 'string'
+              ? h('p', { className: 'ah-hint' }, t('palette.refHint', { name: selected.name }))
               : null,
             h('pre', { className: 'ah-code ah-preview-body' }, selected.prompt));
 
         const footer = h('div', { className: 'ah-palette-foot' },
           h('div', { className: 'ah-foot-row' },
-            h('div', { className: 'ah-args' },
-              h('input', {
-                className: 'ah-input',
-                value: args,
-                placeholder: t('palette.args'),
-                'aria-label': t('palette.args'),
-                onChange: (event) => setArgs(event.target.value),
-              })),
             h('div', { className: 'ah-actions' },
-              h(Button, { ghost: true, small: true, onClick: () => { palette.close(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('action.scopes')),
+              h(Button, { ghost: true, small: true, onClick: () => { palette.close(); requestProjectScope(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('action.scopes')),
               h(Button, { ghost: true, small: true, onClick: () => { palette.close(); props.ctx.get('layout')?.selectPanel?.(PANEL_ID); } }, t('palette.manage')),
               h(Button, { small: true, primary: true, onClick: () => { if (selected) doInsert(selected, 'insert'); }, disabled: !canWrite || selected === null || selected.available === false }, h(Icons.arrow, { size: 13 }), t('palette.insert')),
               h(Button, { small: true, onClick: () => { if (selected) doInsert(selected, 'send'); }, disabled: !canWrite || selected === null || selected.available === false }, h(Icons.send, { size: 13 }), t('palette.send')))),

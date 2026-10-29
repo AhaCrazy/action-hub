@@ -1,5 +1,27 @@
     // -------------------------------------------------------- groups & scopes
 
+    let pendingScopeRequest = false;
+    let scopeDialogOpener = null;
+
+    function requestProjectScope() {
+      if (scopeDialogOpener !== null) {
+        scopeDialogOpener();
+        return;
+      }
+      pendingScopeRequest = true;
+    }
+
+    function registerProjectScopeOpener(opener) {
+      scopeDialogOpener = opener;
+      if (pendingScopeRequest) {
+        pendingScopeRequest = false;
+        opener();
+      }
+      return () => {
+        if (scopeDialogOpener === opener) scopeDialogOpener = null;
+      };
+    }
+
     function ActionCheck(props) {
       return h(React.Fragment, null,
         h('input', {

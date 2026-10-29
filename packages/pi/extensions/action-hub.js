@@ -58,11 +58,7 @@ async function openPalette(ctx, initialQuery = '') {
     { overlay: true },
   );
   if (selected === undefined || selected === null) return;
-  let args = '';
-  if (selected.argsHint) {
-    args = await ctx.ui.input('Action 参数', `${selected.argsHint}（可留空）`) ?? '';
-  }
-  await insertAction(store, ctx, selected, args, paletteTui);
+  await insertAction(store, ctx, selected, paletteTui);
 }
 
 export async function submitReloadThroughEditor(ctx, tui) {

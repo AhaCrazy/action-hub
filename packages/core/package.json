@@ -1,6 +1,6 @@
 {
   "name": "action-hub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "与 harness 无关的通用库：标准 Agent Skill、用户 Command、分组、项目范围和导入导出。",
   "type": "module",
   "license": "MIT",

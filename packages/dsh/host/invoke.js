@@ -1,5 +1,5 @@
 /**
- * User-invoked Command expansion for referenced chips.
+ * User-invoked Action chip expansion for referenced chips.
  *
  * @module dsh-action-hub/host/invoke
  */
@@ -61,10 +61,6 @@ export function installActionInvocations(ctx, store, scopeStore) {
     for (const marker of markers) {
       const action = byHandle.get(marker);
       if (action === undefined) continue;
-      if (action.mode !== 'command') {
-        notices.set(marker, `「${action.name}」当前是 Skill 模式；请从 Action 面板插入正文，本次未注入。`);
-        continue;
-      }
       if (!actionAvailable(action, profile, groups)) {
         notices.set(marker, `「${action.name}」不在当前项目的可用范围内，本次未注入正文。`);
         continue;

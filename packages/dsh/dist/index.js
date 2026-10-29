@@ -8843,6 +8843,9 @@ function actionInvocationMessage(action, context = void 0) {
   const body = expandPrompt(action.prompt, { date: /* @__PURE__ */ new Date() });
   const files = Array.isArray(context?.files) ? context.files : [];
   const parts = [`<action_content name="${name2}">`];
+  parts.push("<action_invocation>");
+  parts.push(`The user explicitly selected the Action "${name2}" from Action Hub and invoked it. This is a direct user request; follow the action instructions below now. Do not ask for clarification about the /ah-... marker.`);
+  parts.push("</action_invocation>");
   if (files.length > 0) {
     parts.push(`<action_resources base="${escape(context.basePath ?? "")}">`);
     for (const file of files) {
@@ -9077,10 +9080,6 @@ function installActionInvocations(ctx, store, scopeStore) {
     for (const marker of markers) {
       const action = byHandle.get(marker);
       if (action === void 0) continue;
-      if (action.mode !== "command") {
-        notices.set(marker, `\u300C${action.name}\u300D\u5F53\u524D\u662F Skill \u6A21\u5F0F\uFF1B\u8BF7\u4ECE Action \u9762\u677F\u63D2\u5165\u6B63\u6587\uFF0C\u672C\u6B21\u672A\u6CE8\u5165\u3002`);
-        continue;
-      }
       if (!actionAvailable(action, profile, groups)) {
         notices.set(marker, `\u300C${action.name}\u300D\u4E0D\u5728\u5F53\u524D\u9879\u76EE\u7684\u53EF\u7528\u8303\u56F4\u5185\uFF0C\u672C\u6B21\u672A\u6CE8\u5165\u6B63\u6587\u3002`);
         continue;

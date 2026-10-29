@@ -1,6 +1,6 @@
 {
   "name": "pi-action-hub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Action Hub 的 Pi 适配器：原生 TUI 面板、编辑器插入和标准 Agent Skill 资源发现。",
   "keywords": [

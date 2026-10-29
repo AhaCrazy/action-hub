@@ -65,13 +65,15 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 ![Action Hub 面板](assets/screenshots/01-palette.png)
 
-左侧搜索结果，右侧显示模式、分组、描述和正文预览；底部可填参数、插入或直接发送。
+左侧搜索结果，右侧显示模式、分组、描述和正文预览；底部可插入或直接发送。需要补充信息时，直接在 chip 后面继续输入。
 
 - 中文名、描述、正文均可搜索；
 - 输入框右侧 `.*` 按钮或 `Alt+R` 切换正则搜索；
 - 每行显示 `[Command]` / `[Skill]`；
-- Command：无参数插入引用 chip，有参数插入展开后的正文；
-- Skill：插入技能正文；
+- Command 和 Skill 都以引用 chip 插入；
+- 不再有参数输入框或占位符替换；
+- 需要补充信息时，直接在 chip 后面继续输入；
+- 发送时由 Host 展开正文，Skill 也仍通过 provider 自动发现。
 - `Enter` / `Tab` 插入，`Ctrl/⌘ + Enter` 发送。
 
 ### 管理

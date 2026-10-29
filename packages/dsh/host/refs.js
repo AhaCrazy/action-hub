@@ -85,6 +85,9 @@ export function actionInvocationMessage(action, context = undefined) {
   const body = expandPrompt(action.prompt, { date: new Date() });
   const files = Array.isArray(context?.files) ? context.files : [];
   const parts = [`<action_content name="${name}">`];
+  parts.push('<action_invocation>');
+  parts.push(`The user explicitly selected the Action "${name}" from Action Hub and invoked it. This is a direct user request; follow the action instructions below now. Do not ask for clarification about the /ah-... marker.`);
+  parts.push('</action_invocation>');
   if (files.length > 0) {
     parts.push(`<action_resources base="${escape(context.basePath ?? '')}">`);
     for (const file of files) {

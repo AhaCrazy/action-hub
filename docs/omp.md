@@ -1,4 +1,4 @@
-﻿# OMP 版 Action Hub
+# OMP 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。
 
@@ -149,7 +149,7 @@ Skill 也可以由用户主动调用：
 
 支持：
 
-- **Action**：通过 `Enter` 打开菜单后编辑、删除、切换 Command / Skill、设置分组、固定、设置参数提示、查看资源、插入；
+- **Action**：通过 `Enter` 打开菜单后编辑、删除、切换 Command / Skill、设置分组、固定、查看资源、插入；
 - **分组**：新建、改名、删除、设为全局、设置成员与子分组；
 - **项目范围**：只配置当前 OMP 工作区；直接启用或屏蔽分组 / Action；修改项目显示名；
 - **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill；

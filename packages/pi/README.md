@@ -1,4 +1,4 @@
-﻿# Pi / OMP 版 Action Hub
+# Pi / OMP 版 Action Hub
 
 在 Pi 或 OMP 中使用共享 Action 库：同一个标准 Skill 可以当模型可调用的 Skill，也可以只作为用户主动调用的 Command。
 
@@ -76,7 +76,7 @@ OMP 插件包名是 `action-hub-workspace`；推荐使用 Git 安装，Pi 的 re
 
 管理界面支持：
 
-- **Action**：通过 `Enter` 打开菜单后编辑、删除、切换 Command/Skill、设置分组、参数提示、固定、查看资源文件、插入到编辑器。
+- **Action**：通过 `Enter` 打开菜单后编辑、删除、切换 Command/Skill、设置分组、固定、查看资源文件、插入到编辑器。
 - **分组**：新建、改名、删除；设为全局分组；设置成员 Action；设置包含的子分组。
 - **项目范围**：只配置当前 Pi 工作目录；直接启用分组或 Action；屏蔽继承来的分组或 Action；修改项目显示名。
 - **导入**：导入标准 Skill 目录或 ZIP，可选择导入为 Command 或 Skill。

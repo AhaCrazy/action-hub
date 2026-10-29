@@ -26,7 +26,7 @@ test('loads only available actions and renders command/skill payloads', async ()
   await store.create({
     name: 'commit',
     description: 'Create a commit',
-    prompt: 'Commit the staged changes with {{args}}.',
+    prompt: 'Commit the staged changes.',
     mode: 'command',
     groups: [group.id],
   });
@@ -45,9 +45,8 @@ test('loads only available actions and renders command/skill payloads', async ()
     ['commit', 'review'],
   );
   assert.ok(catalog.actions.some((action) => action.name === 'action-import-assistant' && action.builtin === true));
-  assert.equal(renderAction(catalog.actions.find((action) => action.name === 'commit'), 'fix bug'), 'Commit the staged changes with fix bug.');
+  assert.equal(renderAction(catalog.actions.find((action) => action.name === 'commit')), 'Commit the staged changes.');
   assert.equal(renderAction(catalog.actions.find((action) => action.name === 'review')), '/skill:review');
-  assert.equal(renderAction(catalog.actions.find((action) => action.name === 'review'), 'src/a.ts'), '/skill:review src/a.ts');
   assert.deepEqual(groupLabels(catalog.actions.find((action) => action.name === 'commit'), catalog.groups), ['Project']);
 });
 
