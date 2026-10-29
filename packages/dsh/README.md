@@ -18,6 +18,14 @@ DSH Desktop 默认 profile 是 `desktop`。
 github:AhaCrazy/action-hub#path:/packages/dsh
 ```
 
+### 通过 npm 安装（大陆网络推荐）
+
+```powershell
+dsh plugin --profile desktop add dsh-action-hub
+```
+
+npm 包名为 `dsh-action-hub`；大陆镜像同步后不需要访问 GitHub。
+
 ### 通过命令行安装
 
 ```powershell

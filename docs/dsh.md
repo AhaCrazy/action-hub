@@ -23,6 +23,16 @@ github:AhaCrazy/action-hub#path:/packages/dsh
 
 旧仓库 `AhaCrazy/dsh-action-hub` 已归档，只保留历史；后续版本、源码和问题反馈都转到本仓库的 `packages/dsh`。
 
+### 通过 npm 安装（大陆网络推荐）
+
+包已经发布到 npm：
+
+```powershell
+dsh plugin --profile desktop add dsh-action-hub
+```
+
+大陆网络可以直接使用 npm 镜像；npmmirror 同步后不需要访问 GitHub。
+
 ### 通过 GitHub Release 资产安装
 
 如果插件市场页面暂时不可用，也可以直接安装预构建资产：

@@ -1,4 +1,4 @@
-﻿# Action Hub
+# Action Hub
 
 一套可移植的 Action 库，在 DSH、Pi 和 OMP 中提供原生使用体验。
 
@@ -35,7 +35,15 @@
 github:AhaCrazy/action-hub#path:/packages/dsh
 ```
 
-#### 方式二：命令行
+#### 方式二：npm（大陆网络推荐）
+
+```powershell
+dsh plugin --profile desktop add dsh-action-hub
+```
+
+npm 包名就是 `dsh-action-hub`，大陆镜像同步后无需访问 GitHub。
+
+#### 方式三：命令行 GitHub 源
 
 ```powershell
 dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
@@ -43,7 +51,7 @@ dsh plugin --profile desktop add 'github:AhaCrazy/action-hub#path:/packages/dsh'
 
 注意 PowerShell 下使用单引号，避免 `#` 被当成注释。
 
-#### 方式三：GitHub Release 资产
+#### 方式四：GitHub Release 资产
 
 如果插件市场或 Git 安装暂时不可用，也可以直接安装预构建资产：
 

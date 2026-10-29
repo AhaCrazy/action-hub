@@ -154,10 +154,18 @@ npm publish --workspace pi-action-hub --access public
 
 ### DSH
 
-DSH 插件市场条目指向本仓库的 `packages/dsh`：
+先发布 npm 包：
+
+```powershell
+npm login
+npm publish --workspace dsh-action-hub --access public
+```
+
+DSH 插件市场条目指向本仓库的 `packages/dsh`，并优先使用 npm：
 
 ```text
 github:AhaCrazy/action-hub#path:/packages/dsh
+npm: dsh-action-hub
 ```
 
 GitHub Release 的预构建 `.tgz` 继续保留，作为市场或 Git 安装不可用时的备用渠道。旧仓库 `AhaCrazy/dsh-action-hub` 已归档，不再接收新版本。
