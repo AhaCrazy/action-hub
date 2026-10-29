@@ -1,4 +1,4 @@
-﻿# DSH 版 Action Hub
+# DSH 版 Action Hub
 
 Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以作为模型自动发现的 **Skill**，也可以只作为用户主动调用的 **Command**。本文只说明 DSH 中的安装与功能。
 
@@ -97,7 +97,15 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 ### 面板
 
-`Alt+A` 或输入框工具行按钮打开：
+`Alt+A` 或输入框工具行按钮打开。
+
+输入框工具行里的 Action Hub 入口：
+
+![DSH 输入框工具行的 Action Hub 入口](assets/dsh-composer-entry.png)
+
+点击列表图标会打开 Action 面板。面板左侧是搜索和 Action 列表，右侧显示选中 Action 的模式、分组、描述和正文预览；底部可以填写参数、插入到输入框或直接发送。
+
+![Action Hub 面板](assets/dsh-palette.png)
 
 - 按名称、描述、正文搜索；
 - 输入框右侧 `.*` 或 `Alt+R` 切换正则搜索；
@@ -116,6 +124,10 @@ Skill：插入展开后的技能正文，由用户显式调用；模型侧仍通
 
 `Ctrl+Alt+A`（macOS `⌘+⌥+A`）或管理页进入：
 
+![Action Hub 管理页面](assets/dsh-management.png)
+
+管理页面分为分组栏和 Action 列表：左侧选择分组，右侧搜索、排序并编辑 Action；顶部可以导入、导出、切换分组栏和打开项目范围。
+
 支持：
 
 - 新建、编辑、删除标准 Skill；
@@ -128,6 +140,15 @@ Skill：插入展开后的技能正文，由用户显式调用；模型侧仍通
 
 ### 分组
 
+![Action 分组编辑](assets/dsh-groups.png)
+
+分组编辑页可以：
+
+- 新建分组；
+- 勾选直接属于该分组的 Action；
+- 通过“包含其他分组”把子分组成员合并进来；
+- 看到每组当前 Action 数量。
+
 - 每个 Action 可以属于多个分组；
 - 全局分组自动对所有 DSH 工作区生效；
 - 非全局分组只在启用它的项目中生效；
@@ -136,6 +157,10 @@ Skill：插入展开后的技能正文，由用户显式调用；模型侧仍通
 ### 项目范围
 
 项目范围属于 DSH 工作区，不属于某个仓库路径，也不写入共享库：
+
+![Action Hub 项目范围](assets/dsh-project-scope.png)
+
+左侧选择工作区，右侧配置该工作区可用的分组和 Action。全局分组默认对所有工作区可用；项目可以继承、单独选中或主动屏蔽某个分组 / Action。
 
 ```text
 C:\Users\<你>\.dsh\action-hub\workspaces\<workspace-id>.json

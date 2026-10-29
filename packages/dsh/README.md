@@ -1,4 +1,4 @@
-﻿# DSH 版 Action Hub
+# DSH 版 Action Hub
 
 DSH 的标准 Agent Skill 库：同一份 `SKILL.md`，可以当模型可调用的 Skill，也可以只当你能调用的 Command。
 
@@ -63,6 +63,10 @@ dsh plugin --profile desktop remove dsh-action-hub
 
 `Alt + A`（macOS `⌥ + A`）或输入框工具行按钮打开：
 
+![Action Hub 面板](assets/screenshots/01-palette.png)
+
+左侧搜索结果，右侧显示模式、分组、描述和正文预览；底部可填参数、插入或直接发送。
+
 - 中文名、描述、正文均可搜索；
 - 输入框右侧 `.*` 按钮或 `Alt+R` 切换正则搜索；
 - 每行显示 `[Command]` / `[Skill]`；
@@ -73,6 +77,10 @@ dsh plugin --profile desktop remove dsh-action-hub
 ### 管理
 
 `Ctrl + Alt + A`（macOS `⌘ + ⌥ + A`）或管理页：
+
+![Action Hub 管理页面](assets/screenshots/02-library.png)
+
+左侧分组栏，右侧 Action 列表；顶部可搜索、排序、导入导出和打开项目范围。
 
 - 新建/编辑标准技能；
 - 切换 Command / Skill；
