@@ -6,6 +6,14 @@ Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以�
 
 ### 安装
 
+npm：
+
+```powershell
+pi install npm:pi-action-hub
+```
+
+或从 GitHub：
+
 ```powershell
 pi install git:github.com/AhaCrazy/action-hub
 ```
@@ -14,6 +22,14 @@ pi install git:github.com/AhaCrazy/action-hub
 
 ### 更新
 
+npm：
+
+```powershell
+pi install npm:pi-action-hub
+```
+
+GitHub：
+
 ```powershell
 pi install git:github.com/AhaCrazy/action-hub
 ```
@@ -21,11 +37,26 @@ pi install git:github.com/AhaCrazy/action-hub
 如果更新没有生效：
 
 ```powershell
+pi remove npm:pi-action-hub
+pi install npm:pi-action-hub
+```
+
+或：
+
+```powershell
 pi remove git:github.com/AhaCrazy/action-hub
 pi install git:github.com/AhaCrazy/action-hub
 ```
 
 ### 卸载
+
+npm：
+
+```powershell
+pi remove npm:pi-action-hub
+```
+
+或 GitHub：
 
 ```powershell
 pi remove git:github.com/AhaCrazy/action-hub

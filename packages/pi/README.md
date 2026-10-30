@@ -6,28 +6,41 @@
 
 ## 安装
 
-Pi：
+npm：
 
 ```powershell
-pi install git:github.com/AhaCrazy/action-hub
+# Pi
+pi install npm:pi-action-hub
+
+# OMP
+omp plugin install pi-action-hub
 ```
 
-OMP：
+或从 GitHub：
 
 ```powershell
+# Pi
+pi install git:github.com/AhaCrazy/action-hub
+
+# OMP
 omp plugin install git:github.com/AhaCrazy/action-hub
 ```
 
 安装后重启对应的 harness。
 
+npm 安装的插件包名是 `pi-action-hub`；Git 安装的 OMP 插件包名是 `action-hub-workspace`。
+
 OMP 更新与卸载：
 
 ```powershell
+# npm
+omp plugin install pi-action-hub --force
+omp plugin uninstall pi-action-hub
+
+# GitHub
 omp plugin install git:github.com/AhaCrazy/action-hub --force
 omp plugin uninstall action-hub-workspace
 ```
-
-OMP 插件包名是 `action-hub-workspace`；推荐使用 Git 安装，Pi 的 release `.tgz` 不是官方 OMP 路径。
 
 ## 打开面板
 

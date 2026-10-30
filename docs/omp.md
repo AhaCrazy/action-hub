@@ -14,13 +14,27 @@ Action Hub 是一个标准 Agent Skill 库：同一个 `SKILL.md` 目录可以�
 
 ### 安装
 
-OMP 使用自己的插件安装器，并兼容本包的 `pi` / `omp` manifest：
+OMP 使用自己的插件安装器，并兼容本包的 `pi` / `omp` manifest。
+
+npm（推荐）：
+
+```powershell
+omp plugin install pi-action-hub
+```
+
+安装后的插件包名是：
+
+```text
+pi-action-hub
+```
+
+或从 GitHub：
 
 ```powershell
 omp plugin install git:github.com/AhaCrazy/action-hub
 ```
 
-安装后 OMP 中的插件包名是：
+Git 安装后的插件包名是：
 
 ```text
 action-hub-workspace
@@ -30,13 +44,29 @@ action-hub-workspace
 
 ### 更新
 
+npm：
+
+```powershell
+omp plugin install pi-action-hub --force
+```
+
+GitHub：
+
 ```powershell
 omp plugin install git:github.com/AhaCrazy/action-hub --force
 ```
 
-OMP 不会自动跟踪 Git 更新；升级后需要重启 OMP。
+升级后需要重启 OMP。
 
 ### 卸载
+
+npm：
+
+```powershell
+omp plugin uninstall pi-action-hub
+```
+
+GitHub：
 
 ```powershell
 omp plugin uninstall action-hub-workspace

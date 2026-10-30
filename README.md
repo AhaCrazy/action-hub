@@ -75,6 +75,14 @@ dsh plugin --profile desktop add https://github.com/AhaCrazy/action-hub/releases
 
 ### Pi
 
+npm：
+
+```powershell
+pi install npm:pi-action-hub
+```
+
+或从 GitHub：
+
 ```powershell
 pi install git:github.com/AhaCrazy/action-hub
 ```
@@ -89,7 +97,15 @@ pi install git:github.com/AhaCrazy/action-hub
 
 ### OMP
 
-OMP 使用自己的插件安装器，同时兼容本包的 `pi` / `omp` manifest：
+OMP 使用自己的插件安装器，同时兼容本包的 `pi` / `omp` manifest。
+
+npm：
+
+```powershell
+omp plugin install pi-action-hub
+```
+
+或从 GitHub：
 
 ```powershell
 omp plugin install git:github.com/AhaCrazy/action-hub
