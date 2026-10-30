@@ -1,0 +1,51 @@
+name: publish-npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        type: choice
+        options:
+          - both
+          - dsh-action-hub
+          - pi-action-hub
+        default: both
+      publish:
+        description: Upload to npm (otherwise dry run)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Use current npm CLI
+        run: npm install -g npm@latest
+
+      - name: Install workspace
+        run: npm ci
+
+      - name: Build and test
+        run: |
+          npm run build
+          npm test
+
+      - name: Publish dsh-action-hub
+        if: inputs.package == 'both' || inputs.package == 'dsh-action-hub'
+        run: npm publish --workspace dsh-action-hub --access public --provenance ${{ inputs.publish && '' || '--dry-run' }}
+
+      - name: Publish pi-action-hub
+        if: inputs.package == 'both' || inputs.package == 'pi-action-hub'
+        run: npm publish --workspace pi-action-hub --access public --provenance ${{ inputs.publish && '' || '--dry-run' }}
