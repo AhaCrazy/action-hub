@@ -2,6 +2,10 @@
 
 本目录按 harness 拆分用户文档，并保留架构与适配器契约给维护者。
 
+## 宣传素材
+
+- [Action Hub 抖音推广动画](assets/action-hub-douyin-promo.mp4)（27.5 秒，1080×1920，MiMo TTS 配音）
+
 ## 用户文档
 
 | 文档 | 内容 |

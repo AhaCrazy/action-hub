@@ -4,6 +4,10 @@
 
 **Action** 就是一个标准 Agent Skill 目录：`SKILL.md` 加可选资源文件。同一个目录可以作为模型可调用的 **Skill**，也可以只作为用户主动调用的 **Command**。分组和全局分组保存在共享状态中；项目范围跟随各自 harness 的工作区，不写进 Skill 文件。
 
+## 宣传视频
+
+[Action Hub 抖音推广动画](docs/assets/action-hub-douyin-promo.mp4)（27.5 秒，1080×1920，MiMo TTS 配音）
+
 ## 文档
 
 | 文档 | 内容 |
