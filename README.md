@@ -6,7 +6,7 @@
 
 ## 宣传视频
 
-[Action Hub 抖音推广动画](docs/assets/action-hub-douyin-promo.mp4)（27.5 秒，1080×1920，MiMo TTS 配音）
+[Action Hub 宣传视频](docs/assets/action-hub-douyin-promo.mp4)
 
 ## 文档
 

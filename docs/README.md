@@ -4,7 +4,7 @@
 
 ## 宣传素材
 
-- [Action Hub 抖音推广动画](assets/action-hub-douyin-promo.mp4)（27.5 秒，1080×1920，MiMo TTS 配音）
+- [Action Hub 宣传视频](assets/action-hub-douyin-promo.mp4)
 
 ## 用户文档
 
