@@ -9,10 +9,11 @@
 import path from 'node:path';
 
 import { installActionInvocations } from './host/invoke.js';
-import { actionInvocationMessage, planActionRefs, referencedActions } from './host/refs.js';
+import { actionInvocationMessage, planActionRefs, referencedActions, hasActionMarker } from './host/refs.js';
 export { actionInvocationMessage, planActionRefs, referencedActions } from './host/refs.js';
 import { actionResourceDir, getBuiltins, isBuiltinId, readAll } from './host/state.js';
 import { installSkillsProvider, notifySkillCatalog } from './host/skills-provider.js';
+import { installSessionTitles, resolveTitleHandles, isMarkerOnlyText } from './host/titles.js';
 import { listProjects, findCurrentProject } from './host/projects.js';
 import { createDshProjectScopeStore, migrateLegacyProjects } from './host/project-scopes.js';
 import { defaultProjectProfile, canonicalPath, resolveProjectRoot } from 'action-hub';
@@ -75,6 +76,14 @@ export async function apply(ctx, config = {}) {
   if (config.seed !== false) await seedDefaultBuiltin(store).catch(() => {});
   ctx.effect(() => installActionInvocations(ctx, store, scopeStore), 'action-hub: command invocations');
   installSkillsProvider(ctx, store, scopeStore);
+  // Session titles are written from the first human message, so an Action
+  // reference only reaches them as its opaque handle. Rewrite it to the Action
+  // name once the title service is available.
+  if (typeof ctx.inject === 'function') {
+    ctx.inject(['sessionTitle'], (child) => installSessionTitles(child, store));
+  } else {
+    installSessionTitles(ctx, store);
+  }
 
   ctx.effect(() => ctx.webServer.register({
     kind: 'prefix',
@@ -430,5 +439,9 @@ export const internals = {
   MAX_PROMPT,
   planActionRefs,
   referencedActions,
+  hasActionMarker,
+  resolveTitleHandles,
+  isMarkerOnlyText,
+  installSessionTitles,
   actionInvocationMessage,
 };

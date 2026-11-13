@@ -129,6 +129,7 @@
         expandPrompt,
         composeDraft,
         composeReferenceDraft,
+        leadingSeparator,
         matchActionMarker,
         searchScore,
         sortActions,

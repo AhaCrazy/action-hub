@@ -8805,7 +8805,13 @@ async function pruneProjectScopes(dir, validKeys) {
 // host/refs.js
 import { createHash as createHash3 } from "node:crypto";
 var ACTION_PREFIX = "ah-";
-var MARKER_PATTERN = /(^|\s)\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+var MARKER_PREFIX = String.raw`(^|[^A-Za-z0-9_])`;
+var MARKER_BODY = String.raw`(ah-[0-9a-f]{10})(?![0-9a-f])`;
+var MARKER_PATTERN = new RegExp(`${MARKER_PREFIX}\\/${MARKER_BODY}`, "gu");
+var MARKER_TEST = new RegExp(`${MARKER_PREFIX}\\/${MARKER_BODY}`, "u");
+function hasActionMarker(text2) {
+  return typeof text2 === "string" && MARKER_TEST.test(text2);
+}
 function actionMarker(id) {
   return `${ACTION_PREFIX}${createHash3("sha1").update(String(id)).digest("hex").slice(0, 10)}`;
 }
@@ -9049,10 +9055,10 @@ function installActionInvocations(ctx, store, scopeStore) {
     if (decision.kind === "reject" || signal.aborted) return decision;
     const direct = messages.filter((message) => message?.source?.kind === "user");
     if (direct.length === 0) return decision;
-    const hasMarker = direct.some((message) => (message.content ?? []).some(
-      (block) => block?.type === "text" && typeof block.text === "string" && /(^|\s)\/ah-[0-9a-f]{10}(?![0-9a-f])/.test(block.text)
+    const hasMarker2 = direct.some((message) => (message.content ?? []).some(
+      (block) => block?.type === "text" && hasActionMarker(block.text)
     ));
-    if (!hasMarker) return decision;
+    if (!hasMarker2) return decision;
     let actions;
     let groups;
     let defaultGroup;
@@ -9294,6 +9300,153 @@ function installSkillsProvider(ctx, store, scopeStore) {
   }
 }
 
+// host/titles.js
+var PROVIDER_WAIT_MS = 1e4;
+var SLASHED_MARKER = /(^|[^A-Za-z0-9_])\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+var BARE_MARKER = /(^|[^A-Za-z0-9_/])(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+var SLASHED_MARKER_TEST = /(^|[^A-Za-z0-9_])\/(ah-[0-9a-f]{10})(?![0-9a-f])/u;
+var BARE_MARKER_TEST = /(^|[^A-Za-z0-9_/])(ah-[0-9a-f]{10})(?![0-9a-f])/u;
+function hasMarker(text2) {
+  return SLASHED_MARKER_TEST.test(text2) || BARE_MARKER_TEST.test(text2);
+}
+function resolveTitleHandles(title, handles) {
+  if (typeof title !== "string" || title === "") return void 0;
+  let changed = false;
+  const swap = (match, prefix, handle2) => {
+    const name2 = handles.get(handle2);
+    if (name2 === void 0) return match;
+    changed = true;
+    return `${prefix}${name2}`;
+  };
+  const resolved = title.replace(SLASHED_MARKER, swap).replace(BARE_MARKER, swap);
+  if (!changed) return void 0;
+  const compact = resolved.replace(/\s+/gu, " ").trim();
+  return compact === "" ? void 0 : compact;
+}
+function isMarkerOnlyText(text2) {
+  if (typeof text2 !== "string" || !hasMarker(text2)) return false;
+  const rest = text2.replace(SLASHED_MARKER, (match, prefix) => prefix).replace(BARE_MARKER, (match, prefix) => prefix).replace(/\s+/gu, " ").trim();
+  return rest === "";
+}
+function firstUserText(session) {
+  let events;
+  try {
+    events = session?.snapshotEvents?.();
+  } catch {
+    return "";
+  }
+  for (const event of Array.isArray(events) ? events : []) {
+    if (event?.type !== "user/message" || event.data?.source?.kind !== "user") continue;
+    const content = Array.isArray(event.data.content) ? event.data.content : [];
+    const text2 = content.filter((block) => block?.type === "text" && typeof block.text === "string").map((block) => block.text).join("\n");
+    if (text2.trim() !== "") return text2;
+  }
+  return "";
+}
+function describe3(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+function installSessionTitles(ctx, store, options = {}) {
+  const sessionTitle = ctx?.sessionTitle ?? (typeof ctx?.get === "function" ? ctx.get("sessionTitle") : void 0);
+  if (sessionTitle === void 0 || typeof sessionTitle.rename !== "function") return () => {
+  };
+  const readActions = options.readActions ?? (async () => (await readAll(store)).actions);
+  const setTimer = options.setTimer ?? ((run, delayMs) => setTimeout(run, delayMs));
+  const clearTimer = options.clearTimer ?? ((timer) => clearTimeout(timer));
+  const waitMs = Number.isFinite(options.waitMs) && options.waitMs > 0 ? options.waitMs : PROVIDER_WAIT_MS;
+  const warn = options.warn ?? ((message) => ctx.logger?.warn?.(message));
+  const pending = /* @__PURE__ */ new Map();
+  let stopped = false;
+  const clearPending = (sessionId) => {
+    const held = pending.get(sessionId);
+    if (held === void 0) return;
+    clearTimer(held.timer);
+    pending.delete(sessionId);
+  };
+  const rename = (session, title) => {
+    try {
+      sessionTitle.rename(session, title);
+    } catch (error) {
+      warn(`dsh-action-hub: could not title session ${session?.id}: ${describe3(error)}`);
+    }
+  };
+  const handlesOf = async () => {
+    try {
+      const actions = await readActions();
+      return new Map(planActionRefs(actions).entries.map((entry) => [entry.name, entry.action.name]));
+    } catch (error) {
+      warn(`dsh-action-hub: could not read Actions for title: ${describe3(error)}`);
+      return /* @__PURE__ */ new Map();
+    }
+  };
+  const scheduleFallback = (session, title, resolved) => {
+    const sessionId = session.id;
+    clearPending(sessionId);
+    const timer = setTimer(() => {
+      pending.delete(sessionId);
+      if (stopped) return;
+      let current;
+      try {
+        current = sessionTitle.get?.(session);
+      } catch {
+        current = void 0;
+      }
+      if (current !== void 0 && current.title !== title) return;
+      if (current !== void 0 && current.source?.kind === "user") return;
+      rename(session, resolved);
+    }, waitMs);
+    pending.set(sessionId, { timer, title });
+  };
+  const onTitle = async (session, event) => {
+    if (stopped) return;
+    const sessionId = session?.id;
+    const title = event?.data?.title;
+    const source = event?.data?.source?.kind;
+    if (typeof sessionId !== "string" || typeof title !== "string" || title === "") return;
+    if (source === "user") {
+      clearPending(sessionId);
+      return;
+    }
+    if (source !== "fallback" && source !== "provider") return;
+    const handles = await handlesOf();
+    if (stopped) return;
+    const resolved = resolveTitleHandles(title, handles);
+    if (source === "provider") {
+      clearPending(sessionId);
+      if (resolved !== void 0) rename(session, resolved);
+      return;
+    }
+    if (resolved === void 0) return;
+    if (isMarkerOnlyText(firstUserText(session))) {
+      clearPending(sessionId);
+      rename(session, resolved);
+      return;
+    }
+    scheduleFallback(session, title, resolved);
+  };
+  const onSessionEvent = (session, event) => {
+    if (stopped || event?.type !== "session/title") return;
+    void onTitle(session, event).catch((error) => {
+      warn(`dsh-action-hub: session title rewrite failed: ${describe3(error)}`);
+    });
+  };
+  const onDisposed = (session) => {
+    const sessionId = session?.id;
+    if (typeof sessionId === "string") clearPending(sessionId);
+  };
+  const offEvent = typeof ctx?.on === "function" ? ctx.on("session/event", onSessionEvent) : void 0;
+  const offDisposed = typeof ctx?.on === "function" ? ctx.on("session/disposed", onDisposed) : void 0;
+  const dispose = () => {
+    stopped = true;
+    for (const held of pending.values()) clearTimer(held.timer);
+    pending.clear();
+    offEvent?.();
+    offDisposed?.();
+  };
+  if (typeof ctx?.effect === "function") ctx.effect(() => dispose, "action-hub: session titles");
+  return dispose;
+}
+
 // index.js
 var name = "action-hub";
 var inject = ["webServer"];
@@ -9327,6 +9480,11 @@ async function apply(ctx, config = {}) {
   });
   ctx.effect(() => installActionInvocations(ctx, store, scopeStore), "action-hub: command invocations");
   installSkillsProvider(ctx, store, scopeStore);
+  if (typeof ctx.inject === "function") {
+    ctx.inject(["sessionTitle"], (child) => installSessionTitles(child, store));
+  } else {
+    installSessionTitles(ctx, store);
+  }
   ctx.effect(() => ctx.webServer.register({
     kind: "prefix",
     path: ROUTE,
@@ -9569,7 +9727,7 @@ async function handle(ctx, store, dataDir, scopeStore, req, res) {
     }
     sendJson(res, 404, { ok: false, error: `\u672A\u77E5\u63A5\u53E3\uFF1A${route}` });
   } catch (error) {
-    sendJson(res, 400, { ok: false, error: describe3(error) });
+    sendJson(res, 400, { ok: false, error: describe4(error) });
   }
 }
 function text(value) {
@@ -9632,7 +9790,7 @@ function sendBytes(res, status, buffer, contentType, filename) {
   });
   res.end(buffer);
 }
-function describe3(error) {
+function describe4(error) {
   return error instanceof Error ? error.message : String(error);
 }
 var internals = {
@@ -9642,6 +9800,10 @@ var internals = {
   MAX_PROMPT,
   planActionRefs,
   referencedActions,
+  hasActionMarker,
+  resolveTitleHandles,
+  isMarkerOnlyText,
+  installSessionTitles,
   actionInvocationMessage
 };
 export {

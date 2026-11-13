@@ -8,7 +8,26 @@ import { createHash } from 'node:crypto';
 import { expandPrompt } from 'action-hub';
 
 const ACTION_PREFIX = 'ah-';
-const MARKER_PATTERN = /(^|\s)\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+// A marker is referenced at the start of the text or after any character that
+// is not an ASCII word character: whitespace, punctuation, and CJK text all
+// qualify. The earlier `(^|\s)` boundary missed chips inserted or typed right
+// after Chinese text ("请依据/ah-…"): the transcript showed the raw handle and
+// the Action was never injected.
+const MARKER_PREFIX = String.raw`(^|[^A-Za-z0-9_])`;
+const MARKER_BODY = String.raw`(ah-[0-9a-f]{10})(?![0-9a-f])`;
+const MARKER_PATTERN = new RegExp(`${MARKER_PREFIX}\\/${MARKER_BODY}`, 'gu');
+const MARKER_TEST = new RegExp(`${MARKER_PREFIX}\\/${MARKER_BODY}`, 'u');
+
+/**
+ * Whether any text carries an Action marker. The cheap pre-step gate uses this
+ * so the boundary rule lives in exactly one place.
+ *
+ * @param {unknown} text
+ * @returns {boolean}
+ */
+export function hasActionMarker(text) {
+  return typeof text === 'string' && MARKER_TEST.test(text);
+}
 
 /**
  * Stable, opaque reference marker for one Action. The id survives renames, so

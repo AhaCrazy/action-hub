@@ -50,12 +50,16 @@
       }
     }
 
-    const ACTION_MARKER_PATTERN = /(^|\s)\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+    // Mirrors the Host boundary in host/refs.js: text start, or any character
+    // that is not an ASCII word character. CJK text directly before the marker
+    // therefore still renders the Action name instead of the raw `/ah-…` handle.
+    const ACTION_MARKER_PATTERN = /(^|[^A-Za-z0-9_])\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
 
     /**
-     * Match one Action marker in a user message. A boundary is required before
-     * the slash, but not after the handle: users often type immediately after
-     * the chip, and the stored text then reads `/ah-…再测试一下`.
+     * Match one Action marker in a user message. The boundary before the slash
+     * is any non-ASCII-word character (whitespace or CJK text both count), but
+     * not required after the handle: users often type immediately after the
+     * chip, and the stored text then reads `/ah-…再测试一下`.
      *
      * @param {string} text
      * @param {number} from

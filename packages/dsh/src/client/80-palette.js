@@ -175,7 +175,10 @@
               }
             }
             if (!placed && span && typeof inputActions.insertText === 'function') {
-              const result = inputActions.insertText(referenceMode ? `${referenceText} ` : text, span);
+              const inserted = referenceMode
+                ? `${leadingSeparator(draft, span, occurrences)}${referenceText} `
+                : text;
+              const result = inputActions.insertText(inserted, span);
               placed = result !== false;
               atCaret = placed;
               referenced = placed && referenceMode;

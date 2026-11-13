@@ -928,6 +928,52 @@ window.__ModuleLoader__.load({
       };
     }
 
+    /**
+     * Map a detect offset (chips count as one placeholder) to the clipboard
+     * offset the draft string uses (chips expand to their full marker).
+     *
+     * @param {string} draft
+     * @param {object[]} occurrences - sorted, non-overlapping reference entries.
+     * @param {number} position
+     * @returns {number}
+     */
+    function clipboardOffsetOfDetect(draft, occurrences, position) {
+      let delta = 0;
+      for (const occurrence of occurrences) {
+        const start = occurrence.offset - delta;
+        if (position <= start) break;
+        if (position < start + 1) return occurrence.offset;
+        delta += Math.max(0, occurrence.length - 1);
+      }
+      return Math.min(position + delta, draft.length);
+    }
+
+    /**
+     * The separator a plain-text Action marker needs at an insertion point.
+     *
+     * A marker only resolves at the start of the text or after a non-ASCII-word
+     * character, so the pure-text fallback paths must not glue it to a word
+     * (`请依据/ah-…` shows the raw handle and never invokes the Action). Chips
+     * occupy one detect character, so a caret right after a chip also needs a
+     * separator.
+     *
+     * @param {string} draft - clipboard text of the draft.
+     * @param {{ start: number, end: number } | null} span - insertion range in detect coordinates.
+     * @param {object[]} occurrences - reference entries of the draft, in offset order.
+     * @returns {string} `' '` when a separator is needed, otherwise `''`.
+     */
+    function leadingSeparator(draft, span, occurrences) {
+      if (span === null || typeof span !== 'object' || !Number.isInteger(span.start) || span.start <= 0) return '';
+      if (typeof draft !== 'string' || draft === '') return '';
+      const list = (Array.isArray(occurrences) ? occurrences : [])
+        .filter((entry) => entry !== null && typeof entry === 'object'
+          && Number.isInteger(entry.offset) && Number.isInteger(entry.length))
+        .sort((left, right) => left.offset - right.offset);
+      const at = clipboardOffsetOfDetect(draft, list, span.start);
+      if (at <= 0) return '';
+      return /\s/u.test(draft.slice(at - 1, at)) ? '' : ' ';
+    }
+
     function relativeTime(timestamp) {
       if (!Number.isFinite(timestamp) || timestamp <= 0) return '';
       const delta = Date.now() - timestamp;
@@ -1539,12 +1585,16 @@ window.__ModuleLoader__.load({
       }
     }
 
-    const ACTION_MARKER_PATTERN = /(^|\s)\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
+    // Mirrors the Host boundary in host/refs.js: text start, or any character
+    // that is not an ASCII word character. CJK text directly before the marker
+    // therefore still renders the Action name instead of the raw `/ah-…` handle.
+    const ACTION_MARKER_PATTERN = /(^|[^A-Za-z0-9_])\/(ah-[0-9a-f]{10})(?![0-9a-f])/gu;
 
     /**
-     * Match one Action marker in a user message. A boundary is required before
-     * the slash, but not after the handle: users often type immediately after
-     * the chip, and the stored text then reads `/ah-…再测试一下`.
+     * Match one Action marker in a user message. The boundary before the slash
+     * is any non-ASCII-word character (whitespace or CJK text both count), but
+     * not required after the handle: users often type immediately after the
+     * chip, and the stored text then reads `/ah-…再测试一下`.
      *
      * @param {string} text
      * @param {number} from
@@ -3546,7 +3596,10 @@ window.__ModuleLoader__.load({
               }
             }
             if (!placed && span && typeof inputActions.insertText === 'function') {
-              const result = inputActions.insertText(referenceMode ? `${referenceText} ` : text, span);
+              const inserted = referenceMode
+                ? `${leadingSeparator(draft, span, occurrences)}${referenceText} `
+                : text;
+              const result = inputActions.insertText(inserted, span);
               placed = result !== false;
               atCaret = placed;
               referenced = placed && referenceMode;
@@ -3979,6 +4032,7 @@ window.__ModuleLoader__.load({
         expandPrompt,
         composeDraft,
         composeReferenceDraft,
+        leadingSeparator,
         matchActionMarker,
         searchScore,
         sortActions,

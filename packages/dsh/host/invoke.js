@@ -4,7 +4,7 @@
  * @module dsh-action-hub/host/invoke
  */
 import { readInvocationResources } from 'action-hub';
-import { planActionRefs, referencedActions, actionInvocationMessage } from './refs.js';
+import { planActionRefs, referencedActions, actionInvocationMessage, hasActionMarker } from './refs.js';
 import { actionResourceDir, readAll } from './state.js';
 import { defaultProjectProfile, canonicalPath, resolveProjectRoot } from 'action-hub';
 import { listProjects } from './projects.js';
@@ -31,7 +31,7 @@ export function installActionInvocations(ctx, store, scopeStore) {
     const direct = messages.filter((message) => message?.source?.kind === 'user');
     if (direct.length === 0) return decision;
     const hasMarker = direct.some((message) => (message.content ?? []).some(
-      (block) => block?.type === 'text' && typeof block.text === 'string' && /(^|\s)\/ah-[0-9a-f]{10}(?![0-9a-f])/.test(block.text),
+      (block) => block?.type === 'text' && hasActionMarker(block.text),
     ));
     if (!hasMarker) return decision;
     let actions;

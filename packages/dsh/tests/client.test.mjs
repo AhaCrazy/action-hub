@@ -189,6 +189,29 @@ test('matchActionMarker accepts text typed right after the chip', () => {
   assert.equal(matchActionMarker('/ah-0123456789abc', 0, names), undefined);
 });
 
+test('matchActionMarker accepts CJK text directly before the marker', () => {
+  const { matchActionMarker } = module.internals;
+  const names = new Map([['ah-0123456789', '会话小结']]);
+  assert.equal(matchActionMarker('请依据/ah-0123456789 这个指令', 0, names).data.name, '会话小结');
+  assert.equal(matchActionMarker('测试/ah-0123456789', 0, names).start, 2);
+  // A path or URL keeps the handle as text: the preceding character is a word character.
+  assert.equal(matchActionMarker('C:/x/ah-0123456789', 0, names), undefined);
+  assert.equal(matchActionMarker('版本v2/ah-0123456789', 0, names), undefined);
+});
+
+test('leadingSeparator keeps a plain marker off a word and off a chip', () => {
+  const { leadingSeparator } = module.internals;
+  assert.equal(leadingSeparator('请依据', { start: 3, end: 3 }, []), ' ');
+  assert.equal(leadingSeparator('请依据 ', { start: 4, end: 4 }, []), '');
+  assert.equal(leadingSeparator('abc', { start: 0, end: 0 }, []), '');
+  assert.equal(leadingSeparator('abc', null, []), '');
+  // The draft uses clipboard offsets, while the caret is a detect offset: the
+  // chip's placeholder counts as one character there.
+  const chip = { offset: 2, length: 14, clipboardText: '/ah-aaaaaaaaaa' };
+  assert.equal(leadingSeparator('A /ah-aaaaaaaaaa', { start: 3, end: 3 }, [chip]), ' ');
+  assert.equal(leadingSeparator('A /ah-aaaaaaaaaa ', { start: 3, end: 3 }, [chip]), ' ');
+});
+
 test('relativeTime renders a non-empty label for a past timestamp', () => {
   const { relativeTime } = module.internals;
   assert.notEqual(relativeTime(Date.now() - 5_000), '');
